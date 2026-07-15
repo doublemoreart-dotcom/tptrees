@@ -73,6 +73,7 @@
     .speciesThumb{position:relative;width:118px;height:88px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,rgba(47,127,85,.16),rgba(225,174,67,.18));border:1px solid var(--line);border-radius:var(--radius-md);color:var(--forest);font-size:.82rem;font-weight:900;text-align:center}
     .speciesThumb:before{content:"";position:absolute;inset:0;background-image:var(--species-image);background-position:center;background-size:cover;background-repeat:no-repeat}
     .speciesThumb:after{content:"";display:none}
+    .speciesThumb.noImage:after{content:attr(data-fallback) "｜尚無圖片";position:relative;z-index:1;display:block;padding:10px;color:var(--forest);line-height:1.35}
     .rank{justify-self:start;align-self:center;color:var(--clay);font-family:ui-monospace,Menlo,monospace;font-size:1.08rem;font-weight:900}
     .speciesMain{min-width:0}
     .speciesMain h3{margin-bottom:4px}
@@ -22718,8 +22719,8 @@
   }
 
   function selectSpecies(name){
-    const found = speciesCounts.find(([species]) => species === name) || speciesCounts.find(([species]) => species.includes(name));
-    selectedSpeciesName = found ? found[0] : speciesCounts[0]?.[0] || "榕樹";
+    const found = allSpeciesCounts.find(([species]) => species === name) || allSpeciesCounts.find(([species]) => species.includes(name));
+    selectedSpeciesName = found ? found[0] : allSpeciesCounts[0]?.[0] || "榕樹";
     document.querySelector("#selected-species").textContent = selectedSpeciesName;
     document.querySelectorAll("[data-pick-species]").forEach(button => {
       const isActive = button.dataset.pickSpecies === selectedSpeciesName;
@@ -22738,7 +22739,7 @@
       return `
         <button class="speciesCard" type="button" data-species="${name}">
           <span class="rank">#${String(index + 1).padStart(2,"0")}</span>
-          <span class="speciesThumb" style="${imageStyle}" data-fallback="${escapeHtml(name)}" aria-hidden="true"></span>
+          <span class="speciesThumb${image.imageUrl ? "" : " noImage"}" style="${imageStyle}" data-fallback="${escapeHtml(name)}" aria-hidden="true"></span>
           <span class="speciesMain">
             <h3>${name}</h3>
             <p>${note.summary}</p>
@@ -22857,10 +22858,10 @@
   function getInitialSpecies(){
     const requested = new URLSearchParams(location.search).get("species") || "";
     const found = requested
-      ? speciesCounts.find(([species]) => species === requested) || speciesCounts.find(([species]) => species.includes(requested))
+      ? allSpeciesCounts.find(([species]) => species === requested) || allSpeciesCounts.find(([species]) => species.includes(requested))
       : null;
     return {
-      name: found?.[0] || speciesCounts[0]?.[0] || "榕樹",
+      name: found?.[0] || allSpeciesCounts[0]?.[0] || "榕樹",
       shouldOpen: Boolean(requested && found)
     };
   }

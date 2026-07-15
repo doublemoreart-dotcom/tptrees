@@ -13,7 +13,7 @@
 - `species/index.html`：樹種科普與常見樹木排行榜
 - `daily/index.html`：今天給我一棵樹
 - `data/`：臺北市行道樹 CSV、本地前端索引與資料 manifest
-- `scripts/`：CSV 更新、manifest 建立與靜態頁語法檢查
+- `scripts/`：資料更新、圖片來源補齊、manifest 建立與靜態頁語法檢查
 - `docs/CSV_UPDATE_FLOW.md`：資料更新流程說明
 - `tests/routes.test.mjs`：頁面、導覽與資料 manifest 的基本驗證
 
@@ -28,16 +28,32 @@ node scripts/verify-static-pages.mjs
 node --test tests/routes.test.mjs
 ```
 
+上線前可直接跑完整檢查：
+
+```bash
+bash scripts/preflight-release.sh
+```
+
 ## 更新資料
 
-```bash
-bash scripts/update-tree-csv.sh
-```
-
-若只要使用目前本機 CSV 重建前端索引：
+日常更新建議跑總入口，會更新資料、檢查頁面，並同步本機測試鏡像：
 
 ```bash
-bash scripts/update-tree-csv.sh --skip-download
+bash scripts/update-site-data.sh --skip-download
 ```
+
+若要下載官方 CSV：
+
+```bash
+bash scripts/update-site-data.sh
+```
+
+若要同時補樹種照片來源，可限制批次數，先從高出現率樹種補起：
+
+```bash
+bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
+```
+
+更新腳本會重建 `data/tree-data-manifest.json` 與 `data/tree-records.js`，可選擇補齊 `data/species-image-sources.json`，並自動執行基本驗證。更新前的 CSV 備份會放在 `data/backups/`，此資料夾不進版控。
 
 正式網站目前由入口網站 repo 統一部署至 GitHub Pages；本 repo 是 TP Trees 的獨立來源。同步自動化完成前，這裡的變更不會立即出現在正式網址。

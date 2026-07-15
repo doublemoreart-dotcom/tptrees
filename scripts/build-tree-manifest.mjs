@@ -12,6 +12,14 @@ const sourceCsvUrl = "https://tppkl.blob.core.windows.net/blobfs/TaipeiTree.csv"
 
 const text = await readFile(csvPath, "utf8");
 
+async function readExistingManifest(){
+  try{
+    return JSON.parse(await readFile(manifestPath, "utf8"));
+  }catch{
+    return null;
+  }
+}
+
 function parseCsv(csvText){
   const parsedRows = [];
   let row = [];
@@ -125,6 +133,9 @@ const topSpecies = countBy(dataRows, speciesIndex).slice(0, 10).map(([name, coun
 const districtCounts = countBy(dataRows, districtIndex).map(([name, count]) => ({ name, count }));
 const csvHash = createHash("sha256").update(text).digest("hex");
 const recordsHash = createHash("sha256").update(JSON.stringify(compactRecords)).digest("hex");
+const existingManifest = await readExistingManifest();
+const csvUnchanged = existingManifest?.csvSha256 === csvHash;
+const now = new Date().toISOString();
 
 const qualityChecks = {
   requiredColumnsPresent: true,
@@ -146,8 +157,8 @@ const manifest = {
   sourcePage: "https://data.taipei/dataset/detail?id=7a49d00c-a5ff-4a6b-be9e-aaa6dc1ff7e8",
   sourceCsv: sourceCsvUrl,
   localCsv: relative(siteRoot, csvPath),
-  generatedAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  generatedAt: csvUnchanged && existingManifest?.generatedAt ? existingManifest.generatedAt : now,
+  updatedAt: csvUnchanged && existingManifest?.updatedAt ? existingManifest.updatedAt : now,
   csvSha256: csvHash,
   recordsSha256: recordsHash,
   rowCount: dataRows.length,

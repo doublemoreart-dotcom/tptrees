@@ -10,18 +10,20 @@ CSV_PATH="$DATA_DIR/TaipeiTree.csv"
 MODE="download"
 LOCAL_SOURCE=""
 SKIP_BACKUP="false"
+RUN_VERIFY="true"
 
 usage(){
   cat <<'USAGE'
 Usage:
-  bash outputs/local-tptrees/scripts/update-tree-csv.sh
-  bash outputs/local-tptrees/scripts/update-tree-csv.sh --from /path/to/TaipeiTree.csv
-  bash outputs/local-tptrees/scripts/update-tree-csv.sh --skip-download
+  bash scripts/update-tree-csv.sh
+  bash scripts/update-tree-csv.sh --from /path/to/TaipeiTree.csv
+  bash scripts/update-tree-csv.sh --skip-download
 
 Options:
   --from FILE       Use a local CSV file instead of downloading.
   --skip-download  Rebuild generated files from the existing data/TaipeiTree.csv.
   --no-backup      Do not create a timestamped backup before replacing CSV.
+  --no-verify      Rebuild data only; skip page and route verification.
   -h, --help       Show this help.
 USAGE
 }
@@ -43,6 +45,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-backup)
       SKIP_BACKUP="true"
+      shift
+      ;;
+    --no-verify)
+      RUN_VERIFY="false"
       shift
       ;;
     -h|--help)
@@ -105,10 +111,23 @@ fi
 echo "Building data manifest and static records..."
 node "$SCRIPT_DIR/build-tree-manifest.mjs"
 
-echo "Verifying static pages..."
-node "$SCRIPT_DIR/verify-static-pages.mjs"
+if [[ "$RUN_VERIFY" == "true" ]]; then
+  echo "Verifying static pages..."
+  node "$SCRIPT_DIR/verify-static-pages.mjs"
+
+  if [[ -f "$SITE_ROOT/tests/routes.test.mjs" ]]; then
+    echo "Running route and manifest tests..."
+    node --test "$SITE_ROOT/tests/routes.test.mjs"
+  fi
+else
+  echo "Skipping verification. Run: bash scripts/preflight-release.sh"
+fi
 
 echo "Done."
 echo "CSV: $CSV_PATH"
 echo "Manifest: $DATA_DIR/tree-data-manifest.json"
 echo "Static records: $DATA_DIR/tree-records.js"
+echo ""
+echo "Next:"
+echo "  bash scripts/preflight-release.sh"
+echo "  git diff --stat"
