@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <title>今天給我一棵樹｜臺北市行道樹小幫手</title>
+  <style>
+    :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;padding-top:86px;background:linear-gradient(90deg,rgba(23,75,63,.045) 1px,transparent 1px),linear-gradient(rgba(23,75,63,.045) 1px,transparent 1px),var(--bg);background-size:44px 44px;color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;letter-spacing:0}
+    a{color:inherit;text-decoration:none}
+    .topNav{position:fixed;top:0;left:0;right:0;z-index:20;padding:14px 28px;background:rgba(245,241,232,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+    .topNavInner,.wrap{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto}
+    .topNavInner{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .siteMark{display:inline-flex;align-items:center;gap:9px;color:var(--forest);font-weight:900}
+    .siteIcon{width:28px;height:28px;display:inline-grid;place-items:center;flex:0 0 auto;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1);color:var(--forest)}
+    .siteIcon svg{width:17px;height:17px;display:block}
+    .navLinks{display:flex;flex-wrap:wrap;gap:8px}
+    .navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .navLinks a:hover,.navLinks a:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.1);color:var(--ink);transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,34,29,.08);outline:none}
+    .navLinks a.active{background:var(--forest);color:#fffdf7}
+    .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
+    main{overflow:hidden}
+    .hero{min-height:calc(100vh - 86px);padding:50px 28px 42px;display:grid;align-items:center}
+    .heroGrid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,1.1fr);gap:42px;align-items:center;perspective:1200px}
+    .eyebrow,.kicker{margin:0 0 14px;color:var(--clay);font-size:.84rem;font-weight:850}
+    h1,h2,h3,p{margin-top:0}
+    h1{margin-bottom:22px;color:var(--ink);font-size:clamp(3rem,8vw,6.2rem);line-height:.98;font-weight:900}
+    h2{margin-bottom:14px;color:var(--ink);font-size:clamp(2rem,4vw,3.6rem);line-height:1.06;font-weight:900}
+    h3{margin-bottom:10px;color:var(--ink);font-size:1.18rem}
+    .lead{max-width:640px;color:#33463c;font-size:clamp(1rem,1.6vw,1.2rem);line-height:1.78}
+    .actions{width:min(100%,620px);display:grid;gap:10px;margin-top:24px}
+    .secondaryActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .button{width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;border:1px solid var(--forest);border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-size:.96rem;font-weight:900;line-height:1.2;cursor:pointer}
+    .button.secondary{background:var(--paper);color:var(--forest)}
+    .button:hover,.button:focus-visible{transform:translateY(-1px);box-shadow:0 10px 22px rgba(23,34,29,.1);outline:none}
+    .button:disabled{opacity:.68;cursor:wait;transform:none;box-shadow:none}
+    .deckNote{max-width:620px;margin-top:22px;padding:14px 16px;border:1px solid rgba(225,174,67,.36);border-radius:var(--radius-lg);background:rgba(225,174,67,.12);color:var(--muted);font-size:.94rem;line-height:1.65}
+    .cardShell{position:relative;perspective:1200px}
+    .treeCard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--paper);box-shadow:var(--shadow);transform-style:preserve-3d;will-change:transform}
+    .treeCard.isFlipping{animation:cardFlip360 .78s cubic-bezier(.2,.74,.22,1) both;box-shadow:0 12px 34px rgba(23,34,29,.1)}
+    @keyframes cardFlip360{
+      0%{transform:rotateY(0deg) scale(1);opacity:1}
+      46%{transform:rotateY(166deg) scale(.985);opacity:.92}
+      50%{transform:rotateY(180deg) scale(.98);opacity:.34}
+      54%{transform:rotateY(194deg) scale(.985);opacity:.92}
+      100%{transform:rotateY(360deg) scale(1);opacity:1}
+    }
+    .treeImage{min-height:260px;background:#dfe8d8 center/cover no-repeat}
+    .cardBody{display:grid;gap:14px;padding:22px}
+    .cardTop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .dateTag{display:inline-flex;width:max-content;margin-bottom:10px;padding:7px 10px;border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.8rem;font-weight:900}
+    .cardName{margin:0;color:var(--ink);font-size:clamp(2.2rem,4.2vw,3.7rem);line-height:1.04;font-weight:900}
+    .countBlock{min-width:128px;text-align:right;color:var(--forest)}
+    .countBlock b{display:block;font-size:1.55rem;line-height:1}
+    .countBlock span{display:block;margin-top:6px;color:var(--muted);font-size:.82rem;font-weight:850}
+    .summary{max-width:54ch;margin:0;color:#33463c;font-size:1.02rem;line-height:1.72;font-weight:750}
+    .tags{display:flex;flex-wrap:wrap;gap:8px}
+    .tag{padding:6px 9px;border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.8rem;font-weight:850}
+    .promptGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .prompt{padding:15px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(255,253,247,.82)}
+    .prompt b{display:block;margin-bottom:6px;color:var(--forest);font-size:1rem}
+    .prompt p{margin:0;color:var(--muted);font-size:.94rem;line-height:1.62}
+    .source{padding:11px 14px;border-top:1px solid var(--line);background:rgba(255,253,247,.9);color:var(--muted);font-size:.76rem;line-height:1.55}
+    .source a{color:var(--forest);font-weight:900;text-decoration:underline;text-underline-offset:3px}
+    .section{padding:72px 28px;border-top:1px solid var(--line)}
+    .sectionHeader{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto 24px}
+    .steps{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .step{padding:20px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper);box-shadow:0 14px 34px rgba(23,34,29,.08)}
+    .step span{display:inline-flex;margin-bottom:18px;color:var(--clay);font-family:ui-monospace,Menlo,monospace;font-weight:900}
+    .step p{margin:0;color:var(--muted);line-height:1.68}
+    .siteFooter{padding:28px;border-top:1px solid var(--line);background:rgba(255,253,247,.72)}
+    .siteFooterInner{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;display:grid;grid-template-columns:minmax(180px,.34fr) minmax(0,.66fr);gap:18px;align-items:start}
+    .siteFooter strong{color:var(--forest);font-size:.98rem}
+    .siteFooter p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.7}
+    .preloader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:28px;background:var(--bg);transition:opacity .32s ease,visibility .32s ease}
+    .preloader.isHidden{opacity:0;visibility:hidden;pointer-events:none}
+    .preloaderCard{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--paper);box-shadow:var(--shadow)}
+    .preloaderMark{display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--forest);font-weight:900}
+    .preloaderIcon{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1)}
+    .preloaderIcon svg{width:24px;height:24px}
+    .preloaderTitle{margin:0 0 6px;color:var(--ink);font-size:1.25rem;font-weight:900}
+    .preloaderText{margin:0;color:var(--muted);font-size:.92rem;line-height:1.6}
+    .preloaderBar{position:relative;height:4px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(23,75,63,.12)}
+    .preloaderBar:before{content:"";position:absolute;inset:0;width:42%;background:var(--forest);animation:preloadSlide 1.05s ease-in-out infinite}
+    @keyframes preloadSlide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+    @media(prefers-reduced-motion:reduce){.treeCard.isFlipping{animation:none;transform:none}}
+    @media(max-width:980px){.heroGrid{grid-template-columns:1fr}.treeCard{width:min(760px,100%);margin:0 auto}.treeImage{min-height:230px}.steps{grid-template-columns:1fr}}
+    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.summary,.prompt p,.step p,.siteFooter p{word-break:break-all;overflow-wrap:anywhere}.cardBody{padding:18px}.cardTop,.promptGrid,.secondaryActions{grid-template-columns:1fr;display:grid}.countBlock{text-align:left}.treeImage{min-height:180px}.actions{width:100%}.siteFooterInner{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="preloader" id="preloader" role="status" aria-live="polite">
+  <div class="preloaderCard">
+    <div class="preloaderMark"><span class="preloaderIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 12.5C4.8 12.5 3 10.8 3 8.4C3 5.8 5.2 4 8.1 4C10 4 11.4 4.8 12 6.1C12.6 4.8 14 4 15.9 4C18.8 4 21 5.8 21 8.4C21 10.8 19.2 12.5 16.5 12.5C14.5 12.5 13.1 11.7 12 10.3C10.9 11.7 9.5 12.5 7.5 12.5Z" fill="currentColor"/></svg></span><span>臺北市行道樹小幫手</span></div>
+    <p class="preloaderTitle">正在挑選今天的樹</p>
+    <p class="preloaderText">準備今日樹種、觀察提示與公開資料提醒。</p>
+    <div class="preloaderBar" aria-hidden="true"></div>
+  </div>
+</div>
+<main>
+  <nav class="topNav" aria-label="頁面導覽">
+    <div class="topNavInner">
+      <a class="siteMark" href="../index.html"><span class="siteIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 12.5C4.8 12.5 3 10.8 3 8.4C3 5.8 5.2 4 8.1 4C10 4 11.4 4.8 12 6.1C12.6 4.8 14 4 15.9 4C18.8 4 21 5.8 21 8.4C21 10.8 19.2 12.5 16.5 12.5C14.5 12.5 13.1 11.7 12 10.3C10.9 11.7 9.5 12.5 7.5 12.5Z" fill="currentColor"/></svg></span><span>臺北市行道樹小幫手</span></a>
+      <div class="navLinks">
+        <a href="../index.html#can-check">你能查什麼</a>
+        <a href="../index.html#gaps">你應該要知道的資訊差</a>
+        <a href="../lifecycle/index.html">樹木的生命履歷</a>
+        <a href="../species/index.html">樹種科普</a>
+        <a class="active" href="./index.html">今天給我一棵樹</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="wrap heroGrid">
+      <div>
+        <p class="eyebrow">每日認識一棵城市樹</p>
+        <h1>今天給我一棵樹</h1>
+        <p class="lead">每天給你一種臺北常見行道樹。從一棵樹開始觀察：它在資料中有多少紀錄、你可以看什麼、以及公開資料還不能直接告訴你什麼。</p>
+        <div class="actions">
+          <button class="button" id="draw-card" type="button">換另一棵樹</button>
+          <div class="secondaryActions">
+            <a class="button secondary" href="../species/index.html">看樹種排行榜</a>
+            <a class="button secondary" href="../lifecycle/index.html">查一棵樹履歷</a>
+          </div>
+        </div>
+        <p class="deckNote">每日推薦每天固定一棵；也可以換一棵樹看看，適合拿來做社群互動或現場導覽開場。</p>
+      </div>
+
+      <article class="treeCard" id="tree-card" aria-live="polite">
+        <div class="treeImage" id="card-image" role="img" aria-label="今日樹種圖片"></div>
+        <div class="cardBody">
+          <div class="cardTop">
+            <div>
+              <span class="dateTag" id="card-date">每日推薦</span>
+              <h2 class="cardName" id="card-name">榕樹</h2>
+            </div>
+            <div class="countBlock">
+              <b id="card-count">18,836</b>
+              <span>公開資料紀錄</span>
+            </div>
+          </div>
+          <p class="summary" id="card-summary">樹冠大、遮蔭感強，是臺北常見的成熟街道樹之一。</p>
+          <div class="tags" id="card-tags"></div>
+          <div class="promptGrid">
+            <div class="prompt"><b>今天可以觀察</b><p id="card-look">看看附近是否有足夠樹穴、人行空間與連續遮蔭。</p></div>
+            <div class="prompt"><b>公開資料還不能判斷</b><p>健康狀態、腐朽、工程影響、最近修剪與移植核准仍需要其他資料或現場確認。</p></div>
+          </div>
+        </div>
+        <div class="source" id="card-source">圖片來源載入中。</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sectionHeader">
+      <p class="kicker">怎麼使用這張卡</p>
+      <h2>從一棵樹走到查驗</h2>
+    </div>
+    <div class="steps">
+      <article class="step"><span>01</span><h3>先認識樹種</h3><p>用卡片記住它的外觀與常見討論點，不需要先背植物學名。</p></article>
+      <article class="step"><span>02</span><h3>再回到公開資料</h3><p>用樹種、行政區、道路或樹木編號，查它在資料中的位置與尺寸。</p></article>
+      <article class="step"><span>03</span><h3>最後判斷缺口</h3><p>公開資料能提供基礎樹籍，但健康、修剪、移植與工程影響仍要另外查驗。</p></article>
+    </div>
+  </section>
+
+  <footer class="siteFooter">
+    <div class="siteFooterInner">
+      <strong>Open Data 使用聲明</strong>
+      <p>本網站以臺北市政府資料大平臺公開之「臺北市行道樹分布圖」資料為基礎，整理為市民查詢、理解與公共討論用途。今天給我一棵樹僅作為認識樹種與導入查驗流程的互動入口，不代表官方即時狀態、樹木健康診斷、工程核准或法律裁定。</p>
+    </div>
+  </footer>
+</main>
+
+<script>
+  const deck = [
+    {name:"榕樹",count:18836,tags:["遮蔭感強","成熟樹常見","根系空間要留意"],summary:"樹冠大、遮蔭感強，是臺北常見的成熟街道樹之一。",look:"看看附近是否有足夠樹穴、人行空間與連續遮蔭。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/0/0a/Ficus_microcarpa_-_La_Gomera_02.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Ficus_microcarpa_-_La_Gomera_02.jpg",author:"H. Zell",license:"CC BY-SA 3.0"},
+    {name:"茄苳",count:14189,tags:["常見行道樹","遮蔭","成熟度可看胸徑"],summary:"茄苳是臺北街道常見樹種，常作為道路綠化與遮蔭樹。",look:"留意胸徑與樹高，判斷它是否已是較成熟的街道樹。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/b/b9/Bischofia_javanica_Villa_Taranto.png",sourceUrl:"https://commons.wikimedia.org/wiki/File:Bischofia_javanica_Villa_Taranto.png",author:"Pampuco",license:"CC BY-SA 4.0"},
+    {name:"樟樹",count:12017,tags:["常綠","遮蔭","城市景觀"],summary:"樟樹在街道、公園與校園都容易遇到，常給人穩定、濃蔭的城市景觀印象。",look:"觀察樹冠是否完整，以及周邊是否有工程或鋪面壓迫。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/a/a8/Cinnamomum_camphora_Vergelegen.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Cinnamomum_camphora_Vergelegen.jpg",author:"Martinvl",license:"CC BY-SA 4.0"},
+    {name:"楓香",count:10447,tags:["季節感","道路景觀","遮蔭"],summary:"楓香具有季節色彩變化，常被用在道路景觀。",look:"找找它是否形成連續林蔭，或在道路上創造季節景觀。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/3/35/Liquidambar_formosana_%E6%A5%93%E9%A6%99.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Liquidambar_formosana_%E6%A5%93%E9%A6%99.jpg",author:"1841Hongkong",license:"CC BY-SA 4.0"},
+    {name:"臺灣欒樹",count:8905,tags:["開花明顯","原生樹種","街道常見"],summary:"臺灣欒樹常見於街道與分隔島，開花與果實季節辨識度高。",look:"用花、果與樹形作為辨認線索，再回資料查位置與尺寸。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Koelreuteria_elegans_tree_-_%CE%9A%CE%BF%CE%B9%CE%BB%CF%81%CE%B5%CE%BF%CF%85%CF%84%CE%B5%CF%81%CE%AF%CE%B1_%CE%B7_%CE%BA%CE%BF%CE%BC%CF%88%CE%AE.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Koelreuteria_elegans_tree_-_%CE%9A%CE%BF%CE%B9%CE%BB%CF%81%CE%B5%CE%BF%CF%85%CF%84%CE%B5%CF%81%CE%AF%CE%B1_%CE%B7_%CE%BA%CE%BF%CE%BC%CF%88%CE%AE.jpg",author:"Ανώνυμος Βικιπαιδιστής",license:"CC BY 3.0"},
+    {name:"黑板樹",count:7601,tags:["數量不少","議題性高","需看環境"],summary:"黑板樹在臺北資料中數量不少，也常因氣味、空間與修剪議題被討論。",look:"不要只因樹種下結論，搭配位置、尺寸、修剪與現場空間一起看。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/f/f5/Devil_Tree_-_Alstonia_scholaris_-_%E0%B4%8F%E0%B4%B4%E0%B4%BF%E0%B4%B2%E0%B4%82_%E0%B4%AA%E0%B4%BE%E0%B4%B2_02.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Devil_Tree_-_Alstonia_scholaris_-_%E0%B4%8F%E0%B4%B4%E0%B4%BF%E0%B4%B2%E0%B4%82_%E0%B4%AA%E0%B4%BE%E0%B4%B2_02.jpg",author:"Shijan Kaakkara",license:"CC BY-SA 4.0"},
+    {name:"白千層",count:5742,tags:["樹皮好辨認","常見街道樹","需看胸徑"],summary:"白千層樹皮層次明顯，常作為辨認特徵。",look:"先看樹皮辨認，再用資料確認樹種、胸徑與位置。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/5/59/Melaleuca_leucadendra-foliage.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Melaleuca_leucadendra-foliage.jpg",author:"Eug",license:"Public domain"},
+    {name:"小葉欖仁",count:4838,tags:["樹形明顯","景觀樹","街道常見"],summary:"小葉欖仁樹形層次明顯，常見於道路景觀。",look:"觀察它是否形成整排道路景觀與遮蔭連續性。",imageUrl:"https://upload.wikimedia.org/wikipedia/commons/0/02/Terminalia_mantaly_in_Hong_Kong.jpg",sourceUrl:"https://commons.wikimedia.org/wiki/File:Terminalia_mantaly_in_Hong_Kong.jpg",author:"Geographer",license:"CC BY-SA 3.0"}
+  ];
+
+  function formatNumber(value){
+    return Number(value || 0).toLocaleString("zh-TW");
+  }
+
+  function todayKey(){
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  }
+
+  function hashString(value){
+    let hash = 0;
+    for(const char of value){
+      hash = ((hash << 5) - hash) + char.charCodeAt(0);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function renderCard(card, label = "每日推薦"){
+    document.querySelector("#card-date").textContent = `${label}・${todayKey()}`;
+    document.querySelector("#card-name").textContent = card.name;
+    document.querySelector("#card-count").textContent = formatNumber(card.count);
+    document.querySelector("#card-summary").textContent = card.summary;
+    document.querySelector("#card-look").textContent = card.look;
+    document.querySelector("#card-tags").innerHTML = card.tags.map(tag => `<span class="tag">${tag}</span>`).join("");
+    const image = document.querySelector("#card-image");
+    image.style.backgroundImage = `linear-gradient(rgba(16,32,25,.04),rgba(16,32,25,.2)),url("${card.imageUrl}")`;
+    image.setAttribute("aria-label", `${card.name}示意圖片`);
+    document.querySelector("#card-source").innerHTML = `圖片來源：<a href="${card.sourceUrl}" target="_blank" rel="noopener">Wikimedia Commons</a>，作者：${card.author}，授權：${card.license}。`;
+  }
+
+  function hidePreloader(){
+    const preloader = document.querySelector("#preloader");
+    if(!preloader) return;
+    preloader.classList.add("isHidden");
+    window.setTimeout(() => preloader.remove(), 420);
+  }
+
+  let practiceIndex = hashString(todayKey()) % deck.length;
+  renderCard(deck[practiceIndex], "每日推薦");
+
+  document.querySelector("#draw-card").addEventListener("click", () => {
+    const treeCard = document.querySelector("#tree-card");
+    const drawButton = document.querySelector("#draw-card");
+    practiceIndex = (practiceIndex + 1 + Math.floor(Math.random() * (deck.length - 1))) % deck.length;
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      renderCard(deck[practiceIndex], "換一棵");
+      return;
+    }
+    drawButton.disabled = true;
+    treeCard.classList.remove("isFlipping");
+    void treeCard.offsetWidth;
+    treeCard.classList.add("isFlipping");
+    window.setTimeout(() => {
+      renderCard(deck[practiceIndex], "換一棵");
+    }, 390);
+    window.setTimeout(() => {
+      treeCard.classList.remove("isFlipping");
+      drawButton.disabled = false;
+    }, 800);
+  });
+
+  window.addEventListener("load", () => window.setTimeout(hidePreloader, 360));
+</script>
+</body>
+</html>

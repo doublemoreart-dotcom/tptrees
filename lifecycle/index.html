@@ -1,24 +1,1174 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>查驗的城市樹木生命履歷</title>
-<style>
-:root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(90deg,rgba(23,75,63,.04) 1px,transparent 1px),linear-gradient(rgba(23,75,63,.04) 1px,transparent 1px),var(--bg);background-size:44px 44px;color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif}a{color:inherit;text-decoration:none}.topNav{position:sticky;top:0;z-index:20;padding:14px 28px;background:rgba(245,241,232,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}.topNavInner,.hero,.section,.closing{width:min(1160px,100%);margin:0 auto}.topNavInner{display:flex;gap:12px;align-items:center;justify-content:space-between}.siteMark{color:var(--forest);font-weight:900}.navLinks{display:flex;flex-wrap:wrap;gap:8px}.navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800}.navLinks a.active{background:var(--forest);color:#fffdf7}.hero{padding:76px 28px 56px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:42px;align-items:center}.eyebrow,.kicker{margin:0 0 14px;color:var(--clay);font-size:.84rem;font-weight:800}h1,h2,h3,p{margin-top:0}h1{margin-bottom:24px;color:var(--ink);font-size:clamp(3rem,8vw,6.6rem);line-height:.96;font-weight:900}h2{margin-bottom:18px;color:var(--ink);font-size:clamp(2rem,4vw,3.8rem);line-height:1.05;font-weight:900}h3{margin-bottom:10px;color:var(--ink);font-size:1.18rem}.lead{color:#33463c;font-size:clamp(1.1rem,2vw,1.4rem);line-height:1.85}.heroCard{padding:28px;background:var(--paper);border:1px solid var(--line);box-shadow:0 24px 70px rgba(23,34,29,.16)}.heroCard strong{display:block;margin-bottom:12px;color:var(--forest);font-size:1.4rem}.heroCard p{margin:0;color:var(--muted);line-height:1.8}.summary{padding:24px 28px;background:var(--forest);color:#fffdf7}.summary p{width:min(1160px,100%);margin:0 auto;font-size:clamp(1.2rem,2.2vw,1.85rem);line-height:1.6;font-weight:800}.section{padding:88px 28px;border-bottom:1px solid var(--line);scroll-margin-top:86px}.sectionIntro{max-width:760px;color:var(--muted);font-size:1.06rem;line-height:1.8}.scenarioGrid,.stepGrid,.statusGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:30px}.card,.step,.status{background:var(--paper);border:1px solid var(--line);box-shadow:0 16px 36px rgba(23,34,29,.08)}.card{min-height:120px;padding:22px;font-weight:850;color:var(--forest);line-height:1.45}.step{padding:24px;min-height:250px}.step span{display:inline-flex;margin-bottom:24px;color:var(--clay);font-family:ui-monospace,Menlo,monospace;font-weight:900}.step p{margin:0;color:var(--muted);line-height:1.75}.flow{margin-top:32px;display:grid;gap:12px}.flow div{position:relative;padding:20px 22px 20px 70px;background:rgba(255,253,247,.86);border:1px solid var(--line);font-weight:850;color:var(--forest)}.flow div:before{content:"";position:absolute;left:24px;top:22px;width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 8px rgba(225,174,67,.2)}.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:30px}.checklist div{padding:16px 18px;background:var(--paper);border:1px solid var(--line);font-weight:800;color:var(--ink)}.status{padding:22px}.status b{display:block;margin-bottom:8px;color:var(--forest)}.status p{margin:0;color:var(--muted);line-height:1.7}.closing{margin-bottom:28px;padding:44px;display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr);gap:32px;align-items:center;background:var(--ink);color:#fffdf7}.closing h2{margin-bottom:0;color:#fffdf7}.closing p:last-child{margin:0;color:rgba(255,253,247,.78);font-size:1.08rem;line-height:1.85}@media(max-width:900px){.topNavInner,.hero,.closing{grid-template-columns:1fr;flex-direction:column;align-items:flex-start}.scenarioGrid,.stepGrid,.statusGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.topNav,.hero,.section{padding-left:18px;padding-right:18px}.navLinks{width:100%;display:grid;grid-template-columns:1fr}.navLinks a{text-align:center}.scenarioGrid,.stepGrid,.statusGrid,.checklist{grid-template-columns:1fr}.closing{padding:30px 22px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <title>樹木的生命履歷</title>
+  <style>
+    :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;padding-top:86px;background:linear-gradient(90deg,rgba(23,75,63,.045) 1px,transparent 1px),linear-gradient(rgba(23,75,63,.045) 1px,transparent 1px),var(--bg);background-size:44px 44px;color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;letter-spacing:0}
+    a{color:inherit;text-decoration:none}
+    .topNav{position:fixed;top:0;left:0;right:0;z-index:20;padding:14px 28px;background:rgba(245,241,232,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+    .topNavInner,.wrap{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto}
+    .topNavInner{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .siteMark{display:inline-flex;align-items:center;gap:9px;color:var(--forest);font-weight:900}
+    .siteIcon{width:28px;height:28px;display:inline-grid;place-items:center;flex:0 0 auto;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1);color:var(--forest)}
+    .siteIcon svg{width:17px;height:17px;display:block}
+    .navLinks{display:flex;flex-wrap:wrap;gap:8px}
+    .navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .navLinks a:hover,.navLinks a:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.1);color:var(--ink);transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,34,29,.08);outline:none}
+    .navLinks a.active{background:var(--forest);color:#fffdf7}
+    .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
+    main{overflow:hidden}
+    .hero{padding:48px 28px 34px}
+    .heroGrid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(420px,1.18fr);gap:34px;align-items:start}
+    .eyebrow,.kicker{margin:0 0 14px;color:var(--clay);font-size:.84rem;font-weight:850}
+    h1,h2,h3,p{margin-top:0}
+    h1{margin-bottom:22px;color:var(--ink);font-size:clamp(3rem,8vw,6.2rem);line-height:.98;font-weight:900}
+    h2{margin-bottom:18px;color:var(--ink);font-size:clamp(2rem,4vw,3.7rem);line-height:1.06;font-weight:900}
+    h3{margin-bottom:10px;color:var(--ink);font-size:1.18rem}
+    .lead{max-width:720px;color:#33463c;font-size:clamp(1.04rem,1.8vw,1.28rem);line-height:1.78}
+    .heroSteps{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:34px auto 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .heroStep{padding:16px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper);box-shadow:none}
+    .heroStep b{display:block;margin-bottom:6px;color:var(--forest);font-size:1rem}
+    .heroStep span{display:block;color:var(--muted);font-size:.9rem;line-height:1.58}
+    .searchBox{padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+    .searchBox label{display:block;margin-bottom:10px;color:var(--forest);font-weight:850}
+    .modeHint{margin:0 0 14px;color:var(--muted);font-size:.96rem;line-height:1.55}
+    .searchInput{display:flex;gap:10px}
+    .searchInput input{min-width:0;flex:1;padding:14px 14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--ink);font-size:1rem}
+    .searchInput button{padding:0 18px;border:0;border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-weight:850}
+    .searchInput button:hover,.resultItem:hover,.modeButton:hover,.quickChip:hover,.secondaryButton:hover{cursor:pointer}
+    .modeGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+    .modeButton{min-height:44px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-weight:850}
+    .modeButton.active{background:var(--forest);color:#fffdf7}
+    .searchPanel{display:none}
+    .searchPanel.active{display:block}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .chips span{padding:7px 10px;border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.86rem;font-weight:800}
+    .filterGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .filterField label{margin-bottom:6px;font-size:.86rem}
+    .filterField select,.filterField input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:var(--radius-sm);background-color:#fff;color:var(--ink);font-size:.95rem}
+    .filterField input{padding:10px}
+    .filterField select{appearance:none;-webkit-appearance:none;padding:10px 42px 10px 10px;background-image:url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4.5 6.75L9 11.25L13.5 6.75' stroke='%23102019' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:18px 18px;line-height:1.35}
+    .filterField select::-ms-expand{display:none}
+    .toggleLine{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;padding:14px;background:rgba(225,174,67,.12);border:1px solid rgba(225,174,67,.3);border-radius:var(--radius-md)}
+    .toggleLine label{margin:0;color:var(--ink)}
+    .toggleText{display:grid;gap:4px;line-height:1.45}
+    .toggleText b{color:var(--ink);font-size:1rem}
+    .toggleText span{color:var(--muted);font-size:.86rem}
+    .toggleLine input{width:18px;height:18px}
+    .quickSearch{margin-top:14px}
+    .quickSearch b{display:block;margin-bottom:8px;color:var(--muted);font-size:.86rem}
+    .quickChips{display:flex;flex-wrap:wrap;gap:8px}
+    .quickChip,.secondaryButton{padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-size:.86rem;font-weight:850}
+    .secondaryButton{width:100%;margin-top:10px}
+    .primarySearch{min-height:44px;background:var(--forest);color:#fffdf7;border-color:var(--forest);font-size:1rem}
+    .technicalOnly{display:none}
+    .results{align-self:start;padding:22px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg)}
+    .resultTop{display:grid;gap:10px;margin-bottom:12px}
+    .resultMeta{margin:0;color:var(--muted);font-size:1rem;line-height:1.5}
+    .resultBack{justify-self:start;min-height:38px;padding:0 12px;border:1px solid rgba(23,75,63,.18);border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.86rem;font-weight:900;white-space:nowrap}
+    .resultBack:hover,.resultBack:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.16);outline:none;cursor:pointer}
+    .resultList{display:grid;gap:8px;max-height:58vh;overflow:auto}
+    .resultItem{width:100%;padding:12px;border:1px solid var(--line);border-radius:var(--radius-md);background:#fff;text-align:left;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+    .resultItem:hover,.resultItem:focus-visible{border-color:rgba(23,75,63,.45);background:rgba(47,127,85,.06);box-shadow:0 10px 22px rgba(23,34,29,.08);transform:translateY(-1px);outline:none}
+    .resultItem.active{border-color:rgba(23,75,63,.7);box-shadow:inset 4px 0 0 var(--forest)}
+    .resultItem.active .resultAction{background:var(--forest);color:#fffdf7}
+    .resultName{display:flex;justify-content:space-between;gap:12px;color:var(--ink);font-weight:900}
+    .resultDetail{margin-top:5px;color:var(--muted);font-size:.88rem;line-height:1.45}
+    .resultAction{display:inline-flex;margin-top:9px;padding:5px 8px;border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.78rem;font-weight:900}
+    .resultGuide{display:grid;gap:14px}
+    .currentTree{padding:14px;border:1px solid rgba(23,75,63,.36);border-radius:var(--radius-md);background:rgba(47,127,85,.07)}
+    .currentTree b{display:block;margin-bottom:5px;color:var(--forest);font-size:.86rem}
+    .currentTree p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.5}
+    .groupBlock{padding:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:#fff}
+    .groupBlock b{display:block;margin-bottom:6px;color:var(--ink)}
+    .groupBlock p{margin:0 0 10px;color:var(--muted);font-size:.86rem;line-height:1.5}
+    .groupChips{display:flex;flex-wrap:wrap;gap:7px}
+    .groupChip{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid rgba(23,75,63,.16);border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.82rem;font-weight:900}
+    .groupChip:hover,.groupChip:focus-visible{border-color:rgba(23,75,63,.45);background:rgba(47,127,85,.16);outline:none;cursor:pointer}
+    .resultHint{padding:12px 14px;border-radius:var(--radius-md);background:rgba(225,174,67,.14);color:#70541c;font-size:.86rem;font-weight:850;line-height:1.55}
+    .emptyState{padding:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(185,100,68,.08);color:var(--clay);font-weight:850;line-height:1.6}
+    .section{padding:82px 28px;border-top:1px solid var(--line);scroll-margin-top:110px}
+    .sectionHeader{max-width:760px;margin-bottom:32px}
+    .sectionHeader p:last-child{color:var(--muted);font-size:1.05rem;line-height:1.78}
+    .dataNote{margin:0 0 18px;padding:18px 20px;background:rgba(255,253,247,.76);border:1px solid var(--line);border-radius:var(--radius-lg);color:var(--muted);line-height:1.7}
+    .dataNote summary{color:var(--forest);font-weight:900;cursor:pointer}
+    .dataNote p{margin:12px 0 0}
+    .querySummary{margin:0 0 18px;padding:22px 24px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:0 16px 36px rgba(23,34,29,.08)}
+    .summaryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .summaryHead h3{margin:0;color:var(--ink);font-size:1.2rem}
+    .summaryHead p{margin:6px 0 0;color:var(--muted);line-height:1.55}
+    .summaryCount{min-width:112px;text-align:right;color:var(--forest);line-height:1}
+    .summaryCount strong{display:block;font-size:1.8rem;font-weight:900}
+    .summaryCount span{display:block;margin-top:5px;color:var(--muted);font-size:.78rem;font-weight:850}
+    .summaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .summaryBlock{padding:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--soft)}
+    .summaryBlock b{display:block;margin-bottom:8px;color:var(--forest)}
+    .summaryBlock p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
+    .summarySubLabel{display:block;margin:10px 0 6px;color:var(--muted);font-size:.78rem;font-weight:850}
+    .summarySubLabel:first-child{margin-top:0}
+    .summaryChips{display:flex;flex-wrap:wrap;gap:6px}
+    .summaryChip{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:rgba(47,127,85,.1);color:var(--forest);font-size:.82rem;font-weight:850}
+    .summaryChip.warn{background:rgba(225,174,67,.16);color:#80621c}
+    .summaryChip.empty{background:rgba(185,100,68,.1);color:var(--clay)}
+    .resultModal{position:fixed;inset:0;z-index:50;display:none;padding:26px;background:rgba(16,32,25,.42);backdrop-filter:blur(8px);overflow:auto}
+    .resultModal.open{display:block}
+    .modalCard{width:min(1240px,100%);margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:0 28px 80px rgba(16,32,25,.24);overflow:hidden}
+    .modalHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:24px 28px;border-bottom:1px solid var(--line);background:var(--paper)}
+    .modalHeader h2{margin:0;font-size:clamp(1.8rem,4vw,3.2rem)}
+    .modalHeader p{margin:8px 0 0;color:var(--muted);line-height:1.6}
+    .modalClose{min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-size:1.4rem;font-weight:900}
+    .modalClose:hover,.modalClose:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.08);outline:none;cursor:pointer}
+    .modalBody{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:18px;align-items:start;padding:22px}
+    .record{display:grid;gap:18px}
+    .record.focusPulse{animation:focusPulse .68s ease}
+    @keyframes focusPulse{0%{filter:none}35%{filter:drop-shadow(0 0 0 rgba(47,127,85,0)) drop-shadow(0 0 22px rgba(47,127,85,.28))}100%{filter:none}}
+    .identity,.timeline,.verdict,.profileCard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:0 16px 36px rgba(23,34,29,.08)}
+    .identity{padding:26px}
+    .identityTitle{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .treeId{color:var(--forest);font-family:ui-monospace,Menlo,monospace;font-size:1.15rem;font-weight:900}
+    .badge{padding:7px 10px;border-radius:999px;background:rgba(47,127,85,.12);color:var(--leaf);font-size:.84rem;font-weight:900}
+    .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+    .fact{display:grid;grid-template-columns:88px 1fr;gap:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+    .fact b{color:var(--muted);font-size:.9rem}
+    .fact span{color:var(--ink);font-weight:850}
+    .profileCard{padding:22px 24px}
+    .profileTop{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+    .profileCard h3{margin:0;color:var(--ink);font-size:1.2rem}
+    .profileCard p{margin:8px 0 0;color:var(--muted);line-height:1.65}
+    .speciesLink{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 12px;border-radius:999px;background:var(--forest);color:#fffdf7;font-size:.86rem;font-weight:900;white-space:nowrap}
+    .speciesLink:hover,.speciesLink:focus-visible{background:var(--ink);outline:none}
+    .timeline{padding:26px}
+    .event{display:grid;grid-template-columns:90px minmax(0,1fr);gap:16px;align-items:start;padding:16px 0;border-bottom:1px solid var(--line)}
+    .event:first-of-type{padding-top:0}
+    .event:last-child{border-bottom:0;padding-bottom:0}
+    .event time{color:var(--clay);font-family:ui-monospace,Menlo,monospace;font-weight:900}
+    .event h3{margin:0 0 6px;font-size:1.02rem}
+    .event p{margin:0;color:var(--muted);line-height:1.6}
+    .sourceTag{display:none}
+    .verdict{margin-top:18px;padding:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .check{padding:18px;background:var(--soft);border:1px solid var(--line);border-radius:var(--radius-md)}
+    .check.ok{border-color:rgba(47,127,85,.34);background:rgba(47,127,85,.08)}
+    .check.warn{border-color:rgba(225,174,67,.44);background:rgba(225,174,67,.12)}
+    .check.alert{border-color:rgba(185,100,68,.42);background:rgba(185,100,68,.1)}
+    .check b{display:block;margin-bottom:8px;color:var(--forest)}
+    .check p{margin:0;color:var(--muted);line-height:1.6}
+    .notice{padding:24px 28px;background:var(--forest);color:#fffdf7}
+    .notice p{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;font-size:clamp(1.12rem,2vw,1.55rem);line-height:1.65;font-weight:850}
+    .siteFooter{padding:28px;border-top:1px solid var(--line);background:rgba(255,253,247,.72)}
+    .siteFooterInner{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;display:grid;grid-template-columns:minmax(180px,.34fr) minmax(0,.66fr);gap:18px;align-items:start}
+    .siteFooter strong{color:var(--forest);font-size:.98rem}
+    .siteFooter p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.7}
+    .preloader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:28px;background:var(--bg);transition:opacity .32s ease,visibility .32s ease}
+    .preloader.isHidden{opacity:0;visibility:hidden;pointer-events:none}
+    .preloaderCard{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--paper);box-shadow:var(--shadow)}
+    .preloaderMark{display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--forest);font-weight:900}
+    .preloaderIcon{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1)}
+    .preloaderIcon svg{width:24px;height:24px}
+    .preloaderTitle{margin:0 0 6px;color:var(--ink);font-size:1.25rem;font-weight:900}
+    .preloaderText{margin:0;color:var(--muted);font-size:.92rem;line-height:1.6}
+    .preloaderBar{position:relative;height:4px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(23,75,63,.12)}
+    .preloaderBar:before{content:"";position:absolute;inset:0;width:42%;background:var(--forest);animation:preloadSlide 1.05s ease-in-out infinite}
+    @keyframes preloadSlide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+    @media(max-width:980px){.heroGrid,.modalBody,.facts,.summaryGrid{grid-template-columns:1fr}.heroSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.verdict{grid-template-columns:1fr}}
+    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.modeHint,.heroStep p,.hint,.dataNote p,.event p,.check p,.siteFooter p,.summaryHead p,.summaryBlock p{word-break:break-all;overflow-wrap:anywhere}.searchInput,.modeGrid,.filterGrid,.heroSteps,.summaryHead{display:grid;grid-template-columns:1fr}.summaryCount{text-align:left}.searchInput button{min-height:44px}.event{grid-template-columns:1fr}.sourceTag{width:max-content}.fact{grid-template-columns:1fr;gap:4px}.siteFooterInner{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-<nav class="topNav" aria-label="頁面導覽"><div class="topNavInner"><a class="siteMark" href="/tptrees/">臺北市行道樹公開資料</a><div class="navLinks"><a href="/tptrees/#can-check">能查什麼</a><a href="/tptrees/#gaps">六個資訊落差</a><a class="active" href="/tptrees/lifecycle/">查驗的城市樹木生命履歷</a></div></div></nav>
+<div class="preloader" id="preloader" role="status" aria-live="polite">
+  <div class="preloaderCard">
+    <div class="preloaderMark"><span class="preloaderIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 12.5C4.8 12.5 3 10.8 3 8.4C3 5.8 5.2 4 8.1 4C10 4 11.4 4.8 12 6.1C12.6 4.8 14 4 15.9 4C18.8 4 21 5.8 21 8.4C21 10.8 19.2 12.5 16.5 12.5C14.5 12.5 13.1 11.7 12 10.3C10.9 11.7 9.5 12.5 7.5 12.5Z" fill="currentColor"/></svg></span><span>臺北市行道樹小幫手</span></div>
+    <p class="preloaderTitle">正在整理樹木資料</p>
+    <p class="preloaderText">載入本機 Open Data 鏡像，準備樹木查驗與篩選條件。</p>
+    <div class="preloaderBar" aria-hidden="true"></div>
+  </div>
+</div>
 <main>
-<section class="hero"><div><p class="eyebrow">市民查驗流程規劃</p><h1>查驗的城市樹木生命履歷</h1><p class="lead">不是只查一棵樹在哪裡，而是查它為什麼改變、誰決定、後來是否還活著。這一頁先規劃市民遇到砍樹、移樹、修剪爭議時，可以照著走的查驗流程。</p></div><div class="heroCard"><strong>市民最想知道三件事</strong><p>這棵樹是誰？它發生了什麼事？官方說法、公開資料與現場狀況能不能對得起來？</p></div></section>
-<section class="summary"><p>把「靜態樹籍」升級成「可追蹤、可對照、可回報」的樹木生命履歷。</p></section>
-<section class="section" id="entry"><p class="kicker">01 查驗入口</p><h2>先用市民語言選情境</h2><p class="sectionIntro">入口不要先丟資料表，而是讓使用者從真實遇到的狀況開始。</p><div class="scenarioGrid"><div class="card">我看到一棵樹被貼公告</div><div class="card">我看到樹被修剪或截頂</div><div class="card">我聽說某工程要移樹或砍樹</div><div class="card">我想查某條路上的樹</div><div class="card">我想查某棵樹是否還在</div><div class="card">我想知道移植後有沒有活</div></div></section>
-<section class="section" id="steps"><p class="kicker">02 查驗流程</p><h2>從樹木身分走到查驗結果</h2><div class="stepGrid"><article class="step"><span>STEP 1</span><h3>樹木身分卡</h3><p>顯示樹木 ID、樹種、行政區、道路位置、胸徑、樹高、調查日期與座標，並提醒這不是最新健康狀態。</p></article><article class="step"><span>STEP 2</span><h3>生命事件時間線</h3><p>把建立樹籍、調查、修剪、工程影響、移植、移除、健康檢查與民眾通報放在同一條時間軸。</p></article><article class="step"><span>STEP 3</span><h3>工程影響對照</h3><p>列出工程名稱、主辦機關、原方案、修正版、變更原因、相關文件與目前狀態。</p></article><article class="step"><span>STEP 4</span><h3>現場查驗</h3><p>讓市民用 checklist 檢查資料與現場是否一致，包含樹是否存在、樹種是否相符、是否有公告或圍籬。</p></article><article class="step"><span>STEP 5</span><h3>移植追蹤</h3><p>追蹤原位置、新位置、移植日期、移植方式，以及半年、一年、三年後是否仍健康存活。</p></article><article class="step"><span>STEP 6</span><h3>查驗結果</h3><p>產生市民可理解的狀態：資料一致、需更新、無法確認、高落差。</p></article></div></section>
-<section class="section" id="flow"><p class="kicker">03 整體流程</p><h2>市民從現場狀況出發</h2><div class="flow"><div>輸入位置、樹木 ID、道路名稱或工程名稱</div><div>找到樹木身分與公開樹籍資料</div><div>查看生命事件時間線</div><div>比對工程處置資料與版本變更</div><div>現場查驗是否一致</div><div>若移植，追蹤新位置與存活狀態</div><div>產生查驗結果與可回報項目</div></div></section>
-<section class="section" id="field-check"><p class="kicker">04 現場查驗</p><h2>資料與現場是否一致？</h2><div class="checklist"><div>現場是否找得到這棵樹？</div><div>樹種是否與資料一致？</div><div>樹高或胸徑是否明顯不合理？</div><div>樹冠是否與過去照片差很多？</div><div>是否有施工圍籬？</div><div>是否有移植、移除或修剪公告？</div><div>是否有 QR code 或樹牌？</div><div>是否能拍照回報？</div></div></section>
-<section class="section" id="result"><p class="kicker">05 查驗結果</p><h2>用六種狀態讓市民看懂</h2><div class="statusGrid"><div class="status"><b>資料一致</b><p>樹籍、工程資訊與現場狀況大致相符。</p></div><div class="status"><b>需更新</b><p>現場已有變化，但公開資料尚未反映。</p></div><div class="status"><b>無法確認</b><p>缺少共同 ID、位置不明或文件不足。</p></div><div class="status"><b>高落差</b><p>資料顯示存在，但現場疑似移除、大幅修剪或移植後失聯。</p></div><div class="status"><b>待追蹤</b><p>已移植或已修剪，需要半年、一年、三年的後續紀錄。</p></div><div class="status"><b>需補文件</b><p>找不到會勘、核准、移植計畫或修剪紀錄。</p></div></div></section>
-<section class="closing"><div><p class="kicker">核心標語</p><h2>不只查樹在哪裡，而是查它如何被改變。</h2></div><p>這組頁面可以成為下一階段的產品藍圖：先以範例案件示範，再逐步接上公開資料、工程文件、現場回報與移植存活追蹤。</p></section>
+  <nav class="topNav" aria-label="頁面導覽">
+    <div class="topNavInner">
+      <a class="siteMark" href="../index.html"><span class="siteIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 12.5C4.8 12.5 3 10.8 3 8.4C3 5.8 5.2 4 8.1 4C10 4 11.4 4.8 12 6.1C12.6 4.8 14 4 15.9 4C18.8 4 21 5.8 21 8.4C21 10.8 19.2 12.5 16.5 12.5C14.5 12.5 13.1 11.7 12 10.3C10.9 11.7 9.5 12.5 7.5 12.5Z" fill="currentColor"/></svg></span><span>臺北市行道樹小幫手</span></a>
+      <div class="navLinks">
+        <a href="../index.html#can-check">你能查什麼</a>
+        <a href="../index.html#gaps">你應該要知道的資訊差</a>
+        <a class="active" href="./index.html">樹木的生命履歷</a>
+        <a href="../species/index.html">樹種科普</a>
+        <a href="../daily/index.html">今天給我一棵樹</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="wrap heroGrid">
+      <div>
+        <p class="eyebrow">從公開資料看懂一棵樹</p>
+        <h1>樹木的生命履歷</h1>
+        <p class="lead">先找到一棵樹，再看公開資料目前能說明什麼：它在哪裡、是什麼樹、有多大、資料是否完整，以及哪些狀態仍需要現場確認。</p>
+      </div>
+      <form class="searchBox" id="search-form">
+        <div class="modeGrid" aria-label="搜尋方式">
+          <button class="modeButton active" type="button" data-mode="all">綜合搜尋</button>
+          <button class="modeButton" type="button" data-mode="id">用編號找</button>
+          <button class="modeButton" type="button" data-mode="place">用地點找</button>
+          <button class="modeButton" type="button" data-mode="species">用樹種找</button>
+        </div>
+
+        <div class="searchPanel active" data-panel="all">
+          <p class="modeHint">不知道要怎麼查時，先輸入任何線索。</p>
+          <label for="tree-search">你手上有什麼線索？</label>
+          <div class="searchInput">
+            <input id="tree-search" type="search" value="" aria-label="查詢樹木" placeholder="例如：BT0614021096、文林路、士林區 榕樹">
+            <button type="submit">查驗</button>
+          </div>
+        </div>
+
+        <div class="searchPanel" data-panel="id">
+          <p class="modeHint">如果你看到樹牌、QR Code 或資料表上的樹木編號，用這裡最準。</p>
+          <label for="tree-id-query">樹木編號</label>
+          <div class="searchInput">
+            <input id="tree-id-query" type="search" aria-label="用樹木編號查詢" placeholder="例如：BT0614021096">
+            <button type="submit">查驗</button>
+          </div>
+        </div>
+
+        <div class="searchPanel" data-panel="place">
+          <p class="modeHint">如果你只知道大概位置，先選行政區，再輸入道路或路段。</p>
+          <div class="filterGrid" aria-label="地點查詢">
+            <div class="filterField">
+              <label for="district-filter">行政區</label>
+              <select id="district-filter"><option value="">全部行政區</option></select>
+            </div>
+            <div class="filterField">
+              <label for="road-filter">道路</label>
+              <select id="road-filter"><option value="">全部道路</option></select>
+            </div>
+          </div>
+          <button class="secondaryButton primarySearch" type="submit">查驗</button>
+        </div>
+
+        <div class="searchPanel" data-panel="species">
+          <p class="modeHint">如果你想看某一種樹在資料中的紀錄，用樹種查詢。</p>
+          <div class="filterGrid" aria-label="樹種查詢">
+            <div class="filterField">
+              <label for="species-filter">樹種</label>
+              <select id="species-filter"><option value="">全部樹種</option></select>
+            </div>
+            <div class="filterField">
+              <label for="species-keyword">補充關鍵字</label>
+              <input id="species-keyword" type="search" placeholder="例如：白千層、榕樹">
+            </div>
+          </div>
+          <button class="secondaryButton primarySearch" type="submit">查驗</button>
+        </div>
+
+        <div class="filterGrid technicalOnly" aria-label="進階篩選">
+          <div class="filterField">
+            <label for="coord-filter">座標</label>
+            <input id="coord-filter" type="search" placeholder="例如：302404 或 2777358">
+          </div>
+        </div>
+        <div class="toggleLine">
+          <label class="toggleText" for="issue-filter">
+            <b>只看需要再確認的資料</b>
+            <span>不是判定樹有問題，而是優先找出欄位缺漏、資料過舊或數值需要現場確認的紀錄。</span>
+          </label>
+          <input id="issue-filter" type="checkbox">
+        </div>
+        <div class="quickSearch technicalOnly">
+          <b>範例</b>
+          <div class="quickChips" id="quick-chips"></div>
+        </div>
+        <button class="secondaryButton" id="clear-filters" type="button">重新查詢</button>
+      </form>
+    </div>
+    <div class="heroSteps" aria-label="查詢流程">
+      <div class="heroStep"><b>1. 找到它</b><span>用你知道的編號、地點或樹種開始。</span></div>
+      <div class="heroStep"><b>2. 看懂它</b><span>確認位置、樹種、胸徑、樹高與調查日期。</span></div>
+      <div class="heroStep"><b>3. 知道缺口</b><span>分辨哪些資訊公開資料還無法回答。</span></div>
+    </div>
+  </section>
+
+  <section class="resultModal" id="record" aria-hidden="true" aria-label="查驗結果彈窗">
+    <div class="modalCard">
+      <div class="modalHeader">
+        <div>
+          <p class="kicker">查驗結果</p>
+          <h2>查驗結果與樹木履歷</h2>
+          <p>先確認是不是你要找的那一棵，再看公開資料能告訴你什麼，並延伸認識這種樹。</p>
+        </div>
+        <button class="modalClose" id="modal-close" type="button" aria-label="關閉查驗結果">×</button>
+      </div>
+      <div class="modalBody">
+        <section class="results" aria-live="polite">
+          <div class="resultTop">
+            <button class="resultBack" id="modal-back" type="button">返回查詢</button>
+            <p class="resultMeta" id="result-meta">正在載入資料。</p>
+          </div>
+          <div class="resultList" id="result-list"></div>
+        </section>
+        <section>
+          <details class="dataNote">
+            <summary>這不是健康診斷，是公開資料查驗</summary>
+            <p>這裡只整理臺北市行道樹的公開資料。它可以幫你確認位置、樹種和尺寸；但不能直接判斷樹是否健康、是否要被移植或是否受工程影響。</p>
+          </details>
+          <section class="querySummary" id="query-summary" aria-label="本次查詢摘要">
+            <div class="summaryHead">
+              <div>
+                <p class="kicker">查驗結果</p>
+                <h3>本次查詢摘要</h3>
+                <p id="summary-scope">先看這次搜尋找到多少資料，再選一棵看履歷。</p>
+              </div>
+              <div class="summaryCount"><span>找到</span><strong id="summary-total">0</strong><span>筆資料</span></div>
+            </div>
+            <div class="summaryGrid" id="summary-grid"></div>
+          </section>
+          <div class="record">
+            <aside class="identity">
+              <div class="identityTitle">
+                <div class="treeId" id="tree-id">TREE-TP-04281</div>
+                <div class="badge" id="record-badge">公開資料</div>
+              </div>
+              <div class="facts" id="facts">
+                <div class="fact"><b>行政區</b><span id="fact-district">松山區</span></div>
+                <div class="fact"><b>道路</b><span id="fact-road">民生東路</span></div>
+                <div class="fact"><b>位置備註</b><span id="fact-note">富錦街口</span></div>
+                <div class="fact"><b>樹種</b><span id="fact-species">白千層</span></div>
+                <div class="fact"><b>胸徑</b><span id="fact-dbh">74 cm</span></div>
+                <div class="fact"><b>樹高</b><span id="fact-height">12 m</span></div>
+                <div class="fact"><b>調查日期</b><span id="fact-date">2024-08-12</span></div>
+                <div class="fact"><b>座標</b><span id="fact-coord">25.0581, 121.5634</span></div>
+              </div>
+            </aside>
+            <div>
+              <section class="profileCard" aria-label="樹木履歷">
+                <div class="profileTop">
+                  <div>
+                    <p class="kicker">樹木履歷</p>
+                    <h3 id="profile-title">這是一棵白千層</h3>
+                    <p id="profile-copy">這筆公開資料記錄它的位置、樹種、胸徑、樹高與調查日期。你可以先用這些資訊確認是不是同一棵樹，再搭配現場觀察。</p>
+                  </div>
+                  <a class="speciesLink" id="species-link" href="../species/index.html">看樹種介紹</a>
+                </div>
+              </section>
+              <section class="timeline" id="timeline" aria-label="公開資料生命履歷">
+              </section>
+              <section class="verdict" id="verdict" aria-label="查驗提示">
+              </section>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+  <footer class="siteFooter">
+    <div class="siteFooterInner">
+      <strong>Open Data 使用聲明</strong>
+      <p>本網站以臺北市政府資料大平臺公開之「臺北市行道樹分布圖」資料為基礎，整理為市民查詢、理解與公共討論用途。內容用於協助辨認行道樹位置、樹種與基礎樹籍，不代表官方即時狀態、樹木健康診斷、工程核准或法律裁定；實際處置仍應以主管機關公告、工程文件與現場查驗為準。</p>
+    </div>
+  </footer>
 </main>
+<script src="../data/tree-records.js"></script>
+<script>
+  const sampleTrees = [
+    {treeId:"TP-SON-000421",district:"松山區",road:"民生東路",note:"富錦街口人行道",species:"白千層",dbh:74,height:12,surveyDate:"2024-08-12",lat:25.0581,lng:121.5634},
+    {treeId:"TP-SHI-001184",district:"士林區",road:"中山北路",note:"福林橋南側安全島",species:"臺灣欒樹",dbh:42,height:10,surveyDate:"2023-11-06",lat:25.0968,lng:121.5269},
+    {treeId:"TP-DAA-003912",district:"大安區",road:"仁愛路",note:"敦化南路口東側",species:"樟樹",dbh:58,height:14,surveyDate:"2024-03-18",lat:25.0374,lng:121.5487},
+    {treeId:"TP-ZHO-002306",district:"中正區",road:"中山南路",note:"凱達格蘭大道旁",species:"大王椰子",dbh:38,height:16,surveyDate:"2022-09-22",lat:25.0398,lng:121.5191},
+    {treeId:"TP-BEI-004815",district:"北投區",road:"承德路",note:"立農街口",species:"榕樹",dbh:66,height:13,surveyDate:"2024-05-04",lat:25.1162,lng:121.5104},
+    {treeId:"TP-NEI-000774",district:"內湖區",road:"瑞光路",note:"港墘路至洲子街",species:"大花紫薇",dbh:24,height:7,surveyDate:"2023-07-19",lat:25.0776,lng:121.5756},
+    {treeId:"TP-WAN-000143",district:"萬華區",road:"西園路",note:"艋舺大道口",species:"茄苳",dbh:46,height:11,surveyDate:"2021-10-13",lat:25.0352,lng:121.4997},
+    {treeId:"TP-DAT-000892",district:"大同區",road:"重慶北路",note:"民生西路口",species:"小葉欖仁",dbh:22,height:8,surveyDate:"2024-01-29",lat:25.0569,lng:121.5135},
+    {treeId:"TP-XIN-002221",district:"信義區",road:"松仁路",note:"市府轉運站周邊",species:"臺灣欒樹",dbh:31,height:9,surveyDate:"2023-12-01",lat:25.0406,lng:121.5688},
+    {treeId:"TP-NAN-001047",district:"南港區",road:"研究院路",note:"中央研究院前",species:"楓香",dbh:52,height:15,surveyDate:"2022-04-08",lat:25.0421,lng:121.6159},
+    {treeId:"TP-WEN-000531",district:"文山區",road:"木柵路",note:"指南路口",species:"水黃皮",dbh:28,height:8,surveyDate:"2024-02-14",lat:24.9876,lng:121.5704},
+    {treeId:"TP-ZHO-004002",district:"中山區",road:"民權東路",note:"松江路口",species:"黑板樹",dbh:35,height:2023,surveyDate:"2023-05-21",lat:25.0628,lng:121.5327},
+    {treeId:"TP-SON-000987",district:"松山區",road:"南京東路",note:"光復北路口",species:"榕樹",dbh:0,height:10,surveyDate:"2024-06-17",lat:25.0519,lng:121.5578},
+    {treeId:"TP-DAA-004518",district:"大安區",road:"新生南路",note:"和平東路口",species:"茄苳",dbh:63,height:13,surveyDate:"2020-12-03",lat:25.0261,lng:121.5334},
+    {treeId:"TP-SHI-003301",district:"士林區",road:"文林路",note:"士林官邸周邊",species:"白千層",dbh:39,height:null,surveyDate:"2024-04-11",lat:25.0942,lng:121.5251},
+    {treeId:"TP-NEI-001882",district:"內湖區",road:"成功路",note:"康寧路口",species:"苦楝",dbh:27,height:9,surveyDate:"",lat:25.0812,lng:121.5906}
+  ];
+  let trees = [...sampleTrees];
+  const bundledCsvPath = "../data/TaipeiTree.csv";
+  const resultLimit = 80;
+
+  const requiredFields = ["treeId","district","road","note","species","dbh","height","surveyDate","lat","lng"];
+  const fieldLabels = {
+    treeId:"樹木編號",
+    district:"行政區",
+    road:"道路",
+    note:"位置備註",
+    species:"樹種",
+    dbh:"胸徑",
+    height:"樹高",
+    surveyDate:"調查日期",
+    lat:"座標 X",
+    lng:"座標 Y"
+  };
+  const form = document.querySelector("#search-form");
+  const input = document.querySelector("#tree-search");
+  const treeIdQuery = document.querySelector("#tree-id-query");
+  const speciesKeyword = document.querySelector("#species-keyword");
+  const resultMeta = document.querySelector("#result-meta");
+  const resultList = document.querySelector("#result-list");
+  const summaryScope = document.querySelector("#summary-scope");
+  const summaryTotal = document.querySelector("#summary-total");
+  const summaryGrid = document.querySelector("#summary-grid");
+  const timeline = document.querySelector("#timeline");
+  const verdict = document.querySelector("#verdict");
+  const resultModal = document.querySelector("#record");
+  const modalClose = document.querySelector("#modal-close");
+  const modalBack = document.querySelector("#modal-back");
+  const districtFilter = document.querySelector("#district-filter");
+  const speciesFilter = document.querySelector("#species-filter");
+  const roadFilter = document.querySelector("#road-filter");
+  const coordFilter = document.querySelector("#coord-filter");
+  const issueFilter = document.querySelector("#issue-filter");
+  const clearFilters = document.querySelector("#clear-filters");
+  const quickChips = document.querySelector("#quick-chips");
+  const modeButtons = [...document.querySelectorAll("[data-mode]")];
+  let selectedTreeId = trees[0].treeId;
+  let searchMode = "all";
+  let queryHistory = [];
+  const groupThreshold = 300;
+
+  function hidePreloader(){
+    const preloader = document.querySelector("#preloader");
+    if(!preloader) return;
+    preloader.classList.add("isHidden");
+    window.setTimeout(() => preloader.remove(), 420);
+  }
+
+  function hasValue(value){
+    return value !== null && value !== undefined && value !== "";
+  }
+
+  function displayValue(value, unit){
+    if(!hasValue(value)) return "未提供";
+    return unit ? `${value} ${unit}` : value;
+  }
+
+  function formatCoord(tree){
+    return hasValue(tree.lat) && hasValue(tree.lng) ? `${tree.lat}, ${tree.lng}` : "未提供";
+  }
+
+  function searchTrees(query){
+    const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return trees.filter(tree => {
+      if(districtFilter.value && tree.district !== districtFilter.value) return false;
+      if(speciesFilter.value && tree.species !== speciesFilter.value) return false;
+      if(roadFilter.value.trim() && !String(tree.road || "").toLowerCase().includes(roadFilter.value.trim().toLowerCase())) return false;
+      if(coordFilter.value.trim()){
+        const coordTarget = [tree.lat,tree.lng].join(" ");
+        if(!coordTarget.includes(coordFilter.value.trim())) return false;
+      }
+      if(issueFilter.checked){
+        const status = getStatus(tree);
+        if(status.missing.length === 0 && status.warnings.length === 0) return false;
+      }
+      if(terms.length === 0) return true;
+      const targetByMode = {
+        all: [tree.treeId,tree.district,tree.road,tree.note,tree.species,tree.surveyDate,tree.lat,tree.lng],
+        id: [tree.treeId],
+        place: [tree.district,tree.road,tree.note],
+        species: [tree.species]
+      };
+      const target = (targetByMode[searchMode] || targetByMode.all).join(" ").toLowerCase();
+      return terms.every(term => target.includes(term));
+    });
+  }
+
+  function getStatus(tree){
+    const missing = requiredFields.filter(field => !hasValue(tree[field]));
+    const warnings = [];
+    if(hasValue(tree.height) && (Number(tree.height) <= 0 || Number(tree.height) > 40)) warnings.push(`樹高 ${tree.height} m 需現場確認`);
+    if(hasValue(tree.dbh) && (Number(tree.dbh) <= 0 || Number(tree.dbh) > 200)) warnings.push(`胸徑 ${tree.dbh} cm 需現場確認`);
+    if(hasValue(tree.surveyDate)){
+      const surveyed = new Date(`${tree.surveyDate}T00:00:00+08:00`);
+      const today = new Date("2026-07-13T00:00:00+08:00");
+      const years = (today - surveyed) / (365.25 * 24 * 60 * 60 * 1000);
+      if(years > 3) warnings.push("調查日期超過 3 年，建議現場確認");
+    }else{
+      warnings.push("缺少調查日期");
+    }
+    return {missing,warnings};
+  }
+
+  function topCounts(results, key, limit = 4){
+    const counts = new Map();
+    results.forEach(tree => {
+      const value = tree[key];
+      if(!hasValue(value)) return;
+      counts.set(value, (counts.get(value) || 0) + 1);
+    });
+    return [...counts.entries()]
+      .sort((a,b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]),"zh-Hant"))
+      .slice(0,limit);
+  }
+
+  function renderSummaryChips(items, emptyText){
+    if(items.length === 0) return `<span class="summaryChip empty">${escapeHtml(emptyText)}</span>`;
+    return items.map(([label,count]) => `<span class="summaryChip">${escapeHtml(label)} ${count} 筆</span>`).join("");
+  }
+
+  function getCheckSummary(results){
+    return results.reduce((summary, tree) => {
+      const status = getStatus(tree);
+      const hasMissing = status.missing.length > 0;
+      const hasOldDate = status.warnings.some(warning => warning.includes("調查日期超過"));
+      const hasSizeIssue = status.warnings.some(warning => warning.includes("樹高") || warning.includes("胸徑"));
+      const needsCheck = hasMissing || status.warnings.length > 0;
+      if(needsCheck) summary.total += 1;
+      if(hasOldDate) summary.oldDate += 1;
+      if(hasMissing) summary.missing += 1;
+      if(hasSizeIssue) summary.size += 1;
+      return summary;
+    }, {total:0, oldDate:0, missing:0, size:0});
+  }
+
+  function getSearchScopeText(results){
+    const parts = [];
+    if(searchMode === "id") parts.push("用樹木編號查詢");
+    if(searchMode === "place") parts.push("用地點查詢");
+    if(searchMode === "species") parts.push("用樹種查詢");
+    if(searchMode === "all") parts.push("綜合搜尋");
+    if(districtFilter.value) parts.push(districtFilter.value);
+    if(roadFilter.value) parts.push(roadFilter.value);
+    if(speciesFilter.value) parts.push(speciesFilter.value);
+    const keyword = getActiveQuery().trim();
+    if(keyword) parts.push(`「${keyword}」`);
+    const scope = parts.filter(Boolean).join("／");
+    return results.length
+      ? `${scope || "目前條件"} 找到 ${results.length} 筆。先看整體分布，再點左側單棵查看履歷。`
+      : `${scope || "目前條件"} 找不到資料。可以放寬行政區、道路或樹種條件。`;
+  }
+
+  function renderQuerySummary(results){
+    summaryScope.textContent = getSearchScopeText(results);
+    summaryTotal.textContent = results.length.toLocaleString("zh-Hant");
+    if(results.length === 0){
+      summaryGrid.innerHTML = `
+        <div class="summaryBlock">
+          <b>這次沒有找到樹</b>
+          <p>試著只保留行政區、改選全部道路，或直接輸入道路名稱。</p>
+        </div>
+        <div class="summaryBlock">
+          <b>可能原因</b>
+          <p>公開資料的道路名稱、位置備註與現場稱呼可能不同。</p>
+        </div>
+        <div class="summaryBlock">
+          <b>下一步</b>
+          <p>改用樹種、樹木編號，或放寬「只看需要再確認」。</p>
+        </div>
+      `;
+      return;
+    }
+    const speciesCounts = topCounts(results,"species",4);
+    const districtCounts = topCounts(results,"district",4);
+    const roadCounts = topCounts(results,"road",4);
+    const checkSummary = getCheckSummary(results);
+    summaryGrid.innerHTML = `
+      <div class="summaryBlock">
+        <b>這次有哪些樹種？</b>
+        <div class="summaryChips">${renderSummaryChips(speciesCounts,"沒有樹種資料")}</div>
+      </div>
+      <div class="summaryBlock">
+        <b>地點分布怎麼看？</b>
+        <span class="summarySubLabel">行政區</span>
+        <div class="summaryChips">${renderSummaryChips(districtCounts,"沒有行政區資料")}</div>
+        <span class="summarySubLabel">道路</span>
+        <div class="summaryChips">${renderSummaryChips(roadCounts,"沒有道路資料")}</div>
+      </div>
+      <div class="summaryBlock">
+        <b>哪些資料要再確認？</b>
+        <div class="summaryChips">
+          <span class="summaryChip ${checkSummary.total ? "warn" : ""}">${checkSummary.total} 筆資料需再確認</span>
+          ${checkSummary.oldDate ? `<span class="summaryChip warn">調查超過 3 年 ${checkSummary.oldDate} 筆</span>` : ""}
+          ${checkSummary.missing ? `<span class="summaryChip warn">欄位缺漏 ${checkSummary.missing} 筆</span>` : ""}
+          ${checkSummary.size ? `<span class="summaryChip warn">尺寸異常 ${checkSummary.size} 筆</span>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderResults(results){
+    const selected = results.find(tree => tree.treeId === selectedTreeId) || results[0];
+    if(results.length > groupThreshold){
+      resultMeta.textContent = `找到 ${results.length} 筆可能符合的樹木履歷。結果很多，先用道路或樹種縮小範圍。`;
+      renderGroupedResults(results, selected);
+      return;
+    }
+    const visibleResults = results.slice(0,resultLimit);
+    const limitNote = results.length > resultLimit ? `，先列出前 ${resultLimit} 筆` : "";
+    resultMeta.textContent = `找到 ${results.length} 筆可能符合的樹木履歷${limitNote}。`;
+    if(results.length === 0){
+      resultList.innerHTML = `<div class="emptyState">找不到符合條件的樹籍。可改用行政區、道路名稱、樹種或樹木編號查詢。</div>`;
+      return;
+    }
+    resultList.innerHTML = visibleResults.map(tree => renderResultItem(tree)).join("");
+  }
+
+  function renderResultItem(tree){
+    const isActive = tree.treeId === selectedTreeId;
+    return `
+      <button class="resultItem ${isActive ? "active" : ""}" type="button" data-tree-id="${tree.treeId}" aria-pressed="${String(isActive)}">
+        <span class="resultName"><span>${tree.species || "未提供樹種"}</span><span>${tree.treeId}</span></span>
+        <span class="resultDetail">${tree.district}｜${tree.road}｜${tree.note || "無位置備註"}</span>
+        <span class="resultAction">${isActive ? "目前顯示中" : "查看履歷"}</span>
+      </button>
+    `;
+  }
+
+  function renderGroupedResults(results, selected){
+    const roadGroups = topCounts(results,"road",8);
+    const speciesGroups = topCounts(results,"species",8);
+    const currentTree = selected ? `
+      <div class="currentTree">
+        <b>目前查看</b>
+        <p>${escapeHtml(selected.species || "未提供樹種")}｜${escapeHtml(selected.road || "未提供道路")}｜${escapeHtml(selected.treeId)}</p>
+      </div>
+    ` : "";
+    resultList.innerHTML = `
+      <div class="resultGuide">
+        ${currentTree}
+        <div class="resultHint">結果超過 ${groupThreshold} 筆時，先選道路或樹種，縮小後再看單棵樹履歷。</div>
+        <section class="groupBlock">
+          <b>先選道路</b>
+          <p>適合你知道大概位置，想從街道找樹。</p>
+          <div class="groupChips">
+            ${roadGroups.map(([road,count]) => `<button class="groupChip" type="button" data-refine-key="road" data-refine-value="${escapeHtml(road)}">${escapeHtml(road)} ${count} 筆</button>`).join("")}
+          </div>
+        </section>
+        <section class="groupBlock">
+          <b>或選樹種</b>
+          <p>適合你想先看某一種樹，再進一步確認位置。</p>
+          <div class="groupChips">
+            ${speciesGroups.map(([species,count]) => `<button class="groupChip" type="button" data-refine-key="species" data-refine-value="${escapeHtml(species)}">${escapeHtml(species)} ${count} 筆</button>`).join("")}
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function buildOptions(select, values, defaultLabel){
+    const currentValue = select.value;
+    select.innerHTML = `<option value="">${escapeHtml(defaultLabel)}</option>${values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}`;
+    if(values.includes(currentValue)) select.value = currentValue;
+  }
+
+  function getRoadsForDistrict(){
+    const selectedDistrict = districtFilter.value;
+    return [...new Set(trees
+      .filter(tree => !selectedDistrict || tree.district === selectedDistrict)
+      .map(tree => tree.road)
+      .filter(Boolean)
+    )].sort((a,b) => a.localeCompare(b,"zh-Hant"));
+  }
+
+  function updateRoadOptions(){
+    const selectedDistrict = districtFilter.value;
+    const roads = getRoadsForDistrict();
+    const defaultLabel = selectedDistrict ? `${selectedDistrict}全部道路` : "全部道路";
+    buildOptions(roadFilter,roads,defaultLabel);
+  }
+
+  function escapeHtml(value){
+    return String(value)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function populateControls(){
+    const districts = [...new Set(trees.map(tree => tree.district).filter(Boolean))].sort((a,b) => a.localeCompare(b,"zh-Hant"));
+    const species = [...new Set(trees.map(tree => tree.species).filter(Boolean))].sort((a,b) => a.localeCompare(b,"zh-Hant"));
+    buildOptions(districtFilter,districts,"全部行政區");
+    updateRoadOptions();
+    buildOptions(speciesFilter,species,"全部樹種");
+    const quickItems = [
+      {label:"士林區 榕樹",query:"士林區 榕樹",mode:"all"},
+      {label:"文林路",query:"文林路",mode:"place"},
+      {label:"大安區 茄苳",query:"大安區 茄苳",mode:"all"},
+      {label:"白千層",query:"白千層",mode:"species"},
+      {label:"只看需確認",query:"",mode:"all",issue:true}
+    ];
+    quickChips.innerHTML = quickItems.map(item => `<button class="quickChip" type="button" data-query="${item.query}" data-quick-mode="${item.mode}" data-issue="${item.issue ? "1" : "0"}">${item.label}</button>`).join("");
+  }
+
+  function renderTree(tree){
+    const status = getStatus(tree);
+    selectedTreeId = tree.treeId;
+    document.querySelector("#tree-id").textContent = tree.treeId;
+    document.querySelector("#record-badge").textContent = status.missing.length || status.warnings.length ? "需查驗" : "公開資料";
+    document.querySelector("#fact-district").textContent = displayValue(tree.district);
+    document.querySelector("#fact-road").textContent = displayValue(tree.road);
+    document.querySelector("#fact-note").textContent = displayValue(tree.note);
+    document.querySelector("#fact-species").textContent = displayValue(tree.species);
+    document.querySelector("#fact-dbh").textContent = displayValue(tree.dbh,"cm");
+    document.querySelector("#fact-height").textContent = displayValue(tree.height,"m");
+    document.querySelector("#fact-date").textContent = displayValue(tree.surveyDate);
+    document.querySelector("#fact-coord").textContent = formatCoord(tree);
+    document.querySelector("#profile-title").textContent = `這是一棵${tree.species || "尚未標明樹種的樹"}`;
+    document.querySelector("#profile-copy").textContent = `${tree.species || "這棵樹"}位在${tree.district || "未提供行政區"} ${tree.road || "未提供道路"}，公開資料記錄胸徑 ${displayValue(tree.dbh,"cm")}、樹高 ${displayValue(tree.height,"m")}，調查日期為 ${displayValue(tree.surveyDate)}。`;
+    const speciesLink = document.querySelector("#species-link");
+    speciesLink.textContent = tree.species ? `看${tree.species}介紹` : "看樹種介紹";
+    const speciesParams = new URLSearchParams({
+      species: tree.species || "",
+      treeId: tree.treeId || "",
+      district: tree.district || "",
+      road: tree.road || "",
+      note: tree.note || ""
+    });
+    speciesLink.href = `../species/index.html?${speciesParams.toString()}`;
+
+    const identityText = `${tree.district || "未提供行政區"} ${tree.road || "未提供道路"}，${tree.note || "未提供位置備註"}。`;
+    const sizeText = `${tree.species || "未提供樹種"}，胸徑 ${displayValue(tree.dbh,"cm")}，樹高 ${displayValue(tree.height,"m")}。`;
+    const locationText = hasValue(tree.lat) && hasValue(tree.lng)
+      ? "有座標，可作為地圖定位的起點。"
+      : "沒有座標，只能靠道路名稱與位置備註到現場找。";
+    const statusText = status.missing.length === 0 && status.warnings.length === 0
+      ? "主要資料都有填，沒有明顯需要先追問的地方。"
+      : [...status.missing.map(field => `缺少${fieldLabels[field] || field}`), ...status.warnings].join("；");
+
+    timeline.innerHTML = [
+      ["在哪裡","這筆資料指向的位置",identityText],
+      ["哪種樹","公開資料記錄的樹種與大小",sizeText],
+      ["好找嗎","現場尋找時可用的線索",locationText],
+      ["要注意","這筆資料還需要確認什麼",statusText]
+    ].map(([layer,title,body]) => `
+      <div class="event">
+        <time>${layer}</time>
+        <div>
+          <h3>${title}</h3>
+          <p>${body}</p>
+        </div>
+        <span class="sourceTag">公開資料</span>
+      </div>
+    `).join("");
+
+    const completeClass = status.missing.length === 0 ? "ok" : "alert";
+    const locationClass = hasValue(tree.lat) && hasValue(tree.lng) ? "ok" : "alert";
+    const warningClass = status.warnings.length === 0 ? "warn" : "alert";
+    verdict.innerHTML = `
+      <div class="check ${completeClass}">
+        <b>${status.missing.length === 0 ? "基本資料足夠" : "有資料沒填"}</b>
+        <p>${status.missing.length === 0 ? "可以先用這筆資料辨認樹木。" : `缺少：${status.missing.map(field => fieldLabels[field] || field).join("、")}。`}</p>
+      </div>
+      <div class="check ${locationClass}">
+        <b>${hasValue(tree.lat) && hasValue(tree.lng) ? "比較容易找到" : "位置要再比對"}</b>
+        <p>${hasValue(tree.lat) && hasValue(tree.lng) ? "有座標與道路資訊，可以作為現場定位起點。" : "沒有座標時，要靠道路名稱與位置備註確認。"}</p>
+      </div>
+      <div class="check ${warningClass}">
+        <b>需現場確認</b>
+        <p>${status.warnings.length ? status.warnings.join("；") : "健康、移植、移除或工程影響仍要看其他資料或現場狀況。"}</p>
+      </div>
+    `;
+  }
+
+  function renderNoSelection(){
+    renderQuerySummary([]);
+    document.querySelector("#tree-id").textContent = "尚未找到符合條件的樹";
+    document.querySelector("#record-badge").textContent = "請換個線索";
+    document.querySelector("#fact-district").textContent = "未選定";
+    document.querySelector("#fact-road").textContent = "未選定";
+    document.querySelector("#fact-note").textContent = "未選定";
+    document.querySelector("#fact-species").textContent = "未選定";
+    document.querySelector("#fact-dbh").textContent = "未選定";
+    document.querySelector("#fact-height").textContent = "未選定";
+    document.querySelector("#fact-date").textContent = "未選定";
+    document.querySelector("#fact-coord").textContent = "未選定";
+    document.querySelector("#profile-title").textContent = "尚未選定樹木";
+    document.querySelector("#profile-copy").textContent = "請先從左側選擇一筆結果，再查看它的公開資料履歷與樹種介紹。";
+    document.querySelector("#species-link").textContent = "看樹種介紹";
+    document.querySelector("#species-link").href = "../species/index.html";
+    timeline.innerHTML = `
+      <div class="emptyState">沒有找到符合條件的樹。可以放寬條件，改用行政區、道路名稱、樹種，或直接輸入樹木編號查詢。</div>
+    `;
+    verdict.innerHTML = "";
+  }
+
+  function renderInitialState(){
+    resultMeta.textContent = `已載入 ${trees.length.toLocaleString("zh-Hant")} 筆行道樹資料。請先輸入樹木編號、地點或樹種開始查驗。`;
+    resultList.innerHTML = `<div class="emptyState">先用上方搜尋找到一棵樹，再查看它的公開資料履歷。</div>`;
+    summaryScope.textContent = "尚未查詢。送出條件後，這裡會整理本次查詢找到幾筆、有哪些樹種與地點分布。";
+    summaryTotal.textContent = "0";
+    summaryGrid.innerHTML = `
+      <div class="summaryBlock">
+        <b>先找一棵樹</b>
+        <p>用樹木編號最精準；不知道編號時，可用行政區、道路或樹種查詢。</p>
+      </div>
+      <div class="summaryBlock">
+        <b>再看查詢摘要</b>
+        <p>送出後會顯示這次找到的筆數、樹種與地點分布。</p>
+      </div>
+      <div class="summaryBlock">
+        <b>最後看單棵履歷</b>
+        <p>點選左側結果，確認位置、樹種、尺寸與哪些資訊需要再查。</p>
+      </div>
+    `;
+    document.querySelector("#tree-id").textContent = "尚未選定樹木";
+    document.querySelector("#record-badge").textContent = "等待查詢";
+    document.querySelector("#fact-district").textContent = "尚未查詢";
+    document.querySelector("#fact-road").textContent = "尚未查詢";
+    document.querySelector("#fact-note").textContent = "尚未查詢";
+    document.querySelector("#fact-species").textContent = "尚未查詢";
+    document.querySelector("#fact-dbh").textContent = "尚未查詢";
+    document.querySelector("#fact-height").textContent = "尚未查詢";
+    document.querySelector("#fact-date").textContent = "尚未查詢";
+    document.querySelector("#fact-coord").textContent = "尚未查詢";
+    document.querySelector("#profile-title").textContent = "先找到一棵樹";
+    document.querySelector("#profile-copy").textContent = "送出查詢後，這裡會顯示你選定樹木的公開資料履歷與樹種介紹連結。";
+    document.querySelector("#species-link").textContent = "看樹種科普";
+    document.querySelector("#species-link").href = "../species/index.html";
+    timeline.innerHTML = `<div class="emptyState">尚未選定樹木。請先送出查詢。</div>`;
+    verdict.innerHTML = "";
+  }
+
+  function getSearchState(){
+    return {
+      searchMode,
+      input: input.value,
+      treeIdQuery: treeIdQuery.value,
+      speciesKeyword: speciesKeyword.value,
+      district: districtFilter.value,
+      road: roadFilter.value,
+      species: speciesFilter.value,
+      coord: coordFilter.value,
+      issue: issueFilter.checked,
+      selectedTreeId
+    };
+  }
+
+  function updateModeUi(focus = false){
+    modeButtons.forEach(button => button.classList.toggle("active", button.dataset.mode === searchMode));
+    document.querySelectorAll("[data-panel]").forEach(panel => {
+      panel.classList.toggle("active", panel.dataset.panel === searchMode);
+    });
+    if(!focus) return;
+    const focusTarget = searchMode === "id" ? treeIdQuery : searchMode === "place" ? roadFilter : searchMode === "species" ? speciesKeyword : input;
+    focusTarget.focus();
+  }
+
+  function restoreSearchState(state){
+    searchMode = state.searchMode || "all";
+    input.value = state.input || "";
+    treeIdQuery.value = state.treeIdQuery || "";
+    speciesKeyword.value = state.speciesKeyword || "";
+    districtFilter.value = state.district || "";
+    updateRoadOptions();
+    roadFilter.value = state.road || "";
+    speciesFilter.value = state.species || "";
+    coordFilter.value = state.coord || "";
+    issueFilter.checked = Boolean(state.issue);
+    selectedTreeId = state.selectedTreeId || selectedTreeId;
+    updateModeUi(false);
+    updateBackButton();
+  }
+
+  function pushSearchState(){
+    queryHistory.push(getSearchState());
+    if(queryHistory.length > 8) queryHistory.shift();
+    updateBackButton();
+  }
+
+  function updateBackButton(){
+    if(!modalBack) return;
+    modalBack.textContent = queryHistory.length ? "回上一層" : "返回查詢";
+    modalBack.setAttribute("aria-label", queryHistory.length ? "回到上一層查詢條件" : "返回查詢表單");
+  }
+
+  function openResultModal(){
+    updateBackButton();
+    resultModal.classList.add("open");
+    resultModal.setAttribute("aria-hidden","false");
+  }
+
+  function closeResultModal(){
+    resultModal.classList.remove("open");
+    resultModal.setAttribute("aria-hidden","true");
+  }
+
+  function pulseRecord(){
+    const record = document.querySelector(".record");
+    if(!record) return;
+    record.classList.remove("focusPulse");
+    void record.offsetWidth;
+    record.classList.add("focusPulse");
+  }
+
+  function updateActiveResultState(){
+    resultList.querySelectorAll(".resultItem[data-tree-id]").forEach(item => {
+      const isActive = item.dataset.treeId === selectedTreeId;
+      item.classList.toggle("active", isActive);
+      item.setAttribute("aria-pressed", String(isActive));
+      const action = item.querySelector(".resultAction");
+      if(action) action.textContent = isActive ? "目前顯示中" : "查看履歷";
+    });
+  }
+
+  function hasSearchCriteria(){
+    return Boolean(
+      getActiveQuery().trim() ||
+      districtFilter.value ||
+      speciesFilter.value ||
+      roadFilter.value ||
+      coordFilter.value.trim() ||
+      issueFilter.checked
+    );
+  }
+
+  function runSearch(showModal = false){
+    if(!hasSearchCriteria()){
+      renderInitialState();
+      if(showModal) openResultModal();
+      return;
+    }
+    const results = searchTrees(getActiveQuery());
+    renderQuerySummary(results);
+    if(results.length === 0){
+      renderResults(results);
+      renderNoSelection();
+    }else{
+      const selected = results.find(tree => tree.treeId === selectedTreeId) || results[0];
+      renderTree(selected);
+      renderResults(results);
+    }
+    if(showModal) openResultModal();
+  }
+
+  function getActiveQuery(){
+    if(searchMode === "id") return treeIdQuery.value;
+    if(searchMode === "species") return speciesKeyword.value;
+    return input.value;
+  }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    queryHistory = [];
+    runSearch(true);
+  });
+
+  modeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      searchMode = button.dataset.mode || "all";
+      modeButtons.forEach(item => item.classList.toggle("active", item === button));
+      if(searchMode !== "all") input.value = "";
+      if(searchMode !== "id") treeIdQuery.value = "";
+      if(searchMode !== "place"){
+        districtFilter.value = "";
+        roadFilter.value = "";
+        updateRoadOptions();
+      }
+      if(searchMode !== "species"){
+        speciesFilter.value = "";
+        speciesKeyword.value = "";
+      }
+      document.querySelectorAll("[data-panel]").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.panel === searchMode);
+      });
+      const focusTarget = searchMode === "id" ? treeIdQuery : searchMode === "place" ? roadFilter : searchMode === "species" ? speciesKeyword : input;
+      focusTarget.focus();
+    });
+  });
+
+  clearFilters.addEventListener("click", () => {
+    queryHistory = [];
+    input.value = "";
+    treeIdQuery.value = "";
+    speciesKeyword.value = "";
+    districtFilter.value = "";
+    speciesFilter.value = "";
+    roadFilter.value = "";
+    updateRoadOptions();
+    coordFilter.value = "";
+    issueFilter.checked = false;
+    searchMode = "all";
+    updateModeUi(false);
+    updateBackButton();
+    closeResultModal();
+  });
+
+  quickChips.addEventListener("click", event => {
+    const button = event.target.closest("[data-query]");
+    if(!button) return;
+    queryHistory = [];
+    districtFilter.value = "";
+    speciesFilter.value = "";
+    roadFilter.value = "";
+    updateRoadOptions();
+    coordFilter.value = "";
+    input.value = button.dataset.query || "";
+    issueFilter.checked = button.dataset.issue === "1";
+    searchMode = button.dataset.quickMode || "all";
+    updateModeUi(false);
+    runSearch(true);
+  });
+
+  resultList.addEventListener("click", event => {
+    const refineButton = event.target.closest("[data-refine-key]");
+    if(refineButton){
+      const key = refineButton.dataset.refineKey;
+      const value = refineButton.dataset.refineValue || "";
+      pushSearchState();
+      if(key === "road"){
+        updateRoadOptions();
+        roadFilter.value = value;
+        searchMode = "place";
+      }
+      if(key === "species"){
+        speciesFilter.value = value;
+        searchMode = "species";
+      }
+      updateModeUi(false);
+      runSearch(true);
+      return;
+    }
+    const button = event.target.closest(".resultItem[data-tree-id]");
+    if(!button) return;
+    event.preventDefault();
+    const tree = trees.find(item => item.treeId === button.dataset.treeId);
+    if(!tree) return;
+    renderTree(tree);
+    updateActiveResultState();
+    pulseRecord();
+  });
+
+  districtFilter.addEventListener("change", () => {
+    updateRoadOptions();
+  });
+
+  modalClose.addEventListener("click", closeResultModal);
+
+  modalBack.addEventListener("click", () => {
+    if(queryHistory.length){
+      const previousState = queryHistory.pop();
+      restoreSearchState(previousState);
+      runSearch(true);
+      return;
+    }
+    closeResultModal();
+  });
+
+  resultModal.addEventListener("click", event => {
+    if(event.target === resultModal) closeResultModal();
+  });
+
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape") closeResultModal();
+  });
+
+  function parseCsv(text){
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let inQuotes = false;
+    for(let i = 0; i < text.length; i += 1){
+      const char = text[i];
+      const next = text[i + 1];
+      if(char === '"' && inQuotes && next === '"'){
+        cell += '"';
+        i += 1;
+      }else if(char === '"'){
+        inQuotes = !inQuotes;
+      }else if(char === "," && !inQuotes){
+        row.push(cell.trim());
+        cell = "";
+      }else if((char === "\n" || char === "\r") && !inQuotes){
+        if(char === "\r" && next === "\n") i += 1;
+        row.push(cell.trim());
+        if(row.some(value => value !== "")) rows.push(row);
+        row = [];
+        cell = "";
+      }else{
+        cell += char;
+      }
+    }
+    row.push(cell.trim());
+    if(row.some(value => value !== "")) rows.push(row);
+    return rows;
+  }
+
+  function pick(record, aliases){
+    const key = Object.keys(record).find(name => aliases.some(alias => name.trim().toLowerCase().includes(alias.toLowerCase())));
+    return key ? record[key] : "";
+  }
+
+  function toNumber(value){
+    if(!hasValue(value)) return null;
+    const match = String(value).match(/-?\d+(\.\d+)?/);
+    return match ? Number(match[0]) : null;
+  }
+
+  function normalizeCsvRows(rows){
+    const headers = rows[0] || [];
+    return rows.slice(1).map((row,index) => {
+      const record = Object.fromEntries(headers.map((header,i) => [header,row[i] || ""]));
+      return {
+        treeId: pick(record,["TreeID","樹木編號","tree id","編號"]) || `OPEN-DATA-${String(index + 1).padStart(5,"0")}`,
+        district: pick(record,["Dist","行政區","區別","district"]),
+        road: pick(record,["Region","道路名稱","路名","道路","road"]),
+        note: pick(record,["RegionRemark","位置備註","路段備註","備註","位置","location"]),
+        species: pick(record,["TreeType","樹種","中文名","species"]),
+        dbh: toNumber(pick(record,["Diameter","胸徑","樹胸徑","米徑","dbh"])),
+        height: toNumber(pick(record,["TreeHeight","樹高","height"])),
+        surveyDate: pick(record,["SurveyDate","調查日期","日期","survey"]),
+        lat: toNumber(pick(record,["TWD97X","緯度","lat","latitude","x"])),
+        lng: toNumber(pick(record,["TWD97Y","經度","lng","lon","longitude","y"]))
+      };
+    }).filter(tree => hasValue(tree.treeId) || hasValue(tree.district) || hasValue(tree.road) || hasValue(tree.species));
+  }
+
+  function normalizeSharedRecords(){
+    const columns = window.TAIPEI_TREE_RECORD_COLUMNS || [];
+    const records = window.TAIPEI_TREE_RECORDS || [];
+    const index = Object.fromEntries(columns.map((column,i) => [column,i]));
+    return records.map((row,rowIndex) => ({
+      treeId: row[index.TreeID] || `OPEN-DATA-${String(rowIndex + 1).padStart(5,"0")}`,
+      district: row[index.Dist] || "",
+      road: row[index.Region] || "",
+      note: row[index.RegionRemark] || "",
+      species: row[index.TreeType] || "",
+      dbh: toNumber(row[index.Diameter]),
+      height: toNumber(row[index.TreeHeight]),
+      surveyDate: row[index.SurveyDate] || "",
+      lat: toNumber(row[index.TWD97X]),
+      lng: toNumber(row[index.TWD97Y])
+    })).filter(tree => hasValue(tree.treeId) || hasValue(tree.district) || hasValue(tree.road) || hasValue(tree.species));
+  }
+
+  async function loadBundledCsv(){
+    if(Array.isArray(window.TAIPEI_TREE_RECORDS) && window.TAIPEI_TREE_RECORDS.length){
+      trees = normalizeSharedRecords();
+      selectedTreeId = trees[0]?.treeId || sampleTrees[0].treeId;
+      populateControls();
+      renderInitialState();
+      hidePreloader();
+      return;
+    }
+    try{
+      const response = await fetch(bundledCsvPath);
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      const rows = parseCsv(await response.text());
+      const imported = normalizeCsvRows(rows);
+      if(imported.length === 0) throw new Error("empty csv");
+      trees = imported;
+      selectedTreeId = trees[0].treeId;
+    }catch(error){
+      trees = [...sampleTrees];
+      selectedTreeId = trees[0].treeId;
+    }
+    populateControls();
+    renderInitialState();
+    hidePreloader();
+  }
+
+  window.addEventListener("load", () => window.setTimeout(hidePreloader, 4500));
+  loadBundledCsv();
+</script>
 </body>
 </html>

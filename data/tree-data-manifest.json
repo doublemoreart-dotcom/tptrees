@@ -1,0 +1,155 @@
+{
+  "dataset": "臺北市行道樹分布圖",
+  "resource": "行道樹資料_CSV",
+  "sourcePage": "https://data.taipei/dataset/detail?id=7a49d00c-a5ff-4a6b-be9e-aaa6dc1ff7e8",
+  "sourceCsv": "https://tppkl.blob.core.windows.net/blobfs/TaipeiTree.csv",
+  "localCsv": "data/TaipeiTree.csv",
+  "generatedAt": "2026-07-15T04:23:47.258Z",
+  "updatedAt": "2026-07-15T04:23:47.258Z",
+  "csvSha256": "9bb016bdd1e104089691a2df18ce5420fe0d87b193722daa6dfac32f37fa390c",
+  "recordsSha256": "6f405bfe9022768ac7c4bf9ae5aa5ed4bd026cf56b55e49c459ff1627e59058f",
+  "rowCount": 164046,
+  "columns": [
+    "TreeID",
+    "Dist",
+    "Region",
+    "RegionRemark",
+    "TreeType",
+    "Diameter",
+    "TreeHeight",
+    "SurveyDate",
+    "TWD97X",
+    "TWD97Y",
+    "UpdDate"
+  ],
+  "generatedFiles": [
+    "data/tree-data-manifest.json",
+    "data/tree-records.js"
+  ],
+  "fieldMap": {
+    "treeId": "TreeID",
+    "district": "Dist",
+    "road": "Region",
+    "note": "RegionRemark",
+    "species": "TreeType",
+    "diameterCm": "Diameter",
+    "heightM": "TreeHeight",
+    "surveyDate": "SurveyDate",
+    "coordinateX": "TWD97X",
+    "coordinateY": "TWD97Y",
+    "sourceUpdatedAt": "UpdDate"
+  },
+  "summary": {
+    "topSpecies": [
+      {
+        "name": "榕樹",
+        "count": 18836
+      },
+      {
+        "name": "茄苳",
+        "count": 14189
+      },
+      {
+        "name": "樟樹",
+        "count": 12017
+      },
+      {
+        "name": "楓香",
+        "count": 10447
+      },
+      {
+        "name": "臺灣欒樹",
+        "count": 8905
+      },
+      {
+        "name": "黑板樹",
+        "count": 7601
+      },
+      {
+        "name": "白千層",
+        "count": 5742
+      },
+      {
+        "name": "小葉欖仁",
+        "count": 4838
+      },
+      {
+        "name": "水黃皮",
+        "count": 3923
+      },
+      {
+        "name": "山櫻花",
+        "count": 3311
+      }
+    ],
+    "districtCounts": [
+      {
+        "name": "士林區",
+        "count": 23700
+      },
+      {
+        "name": "大安區",
+        "count": 22018
+      },
+      {
+        "name": "北投區",
+        "count": 18363
+      },
+      {
+        "name": "中山區",
+        "count": 17135
+      },
+      {
+        "name": "內湖區",
+        "count": 15524
+      },
+      {
+        "name": "南港區",
+        "count": 12997
+      },
+      {
+        "name": "松山區",
+        "count": 11534
+      },
+      {
+        "name": "信義區",
+        "count": 11457
+      },
+      {
+        "name": "文山區",
+        "count": 10313
+      },
+      {
+        "name": "中正區",
+        "count": 9114
+      },
+      {
+        "name": "萬華區",
+        "count": 7183
+      },
+      {
+        "name": "大同區",
+        "count": 4708
+      }
+    ]
+  },
+  "qualityChecks": {
+    "requiredColumnsPresent": true,
+    "rowCountAboveMinimum": true,
+    "missingTreeIds": 0,
+    "duplicateTreeIds": 0,
+    "missingSpecies": 18,
+    "missingDistrict": 0,
+    "missingRoad": 167,
+    "missingSurveyDate": 162,
+    "missingCoordinates": 0,
+    "suspiciousDiameter": 9318,
+    "suspiciousHeight": 81
+  },
+  "websiteUse": [
+    "lifecycle/index.html 與 species/index.html 會優先讀取 data/tree-records.js 作為本機靜態資料鏡像",
+    "data/tree-records.js 由 data/TaipeiTree.csv 產生，供 file:// 與靜態測試使用",
+    "CSV 僅作為內部資料來源，不提供一般使用者手動匯入",
+    "首頁仍為說明頁；生命履歷頁負責資料查驗與欄位異常提示"
+  ]
+}
