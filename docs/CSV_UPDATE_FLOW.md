@@ -19,6 +19,8 @@ tptrees/
     tree-records.js
     backups/
   scripts/
+    generate-brand-assets.mjs
+    render-social-preview-png.sh
     update-site-data.sh
     update-tree-csv.sh
     update-species-images.mjs
@@ -46,10 +48,12 @@ bash scripts/update-site-data.sh --skip-download
 
 這會完成：
 
-1. 用既有 `data/TaipeiTree.csv` 重建 manifest 與前端資料。
-2. 執行頁面語法、路由與資料測試。
-3. 檢查樹種圖片來源覆蓋率與可疑檔名。
-4. 同步到本機測試鏡像 `outputs/local-tptrees`。
+1. 重建 `favicon.ico` 與社群分享縮圖來源稿。
+2. 用既有 `data/TaipeiTree.csv` 重建 manifest 與前端資料。
+3. 執行頁面語法、路由與資料測試。
+4. 檢查樹種圖片來源覆蓋率與可疑檔名。
+5. 同步到本機測試鏡像 `outputs/local-tptrees`。
+6. 驗證本機測試鏡像的四個頁面 inline JavaScript。
 
 若要下載官方 CSV：
 
@@ -64,6 +68,21 @@ bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
 ```
 
 > 圖片補完採「可信才補」策略。若 Wikimedia Commons / Wikidata 無法穩定對到正確樹種，會留在缺圖清單，不會硬塞錯圖。
+
+若只是要確認目前版本能不能準備提交，不重新產生資料：
+
+```bash
+bash scripts/update-site-data.sh --check-only
+```
+
+這會跑圖片來源檢查、preflight，並重新同步與驗證本機鏡像。
+
+若有調整社群縮圖文案或視覺，需再轉出 PNG：
+
+```bash
+node scripts/generate-brand-assets.mjs
+bash scripts/render-social-preview-png.sh
+```
 
 ## 進階：只更新 CSV
 
@@ -123,7 +142,8 @@ bash scripts/preflight-release.sh
 2. 首頁、生命履歷、樹種科普、今天給我一棵樹的路由測試。
 3. `tree-data-manifest.json` 的筆數、雜湊與品質摘要。
 4. `species-image-sources.json` 的覆蓋率與可疑圖片標題。
-5. `git status --short`，確認有哪些檔案待提交。
+5. `favicon.ico`、`favicon.svg`、`social-preview.svg` 與社群分享 meta 是否存在。
+6. `git status --short`，確認有哪些檔案待提交。
 
 ## 更新後會產生什麼
 
@@ -132,6 +152,9 @@ bash scripts/preflight-release.sh
 - `tree-data-manifest.json`：資料來源、更新時間、欄位對應、雜湊值與資料品質摘要。
 - `species-image-sources.json`：樹種科普與每日樹卡使用的圖片來源與授權註記。
 - `species-image-sources.js`：供靜態頁直接讀取的圖片來源資料。
+- `favicon.ico`：瀏覽器分頁與舊版 favicon 使用。
+- `public/social-preview.svg`：社群轉發縮圖來源稿。
+- `public/social-preview.png`：社群轉發實際使用縮圖。
 - `data/backups/TaipeiTree-YYYYMMDD-HHMMSS.csv`：更新前備份。
 
 ## manifest 會記錄的品質摘要
@@ -231,6 +254,13 @@ node scripts/update-species-images.mjs --limit=120
 ```bash
 node scripts/check-species-images.mjs
 ```
+
+這會列出：
+
+- 目前有圖的樹種數與覆蓋率。
+- 最近一次補圖仍缺圖的樹種。
+- 圖片來源是否缺少標題、來源網址、作者或授權。
+- 是否有疑似錯誤語境的圖片標題。
 
 ## 目前資料邊界
 

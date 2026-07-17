@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">臺北市行道樹小幫手</title>
+  <desc id="desc">用公開資料找到一棵樹、看懂它、知道資料缺口。</desc>
+  <defs>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#174b3f" stroke-opacity=".07" stroke-width="1"/>
+    </pattern>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#102019" flood-opacity=".16"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#f5f1e8"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect x="74" y="70" width="1052" height="490" rx="42" fill="#102019" filter="url(#softShadow)"/>
+  <g transform="translate(850 146)">
+    <circle cx="86" cy="86" r="86" fill="#fffdf7" opacity=".98"/>
+    <path fill="#174b3f" d="M86 150c-5.4 0-9.6-4.2-9.6-9.6v-36.5C67.3 112 56.4 116 43.9 116 20.9 116 6.4 102.1 6.4 80.5 6.4 57.2 24 42.1 50.1 42.1c16.5 0 28.7 6.2 35.9 17.6 7.1-11.4 19.4-17.6 35.9-17.6 26.1 0 43.7 15.1 43.7 38.4 0 21.6-14.5 35.5-37.5 35.5-12.5 0-23.3-4-32.5-12.1v36.5c0 5.4-4.2 9.6-9.6 9.6Z"/>
+    <path fill="#bddc7a" d="M47.6 98.2c-14.5 0-23-6.8-23-17.7 0-12 10-19.6 25.6-19.6 13.1 0 22.7 6 27.6 17.3-6.8 13.1-16.5 20-30.2 20Zm76.8 0c-13.7 0-23.3-6.9-30.2-20 4.8-11.3 14.5-17.3 27.6-17.3 15.7 0 25.6 7.7 25.6 19.6 0 10.8-8.5 17.7-23 17.7Z"/>
+  </g>
+  <text x="126" y="154" fill="#b96444" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="28" font-weight="800">臺北市行道樹小幫手</text>
+  <text x="126" y="254" fill="#fffdf7" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="78" font-weight="900">找到它・看懂它</text>
+  <text x="126" y="344" fill="#fffdf7" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="78" font-weight="900">知道缺口</text>
+  <text x="126" y="426" fill="#d9dfd8" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="32" font-weight="700">從臺北市行道樹公開資料開始，查位置、樹種、尺寸與資料狀態。</text>
+  <g transform="translate(126 480)">
+    <rect x="0" y="0" width="158" height="50" rx="25" fill="#e7f0e7"/>
+    <rect x="174" y="0" width="158" height="50" rx="25" fill="#e7f0e7"/>
+    <rect x="348" y="0" width="158" height="50" rx="25" fill="#e7f0e7"/>
+    <text x="32" y="34" fill="#174b3f" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="23" font-weight="850">樹木履歷</text>
+    <text x="206" y="34" fill="#174b3f" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="23" font-weight="850">樹種科普</text>
+    <text x="380" y="34" fill="#174b3f" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans TC','PingFang TC','Microsoft JhengHei',Arial,sans-serif" font-size="23" font-weight="850">今日一樹</text>
+  </g>
+</svg>

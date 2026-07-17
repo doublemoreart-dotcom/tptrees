@@ -13,6 +13,7 @@
 - `species/index.html`：樹種科普與常見樹木排行榜
 - `daily/index.html`：今天給我一棵樹
 - `data/`：臺北市行道樹 CSV、本地前端索引與資料 manifest
+- `favicon.ico`、`favicon.svg`、`public/social-preview.svg`：瀏覽器與社群分享資產
 - `scripts/`：資料更新、圖片來源補齊、manifest 建立與靜態頁語法檢查
 - `docs/CSV_UPDATE_FLOW.md`：資料更新流程說明
 - `tests/routes.test.mjs`：頁面、導覽與資料 manifest 的基本驗證
@@ -28,6 +29,13 @@ node scripts/verify-static-pages.mjs
 node --test tests/routes.test.mjs
 ```
 
+若有調整品牌視覺或社群縮圖文案，可重建站台資產：
+
+```bash
+node scripts/generate-brand-assets.mjs
+bash scripts/render-social-preview-png.sh
+```
+
 上線前可直接跑完整檢查：
 
 ```bash
@@ -40,6 +48,12 @@ bash scripts/preflight-release.sh
 
 ```bash
 bash scripts/update-site-data.sh --skip-download
+```
+
+若只是要確認目前版本能不能提交或推送，不重新產生資料：
+
+```bash
+bash scripts/update-site-data.sh --check-only
 ```
 
 若要下載官方 CSV：

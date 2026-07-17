@@ -7,15 +7,15 @@ MANIFEST="$SITE_ROOT/data/tree-data-manifest.json"
 
 cd "$SITE_ROOT"
 
-echo "1/5 Verify inline JavaScript"
+echo "1/6 Verify inline JavaScript"
 node scripts/verify-static-pages.mjs
 
 echo ""
-echo "2/5 Verify routes and data manifest"
+echo "2/6 Verify routes and data manifest"
 node --test tests/routes.test.mjs
 
 echo ""
-echo "3/5 Data snapshot"
+echo "3/6 Data snapshot"
 node -e '
 const fs = require("node:fs");
 const manifest = JSON.parse(fs.readFileSync("data/tree-data-manifest.json", "utf8"));
@@ -29,11 +29,35 @@ console.log(`suspiciousHeight: ${manifest.qualityChecks.suspiciousHeight}`);
 '
 
 echo ""
-echo "4/5 Species image source snapshot"
+echo "4/6 Species image source snapshot"
 node scripts/check-species-images.mjs
 
 echo ""
-echo "5/5 Git status"
+echo "5/6 Brand asset snapshot"
+node -e '
+const fs = require("node:fs");
+const required = ["favicon.svg", "favicon.ico", "public/social-preview.svg", "public/social-preview.png"];
+for(const file of required){
+  const stat = fs.statSync(file);
+  console.log(`${file}: ${stat.size} bytes`);
+}
+const svgStat = fs.statSync("public/social-preview.svg");
+const pngStat = fs.statSync("public/social-preview.png");
+if(svgStat.mtimeMs - pngStat.mtimeMs > 1000){
+  throw new Error("public/social-preview.png is older than public/social-preview.svg; run bash scripts/render-social-preview-png.sh");
+}
+const pages = ["index.html", "lifecycle/index.html", "species/index.html", "daily/index.html"];
+for(const page of pages){
+  const html = fs.readFileSync(page, "utf8");
+  if(!html.includes("favicon.ico") || !html.includes("og:image") || !html.includes("twitter:image")){
+    throw new Error(`${page} missing favicon or social image metadata`);
+  }
+}
+console.log("social metadata: ok");
+'
+
+echo ""
+echo "6/6 Git status"
 git status --short
 
 echo ""

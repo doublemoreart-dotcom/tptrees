@@ -9,6 +9,18 @@ const badPattern = /logo|icon|map|diagram|svg|botanical magazine|theatre|theater
 const source = JSON.parse(await readFile(sourcesPath, "utf8"));
 const items = source.items || {};
 const entries = Object.entries(items).filter(([, item]) => item?.imageUrl);
+const missingAttribution = entries
+  .filter(([, item]) => !item.imageTitle || !item.sourceUrl || !item.author || !item.license)
+  .map(([species, item]) => ({
+    species,
+    imageTitle: item.imageTitle || "未提供圖片標題",
+    missing: [
+      ["imageTitle", item.imageTitle],
+      ["sourceUrl", item.sourceUrl],
+      ["author", item.author],
+      ["license", item.license]
+    ].filter(([, value]) => !value).map(([key]) => key)
+  }));
 const suspicious = entries
   .filter(([, item]) => badPattern.test([
     item.imageTitle,
@@ -28,6 +40,36 @@ const coverageRate = totalSpecies ? imageSources / totalSpecies : 0;
 console.log(`species images: ${imageSources}/${totalSpecies}`);
 console.log(`missing species images: ${missing}`);
 console.log(`coverage rate: ${(coverageRate * 100).toFixed(1)}%`);
+
+if(source.lastRun){
+  const failures = source.lastRun.failures || [];
+  console.log(`last image update: ${source.lastRun.updatedAt || source.lastRun.date || source.updatedAt || "unknown"}`);
+  console.log(`last attempted: ${source.lastRun.attempted || 0}`);
+  console.log(`last added: ${source.lastRun.added || 0}`);
+  console.log(`last failed: ${failures.length}`);
+  if(failures.length){
+    console.log("");
+    console.log("Recent missing image candidates:");
+    for(const item of failures.slice(0, 12)){
+      console.log(`- ${item.species}: ${item.reason || "not found"}`);
+    }
+    if(failures.length > 12){
+      console.log(`...and ${failures.length - 12} more`);
+    }
+  }
+}
+
+if(missingAttribution.length){
+  console.log("");
+  console.log("Image sources missing attribution fields:");
+  for(const item of missingAttribution.slice(0, 20)){
+    console.log(`- ${item.species}: ${item.imageTitle} (${item.missing.join(", ")})`);
+  }
+  if(missingAttribution.length > 20){
+    console.log(`...and ${missingAttribution.length - 20} more`);
+  }
+  process.exitCode = 1;
+}
 
 if(suspicious.length){
   console.log("");
