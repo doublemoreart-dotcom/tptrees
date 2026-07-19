@@ -12,6 +12,7 @@ IMAGE_LIMIT=""
 RUN_PREFLIGHT="true"
 SYNC_LOCAL="true"
 CHECK_ONLY="false"
+RENDER_SOCIAL_PNG="true"
 LOCAL_TARGET="$LOCAL_TARGET_DEFAULT"
 
 usage(){
@@ -29,6 +30,7 @@ Options:
   --with-images       Update species image sources from public APIs.
   --image-limit N     Limit species image update attempts.
   --check-only        Skip data updates and run checks / local sync only.
+  --no-social-png     Do not render public/social-preview.png from SVG.
   --no-preflight      Skip release preflight checks.
   --no-sync-local     Do not copy files to outputs/local-tptrees.
   --local-target DIR  Copy the test mirror to another directory.
@@ -62,6 +64,10 @@ while [[ $# -gt 0 ]]; do
       CHECK_ONLY="true"
       shift
       ;;
+    --no-social-png)
+      RENDER_SOCIAL_PNG="false"
+      shift
+      ;;
     --no-preflight)
       RUN_PREFLIGHT="false"
       shift
@@ -92,14 +98,19 @@ done
 
 cd "$SITE_ROOT"
 
-echo "== 0/4 Generate brand assets =="
+echo "== 1/5 Generate brand assets =="
 node scripts/generate-brand-assets.mjs
+if [[ "$RENDER_SOCIAL_PNG" == "true" ]]; then
+  bash scripts/render-social-preview-png.sh
+else
+  echo "Skip social preview PNG render"
+fi
 echo ""
 
 if [[ "$CHECK_ONLY" == "true" ]]; then
-  echo "== 1/4 Check existing generated records =="
+  echo "== 2/5 Check existing generated records =="
 else
-  echo "== 1/4 Update Taipei tree CSV and generated records =="
+  echo "== 2/5 Update Taipei tree CSV and generated records =="
   if [[ "$RUN_PREFLIGHT" == "true" ]]; then
     bash scripts/update-tree-csv.sh "${CSV_ARGS[@]}" --no-verify
   else
@@ -109,7 +120,7 @@ fi
 
 if [[ "$RUN_IMAGES" == "true" ]]; then
   echo ""
-  echo "== 2/4 Update species image sources =="
+  echo "== 3/5 Update species image sources =="
   if [[ -n "$IMAGE_LIMIT" ]]; then
     node scripts/update-species-images.mjs "--limit=$IMAGE_LIMIT"
   else
@@ -118,24 +129,24 @@ if [[ "$RUN_IMAGES" == "true" ]]; then
   node scripts/check-species-images.mjs
 else
   echo ""
-  echo "== 2/4 Skip species image source update =="
+  echo "== 3/5 Skip species image source update =="
   node scripts/check-species-images.mjs
 fi
 
 if [[ "$RUN_PREFLIGHT" == "true" ]]; then
   echo ""
-  echo "== 3/4 Run preflight =="
+  echo "== 4/5 Run preflight =="
   bash scripts/preflight-release.sh
 else
   echo ""
-  echo "== 3/4 Skip preflight =="
+  echo "== 4/5 Skip preflight =="
 fi
 
 if [[ "$SYNC_LOCAL" == "true" ]]; then
   echo ""
-  echo "== 4/4 Sync local test mirror =="
+  echo "== 5/5 Sync local test mirror =="
   mkdir -p "$LOCAL_TARGET"
-  for entry in index.html favicon.svg app daily data docs lifecycle public scripts species tests README.md AGENTS.md .gitignore; do
+  for entry in index.html favicon.svg favicon.ico app daily data docs lifecycle public scripts species tests README.md AGENTS.md .gitignore; do
     if [[ -e "$SITE_ROOT/$entry" ]]; then
       cp -R "$SITE_ROOT/$entry" "$LOCAL_TARGET/"
     fi
@@ -145,7 +156,7 @@ if [[ "$SYNC_LOCAL" == "true" ]]; then
   (cd "$LOCAL_TARGET" && node scripts/verify-static-pages.mjs)
 else
   echo ""
-  echo "== 4/4 Skip local test mirror sync =="
+  echo "== 5/5 Skip local test mirror sync =="
 fi
 
 echo ""

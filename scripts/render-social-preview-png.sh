@@ -17,6 +17,11 @@ if [[ ! -f "$SOURCE" ]]; then
   exit 1
 fi
 
+if [[ -f "$TARGET" && "$TARGET" -nt "$SOURCE" ]]; then
+  echo "Unchanged public/social-preview.png"
+  exit 0
+fi
+
 "$CHROME" \
   --headless=new \
   --disable-gpu \

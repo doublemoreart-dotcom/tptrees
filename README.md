@@ -12,6 +12,7 @@
 - `lifecycle/index.html`：樹木的生命履歷查詢
 - `species/index.html`：樹種科普與常見樹木排行榜
 - `daily/index.html`：今天給我一棵樹
+- `app/analytics.js`：GA4 追蹤碼共用設定，只在正式網域送出資料
 - `data/`：臺北市行道樹 CSV、本地前端索引與資料 manifest
 - `favicon.ico`、`favicon.svg`、`public/social-preview.svg`：瀏覽器與社群分享資產
 - `scripts/`：資料更新、圖片來源補齊、manifest 建立與靜態頁語法檢查
@@ -68,6 +69,6 @@ bash scripts/update-site-data.sh
 bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
 ```
 
-更新腳本會重建 `data/tree-data-manifest.json` 與 `data/tree-records.js`，可選擇補齊 `data/species-image-sources.json`，並自動執行基本驗證。更新前的 CSV 備份會放在 `data/backups/`，此資料夾不進版控。
+更新腳本會重建 `data/tree-data-manifest.json` 與 `data/tree-records.js`，可選擇補齊 `data/species-image-sources.json`，並自動執行基本驗證；其中也會檢查「今天給我一棵樹」的分享與下載分享圖片互動。更新前的 CSV 備份會放在 `data/backups/`，此資料夾不進版控。
 
 正式網站目前由入口網站 repo 統一部署至 GitHub Pages；本 repo 是 TP Trees 的獨立來源。同步自動化完成前，這裡的變更不會立即出現在正式網址。

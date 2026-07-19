@@ -19,6 +19,7 @@
   <meta name="twitter:title" content="今天給我一棵樹｜臺北市行道樹小幫手">
   <meta name="twitter:description" content="每天給你一種臺北常見行道樹，從一棵樹開始理解公開資料。">
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
+  <script defer src="../app/analytics.js"></script>
   <title>今天給我一棵樹｜臺北市行道樹小幫手</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -39,7 +40,9 @@
     .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
     main{overflow:hidden}
     .hero{min-height:calc(100vh - 86px);padding:50px 28px 42px;display:grid;align-items:center}
-    .heroGrid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,1.1fr);gap:42px;align-items:center;perspective:1200px}
+    .heroGrid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,1.1fr);column-gap:42px;row-gap:0;align-items:center;perspective:1200px}
+    .heroIntro{grid-column:1;grid-row:1}
+    .heroControls{grid-column:1;grid-row:2}
     .eyebrow,.kicker{margin:0 0 14px;color:var(--clay);font-size:.84rem;font-weight:850}
     h1,h2,h3,p{margin-top:0}
     h1{margin-bottom:22px;color:var(--ink);font-size:clamp(3rem,8vw,6.2rem);line-height:.98;font-weight:900}
@@ -52,10 +55,13 @@
     .button.secondary{background:var(--paper);color:var(--forest)}
     .button:hover,.button:focus-visible{transform:translateY(-1px);box-shadow:0 10px 22px rgba(23,34,29,.1);outline:none}
     .button:disabled{opacity:.68;cursor:wait;transform:none;box-shadow:none}
+    .shareFeedback{min-height:1.35em;margin:0;color:var(--muted);font-size:.86rem;font-weight:850;line-height:1.45}
+    .shareFeedback.isSuccess{color:var(--forest)}
+    .shareFeedback.isError{color:var(--clay)}
     .deckNote{max-width:620px;margin-top:22px;padding:14px 16px;border:1px solid rgba(225,174,67,.36);border-radius:var(--radius-lg);background:rgba(225,174,67,.12);color:var(--muted);font-size:.94rem;line-height:1.65}
     .cardShell{position:relative;perspective:1200px}
-    .treeCard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--paper);box-shadow:var(--shadow);transform-style:preserve-3d;will-change:transform}
-    .treeCard.isFlipping{animation:cardFlip360 .78s cubic-bezier(.2,.74,.22,1) both;box-shadow:0 12px 34px rgba(23,34,29,.1)}
+    .treeCard{grid-column:2;grid-row:1 / span 2;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--paper);box-shadow:0 1px 4px rgba(23,34,29,.07),0 14px 36px rgba(23,34,29,.1),0 34px 78px rgba(23,34,29,.08);transform-style:preserve-3d;will-change:transform}
+    .treeCard.isFlipping{animation:cardFlip360 .78s cubic-bezier(.2,.74,.22,1) both;box-shadow:0 2px 8px rgba(23,34,29,.08),0 16px 42px rgba(23,34,29,.1)}
     @keyframes cardFlip360{
       0%{transform:rotateY(0deg) scale(1);opacity:1}
       46%{transform:rotateY(166deg) scale(.985);opacity:.92}
@@ -102,7 +108,7 @@
     .preloaderBar:before{content:"";position:absolute;inset:0;width:42%;background:var(--forest);animation:preloadSlide 1.05s ease-in-out infinite}
     @keyframes preloadSlide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
     @media(prefers-reduced-motion:reduce){.treeCard.isFlipping{animation:none;transform:none}}
-    @media(max-width:980px){.heroGrid{grid-template-columns:1fr}.treeCard{width:min(760px,100%);margin:0 auto}.treeImage{min-height:230px}.steps{grid-template-columns:1fr}}
+    @media(max-width:980px){.heroGrid{grid-template-columns:1fr;row-gap:28px}.heroIntro{grid-column:1;grid-row:1}.treeCard{grid-column:1;grid-row:2;width:min(760px,100%);margin:0 auto}.heroControls{grid-column:1;grid-row:3}.treeImage{min-height:230px}.steps{grid-template-columns:1fr}}
     @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.summary,.prompt p,.step p,.siteFooter p{word-break:break-all;overflow-wrap:anywhere}.cardBody{padding:18px}.cardTop,.promptGrid,.secondaryActions{grid-template-columns:1fr;display:grid}.countBlock{text-align:left}.treeImage{min-height:180px}.actions{width:100%}.siteFooterInner{grid-template-columns:1fr}}
   </style>
 </head>
@@ -131,16 +137,22 @@
 
   <section class="hero">
     <div class="wrap heroGrid">
-      <div>
+      <div class="heroIntro">
         <p class="eyebrow">每日認識一棵城市樹</p>
         <h1>今天給我一棵樹</h1>
         <p class="lead">每天給你一種臺北常見行道樹。從一棵樹開始觀察：它在資料中有多少紀錄、你可以看什麼、以及公開資料還不能直接告訴你什麼。</p>
+      </div>
+
+      <div class="heroControls">
         <div class="actions">
           <button class="button" id="draw-card" type="button">換另一棵樹</button>
+          <button class="button secondary" id="share-card" type="button">分享今天這棵樹</button>
+          <button class="button secondary" id="download-card" type="button">下載分享圖片</button>
           <div class="secondaryActions">
             <a class="button secondary" href="../species/index.html">看樹種排行榜</a>
             <a class="button secondary" href="../lifecycle/index.html">查一棵樹履歷</a>
           </div>
+          <p class="shareFeedback" id="share-feedback" aria-live="polite"></p>
         </div>
         <p class="deckNote">每日推薦每天固定一棵；也可以換一棵樹看看，適合拿來做社群互動或現場導覽開場。</p>
       </div>
@@ -233,6 +245,207 @@
     document.querySelector("#card-source").innerHTML = `圖片來源：<a href="${card.sourceUrl}" target="_blank" rel="noopener">Wikimedia Commons</a>，作者：${card.author}，授權：${card.license}。`;
   }
 
+  function sharedCardIndex(){
+    const params = new URLSearchParams(window.location.search);
+    const treeName = params.get("tree");
+    if(!treeName) return null;
+    const index = deck.findIndex(card => card.name === treeName);
+    return index >= 0 ? index : null;
+  }
+
+  function currentCard(){
+    return deck[practiceIndex];
+  }
+
+  function shareUrl(card){
+    return `https://dinopeng.com/tptrees/daily/?tree=${encodeURIComponent(card.name)}`;
+  }
+
+  function setShareFeedback(message, tone = "success"){
+    const feedback = document.querySelector("#share-feedback");
+    feedback.textContent = message;
+    feedback.classList.toggle("isSuccess", tone === "success");
+    feedback.classList.toggle("isError", tone === "error");
+  }
+
+  function copyShareText(text){
+    if(navigator.clipboard && window.isSecureContext){
+      return navigator.clipboard.writeText(text);
+    }
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    return copied ? Promise.resolve() : Promise.reject(new Error("copy failed"));
+  }
+
+  function loadShareImage(url){
+    return new Promise(resolve => {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => resolve(image);
+      image.onerror = () => resolve(null);
+      image.src = url;
+    });
+  }
+
+  function drawWrappedText(context, text, x, y, maxWidth, lineHeight, maxLines){
+    const words = text.split("");
+    let line = "";
+    let lines = [];
+    for(const word of words){
+      const testLine = line + word;
+      if(context.measureText(testLine).width > maxWidth && line){
+        lines.push(line);
+        line = word;
+      }else{
+        line = testLine;
+      }
+    }
+    if(line) lines.push(line);
+    lines = lines.slice(0, maxLines);
+    lines.forEach((item, index) => context.fillText(item, x, y + index * lineHeight));
+    return y + lines.length * lineHeight;
+  }
+
+  function drawRoundedRect(context, x, y, width, height, radius){
+    context.beginPath();
+    context.moveTo(x + radius, y);
+    context.lineTo(x + width - radius, y);
+    context.quadraticCurveTo(x + width, y, x + width, y + radius);
+    context.lineTo(x + width, y + height - radius);
+    context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    context.lineTo(x + radius, y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - radius);
+    context.lineTo(x, y + radius);
+    context.quadraticCurveTo(x, y, x + radius, y);
+    context.closePath();
+  }
+
+  function drawImageCover(context, image, x, y, width, height){
+    const scale = Math.max(width / image.width, height / image.height);
+    const drawWidth = image.width * scale;
+    const drawHeight = image.height * scale;
+    context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+  }
+
+  async function downloadCurrentCard(){
+    const card = currentCard();
+    const downloadButton = document.querySelector("#download-card");
+    downloadButton.disabled = true;
+    setShareFeedback("正在產生分享圖片...");
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 1500;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#f5f1e8";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.strokeStyle = "rgba(23,75,63,.12)";
+    context.lineWidth = 1;
+    for(let x = 0; x < canvas.width; x += 56){
+      context.beginPath();
+      context.moveTo(x, 0);
+      context.lineTo(x, canvas.height);
+      context.stroke();
+    }
+    for(let y = 0; y < canvas.height; y += 56){
+      context.beginPath();
+      context.moveTo(0, y);
+      context.lineTo(canvas.width, y);
+      context.stroke();
+    }
+
+    context.save();
+    context.shadowColor = "rgba(23,34,29,.16)";
+    context.shadowBlur = 42;
+    context.shadowOffsetY = 24;
+    drawRoundedRect(context, 90, 90, 1020, 1320, 44);
+    context.fillStyle = "#fffdf7";
+    context.fill();
+    context.restore();
+
+    const image = await loadShareImage(card.imageUrl);
+    context.save();
+    drawRoundedRect(context, 90, 90, 1020, 560, 44);
+    context.clip();
+    if(image){
+      drawImageCover(context, image, 90, 90, 1020, 560);
+      context.fillStyle = "rgba(16,32,25,.12)";
+      context.fillRect(90, 90, 1020, 560);
+    }else{
+      context.fillStyle = "#dfe8d8";
+      context.fillRect(90, 90, 1020, 560);
+      context.fillStyle = "#174b3f";
+      context.font = "900 46px -apple-system, BlinkMacSystemFont, sans-serif";
+      context.fillText("臺北市行道樹小幫手", 150, 360);
+    }
+    context.restore();
+
+    context.fillStyle = "#174b3f";
+    context.font = "900 34px -apple-system, BlinkMacSystemFont, sans-serif";
+    context.fillText(`每日推薦・${todayKey()}`, 150, 740);
+    context.fillStyle = "#102019";
+    context.font = "900 112px -apple-system, BlinkMacSystemFont, sans-serif";
+    context.fillText(card.name, 150, 875);
+    context.fillStyle = "#174b3f";
+    context.font = "900 64px -apple-system, BlinkMacSystemFont, sans-serif";
+    context.fillText(formatNumber(card.count), 150, 995);
+    context.fillStyle = "#5f6c64";
+    context.font = "850 32px -apple-system, BlinkMacSystemFont, sans-serif";
+    context.fillText("公開資料紀錄", 150, 1045);
+    context.fillStyle = "#33463c";
+    context.font = "800 42px -apple-system, BlinkMacSystemFont, sans-serif";
+    drawWrappedText(context, card.summary, 150, 1140, 900, 62, 3);
+    context.fillStyle = "#174b3f";
+    context.font = "900 28px -apple-system, BlinkMacSystemFont, sans-serif";
+    context.fillText("dinopeng.com/tptrees/daily", 150, 1335);
+
+    canvas.toBlob(blob => {
+      if(!blob){
+        setShareFeedback("目前無法產生圖片，請再試一次。", "error");
+        downloadButton.disabled = false;
+        return;
+      }
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `tp-tree-${card.name}-${todayKey()}.png`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      setShareFeedback("分享圖片已下載。");
+      downloadButton.disabled = false;
+      if(typeof window.gtag === "function"){
+        window.gtag("event", "download_daily_tree_card", {tree_species: card.name});
+      }
+    }, "image/png");
+  }
+
+  async function shareCurrentCard(){
+    const card = currentCard();
+    const url = shareUrl(card);
+    const title = `今天給我一棵樹：${card.name}`;
+    const text = `我抽到臺北常見行道樹「${card.name}」：${card.summary}`;
+    try{
+      if(navigator.share){
+        await navigator.share({title, text, url});
+        setShareFeedback("已開啟分享選單。");
+      }else{
+        await copyShareText(`${title}\n${text}\n${url}`);
+        setShareFeedback("已複製分享文字與連結。");
+      }
+      if(typeof window.gtag === "function"){
+        window.gtag("event", "share_daily_tree", {tree_species: card.name});
+      }
+    }catch(error){
+      if(error && error.name === "AbortError") return;
+      setShareFeedback("目前無法自動分享，請再試一次。", "error");
+    }
+  }
+
   function hidePreloader(){
     const preloader = document.querySelector("#preloader");
     if(!preloader) return;
@@ -240,8 +453,9 @@
     window.setTimeout(() => preloader.remove(), 420);
   }
 
-  let practiceIndex = hashString(todayKey()) % deck.length;
-  renderCard(deck[practiceIndex], "每日推薦");
+  const sharedIndex = sharedCardIndex();
+  let practiceIndex = sharedIndex ?? hashString(todayKey()) % deck.length;
+  renderCard(deck[practiceIndex], sharedIndex === null ? "每日推薦" : "朋友分享");
 
   document.querySelector("#draw-card").addEventListener("click", () => {
     const treeCard = document.querySelector("#tree-card");
@@ -263,6 +477,9 @@
       drawButton.disabled = false;
     }, 800);
   });
+
+  document.querySelector("#share-card").addEventListener("click", shareCurrentCard);
+  document.querySelector("#download-card").addEventListener("click", downloadCurrentCard);
 
   window.addEventListener("load", () => window.setTimeout(hidePreloader, 360));
 </script>
