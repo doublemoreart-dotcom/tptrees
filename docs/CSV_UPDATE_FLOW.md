@@ -9,6 +9,7 @@ tptrees/
   index.html
   app/
     analytics.js
+    heroicons.js
   lifecycle/
     index.html
   species/
@@ -79,6 +80,59 @@ bash scripts/update-site-data.sh --check-only
 ```
 
 這會跑圖片來源檢查、preflight，並重新同步與驗證本機鏡像。
+
+若下一步就是準備推 git，建議改用：
+
+```bash
+bash scripts/update-site-data.sh --prepare-push
+```
+
+這會自動使用 `--check-only` 模式，並在最後列出：
+
+- 目前 branch 與 upstream。
+- GitHub remote。
+- 待提交檔案。
+- diff 摘要。
+- 建議 commit / push 指令。
+
+若這次有改畫面、互動、資料或靜態資產，還需要把同一份發布內容同步到主站 repo 的 `/tptrees` 目錄：
+
+```bash
+bash scripts/update-site-data.sh --check-only --portal-target /path/to/dinopeng-com/tptrees
+```
+
+也可以先設定環境變數，之後不用每次輸入路徑：
+
+```bash
+export TPTREES_PORTAL_TARGET=/path/to/dinopeng-com/tptrees
+bash scripts/update-site-data.sh --check-only
+```
+
+同步清單由腳本內的 `PUBLISH_ENTRIES` 統一管理，包含 HTML、`app/`、`daily/`、`data/`、`lifecycle/`、`public/`、`scripts/`、`species/`、favicon、README 與測試檔。
+
+推送後若要確認正式站已經吃到新版：
+
+```bash
+bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
+```
+
+這會檢查正式網址下的四個主要頁面與共用資產：
+
+- `https://dinopeng.com/tptrees/`
+- `https://dinopeng.com/tptrees/lifecycle/`
+- `https://dinopeng.com/tptrees/species/`
+- `https://dinopeng.com/tptrees/daily/`
+- `app/analytics.js`
+- `app/heroicons.js`
+- `favicon.svg`
+- `favicon.ico`
+- `public/social-preview.png`
+
+如果正式站使用不同測試網址，也可以指定：
+
+```bash
+bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live https://example.com/tptrees
+```
 
 若有調整社群縮圖文案或視覺，可以單獨重建品牌資產：
 
@@ -236,7 +290,7 @@ http://localhost:8000/
 建議至少執行：
 
 ```bash
-bash scripts/update-site-data.sh --skip-download
+bash scripts/update-site-data.sh --prepare-push
 ```
 
 並確認：
@@ -246,6 +300,23 @@ bash scripts/update-site-data.sh --skip-download
 - 四個頁面驗證皆為 `ok`。
 - 本機瀏覽 `index.html`、`lifecycle/`、`species/`、`daily/` 正常。
 - `daily/` 的「分享今天這棵樹」與「下載分享圖片」可正常操作。
+
+## 推 git 後確認正式站
+
+推送完成後執行：
+
+```bash
+bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
+```
+
+判讀方式：
+
+- `Live verification complete.`：正式站 HTML 已經有新版標記。
+- 缺少某個 marker：正式站該頁還不是新版，先等 GitHub Pages 部署或清快取。
+- 某個 asset/path 404：頁面 HTML 已更新，但部署端漏同步資產或資料夾。
+- `curl` 失敗：正式網址無法讀取，需檢查部署狀態或網址設定。
+
+若出現「頁面 HTML 已更新，但 `app/analytics.js`、`app/heroicons.js`、`favicon.ico` 或 `public/social-preview.png` 404」，代表 source repo 已推，但主站 repo 的 `/tptrees` 目錄沒有完整同步。此時先同步主站目錄，再推主站 repo。
 
 ## 樹種圖片補完流程
 

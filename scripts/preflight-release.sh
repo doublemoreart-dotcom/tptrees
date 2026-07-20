@@ -36,7 +36,7 @@ echo ""
 echo "5/7 Brand asset snapshot"
 node -e '
 const fs = require("node:fs");
-const required = ["favicon.svg", "favicon.ico", "public/social-preview.svg", "public/social-preview.png"];
+const required = ["favicon.svg", "favicon.ico", "public/social-preview.svg", "public/social-preview.png", "app/analytics.js", "app/heroicons.js"];
 for(const file of required){
   const stat = fs.statSync(file);
   console.log(`${file}: ${stat.size} bytes`);
@@ -55,8 +55,11 @@ for(const page of pages){
   if(!html.includes("app/analytics.js")){
     throw new Error(`${page} missing analytics script`);
   }
+  if(!html.includes("app/heroicons.js")){
+    throw new Error(`${page} missing heroicons script`);
+  }
 }
-console.log("social metadata and analytics: ok");
+console.log("social metadata, analytics and heroicons: ok");
 '
 
 echo ""

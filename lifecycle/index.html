@@ -20,6 +20,7 @@
   <meta name="twitter:description" content="查位置、樹種、尺寸與資料缺口，理解一棵行道樹目前公開資料能說明什麼。">
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
   <script defer src="../app/analytics.js"></script>
+  <script defer src="../app/heroicons.js"></script>
   <title>樹木的生命履歷</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -33,8 +34,9 @@
     .siteMark{display:inline-flex;align-items:center;gap:9px;color:var(--forest);font-weight:900}
     .siteIcon{width:28px;height:28px;display:inline-grid;place-items:center;flex:0 0 auto;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1);color:var(--forest)}
     .siteIcon svg{width:17px;height:17px;display:block}
+    .heroIcon{width:1.05em;height:1.05em;display:inline-block;flex:0 0 auto}
     .navLinks{display:flex;flex-wrap:wrap;gap:8px}
-    .navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .navLinks a{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
     .navLinks a:hover,.navLinks a:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.1);color:var(--ink);transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,34,29,.08);outline:none}
     .navLinks a.active{background:var(--forest);color:#fffdf7}
     .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
@@ -48,18 +50,24 @@
     h3{margin-bottom:10px;color:var(--ink);font-size:1.18rem}
     .lead{max-width:720px;color:#33463c;font-size:clamp(1.04rem,1.8vw,1.28rem);line-height:1.78}
     .heroSteps{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:34px auto 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .heroStep{padding:16px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper);box-shadow:none}
+    .heroStep{min-height:132px;display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:16px;align-items:start;padding:18px 18px 16px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper);box-shadow:none}
     .heroStep b{display:block;margin-bottom:6px;color:var(--forest);font-size:1rem}
     .heroStep span{display:block;color:var(--muted);font-size:.9rem;line-height:1.58}
+    .heroStepArt{width:92px;height:78px;color:var(--forest)}
+    .heroStepArt .soft{fill:rgba(47,127,85,.12)}
+    .heroStepArt .warm{fill:rgba(225,174,67,.22)}
+    .heroStepArt .clay{fill:rgba(185,100,68,.2)}
+    .heroStepArt .line{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .heroStepArt .thin{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.72}
     .searchBox{padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
     .searchBox label{display:block;margin-bottom:10px;color:var(--forest);font-weight:850}
     .modeHint{margin:0 0 14px;color:var(--muted);font-size:.96rem;line-height:1.55}
     .searchInput{display:flex;gap:10px}
     .searchInput input{min-width:0;flex:1;padding:14px 14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--ink);font-size:1rem}
-    .searchInput button{padding:0 18px;border:0;border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-weight:850}
+    .searchInput button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 18px;border:0;border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-weight:850}
     .searchInput button:hover,.resultItem:hover,.modeButton:hover,.quickChip:hover,.secondaryButton:hover{cursor:pointer}
     .modeGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
-    .modeButton{min-height:44px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-weight:850}
+    .modeButton{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-weight:850}
     .modeButton.active{background:var(--forest);color:#fffdf7}
     .searchPanel{display:none}
     .searchPanel.active{display:block}
@@ -81,6 +89,7 @@
     .quickSearch b{display:block;margin-bottom:8px;color:var(--muted);font-size:.86rem}
     .quickChips{display:flex;flex-wrap:wrap;gap:8px}
     .quickChip,.secondaryButton{padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--forest);font-size:.86rem;font-weight:850}
+    .secondaryButton{display:inline-flex;align-items:center;justify-content:center;gap:7px}
     .secondaryButton{width:100%;margin-top:10px}
     .primarySearch{min-height:44px;background:var(--forest);color:#fffdf7;border-color:var(--forest);font-size:1rem}
     .technicalOnly{display:none}
@@ -192,7 +201,7 @@
     .preloaderBar:before{content:"";position:absolute;inset:0;width:42%;background:var(--forest);animation:preloadSlide 1.05s ease-in-out infinite}
     @keyframes preloadSlide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
     @media(max-width:980px){.heroGrid,.modalBody,.facts,.summaryGrid{grid-template-columns:1fr}.heroSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.verdict{grid-template-columns:1fr}}
-    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.modeHint,.heroStep p,.hint,.dataNote p,.event p,.check p,.siteFooter p,.summaryHead p,.summaryBlock p{word-break:break-all;overflow-wrap:anywhere}.searchInput,.modeGrid,.filterGrid,.heroSteps,.summaryHead{display:grid;grid-template-columns:1fr}.summaryCount{text-align:left}.searchInput button{min-height:44px}.event{grid-template-columns:1fr}.sourceTag{width:max-content}.fact{grid-template-columns:1fr;gap:4px}.siteFooterInner{grid-template-columns:1fr}}
+    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.modeHint,.heroStep p,.hint,.dataNote p,.event p,.check p,.siteFooter p,.summaryHead p,.summaryBlock p{word-break:break-all;overflow-wrap:anywhere}.searchInput,.modeGrid,.filterGrid,.heroSteps,.summaryHead{display:grid;grid-template-columns:1fr}.heroStep{min-height:auto;grid-template-columns:minmax(0,1fr) 76px}.heroStepArt{width:76px;height:64px}.summaryCount{text-align:left}.searchInput button{min-height:44px}.event{grid-template-columns:1fr}.sourceTag{width:max-content}.fact{grid-template-columns:1fr;gap:4px}.siteFooterInner{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -302,9 +311,9 @@
       </form>
     </div>
     <div class="heroSteps" aria-label="查詢流程">
-      <div class="heroStep"><b>1. 找到它</b><span>用你知道的編號、地點或樹種開始。</span></div>
-      <div class="heroStep"><b>2. 看懂它</b><span>確認位置、樹種、胸徑、樹高與調查日期。</span></div>
-      <div class="heroStep"><b>3. 知道缺口</b><span>分辨哪些資訊公開資料還無法回答。</span></div>
+      <div class="heroStep"><div><b>1. 找到它</b><span>用你知道的編號、地點或樹種開始。</span></div><svg class="heroStepArt" viewBox="0 0 120 92" aria-hidden="true"><circle class="soft" cx="52" cy="38" r="25"/><path class="line" d="M52 63v16M37 79h30"/><path class="thin" d="M81 21a17 17 0 1 1-24 24 17 17 0 0 1 24-24Zm9 31 15 15"/><path class="line" d="M41 38h22"/></svg></div>
+      <div class="heroStep"><div><b>2. 看懂它</b><span>確認位置、樹種、胸徑、樹高與調查日期。</span></div><svg class="heroStepArt" viewBox="0 0 120 92" aria-hidden="true"><rect class="soft" x="20" y="12" width="72" height="66" rx="12"/><path class="line" d="M36 30h38M36 45h30M36 60h22"/><path class="warm" d="M80 54h26v20H80z"/><path class="thin" d="M86 61h14M86 68h10"/></svg></div>
+      <div class="heroStep"><div><b>3. 知道缺口</b><span>分辨哪些資訊公開資料還無法回答。</span></div><svg class="heroStepArt" viewBox="0 0 120 92" aria-hidden="true"><rect class="soft" x="15" y="18" width="46" height="54" rx="10"/><rect class="clay" x="70" y="18" width="36" height="54" rx="10"/><path class="line" d="M27 36h22M27 52h16M82 36h12M82 52h8"/><path class="thin" d="M62 45h8m-3-4 4 4-4 4"/><path class="line" d="M88 69v.01"/></svg></div>
     </div>
   </section>
 

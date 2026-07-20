@@ -20,6 +20,7 @@
   <meta name="twitter:description" content="看臺北市常見樹木排行榜，從樹種開始認識街道上的城市樹。">
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
   <script defer src="../app/analytics.js"></script>
+  <script defer src="../app/heroicons.js"></script>
   <title>樹種科普｜臺北市行道樹小幫手</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -33,8 +34,9 @@
     .siteMark{display:inline-flex;align-items:center;gap:9px;color:var(--forest);font-weight:900}
     .siteIcon{width:28px;height:28px;display:inline-grid;place-items:center;flex:0 0 auto;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1);color:var(--forest)}
     .siteIcon svg{width:17px;height:17px;display:block}
+    .heroIcon{width:1.05em;height:1.05em;display:inline-block;flex:0 0 auto}
     .navLinks{display:flex;flex-wrap:wrap;gap:8px}
-    .navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .navLinks a{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
     .navLinks a:hover,.navLinks a:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.1);color:var(--ink);transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,34,29,.08);outline:none}
     .navLinks a.active{background:var(--forest);color:#fffdf7}
     .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
@@ -53,7 +55,7 @@
     .searchInput{display:flex;gap:10px}
     .selectedSpecies{min-width:0;flex:1;display:flex;align-items:center;min-height:52px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#fff;color:var(--muted);font-size:.92rem}
     .selectedSpecies b{margin-left:6px;color:var(--ink);font-size:1.02rem}
-    .searchInput button{padding:0 18px;border:0;border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-weight:850}
+    .searchInput button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 18px;border:0;border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-weight:850}
     .speciesPicker{display:flex;flex-wrap:wrap;gap:8px;max-height:214px;margin:14px 0 12px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(255,253,247,.72);overflow:auto}
     .speciesOption{min-height:36px;padding:8px 11px;border:1px solid rgba(23,75,63,.16);border-radius:999px;background:#fff;color:var(--forest);font:inherit;font-size:.86rem;font-weight:850;cursor:pointer}
     .speciesOption:hover,.speciesOption:focus-visible{border-color:rgba(23,75,63,.45);background:rgba(47,127,85,.1);outline:none}
@@ -62,25 +64,35 @@
     .hint{margin:12px 0 0;color:var(--muted);font-size:.92rem;line-height:1.6}
     .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
     .sectionHeader .stats{margin-top:20px}
-    .stat{padding:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(255,253,247,.72)}
+    .stat{position:relative;min-height:104px;padding:18px 72px 18px 18px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(255,253,247,.72);overflow:hidden}
     .stat b{display:block;color:var(--forest);font-size:1.5rem}
     .stat span{color:var(--muted);font-size:.86rem}
-    .rankingControls{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto 16px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
-    .districtField{width:min(100%,360px);display:grid;gap:8px}
-    .districtField label{color:var(--forest);font-size:1rem;font-weight:900}
-    .districtFilter{width:100%;min-height:52px;padding:11px 48px 11px 14px;border:1px solid var(--line);border-radius:var(--radius-md);background-color:#fff;background-image:url("data:image/svg+xml,%3Csvg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 8.25L11 13.75L16.5 8.25' stroke='%23102019' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;background-size:22px 22px;color:var(--ink);font:inherit;font-size:1.06rem;font-weight:500;appearance:none;-webkit-appearance:none}
+    .statIcon{position:absolute;right:18px;top:50%;width:40px;height:40px;transform:translateY(-50%);color:var(--forest);opacity:.34}
+    .statIcon .soft{fill:rgba(47,127,85,.12)}
+    .statIcon .line{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+    .rankingControls{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:-2px auto 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+    .filterControls{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    .districtField{width:auto;display:flex;align-items:center;gap:10px}
+    .districtField label{color:var(--forest);font-size:.9rem;font-weight:900}
+    .districtFilter{width:auto;min-width:184px;min-height:42px;padding:8px 42px 8px 14px;border:1px solid rgba(23,75,63,.18);border-radius:999px;background-color:rgba(255,253,247,.84);background-image:url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 8.25L11 13.75L16.5 8.25' stroke='%23102019' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:20px 20px;color:var(--ink);font:inherit;font-size:.95rem;font-weight:850;appearance:none;-webkit-appearance:none}
     .districtFilter:focus-visible{border-color:rgba(23,75,63,.48);outline:none}
     .compactNotes{padding:0 28px 34px}
     .noteGrid{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .noteCard{padding:16px;box-shadow:none}
+    .noteCard{min-height:150px;display:grid;grid-template-columns:minmax(0,1fr) 88px;gap:16px;align-items:start;padding:18px;box-shadow:none}
     .noteCard b{display:block;margin-bottom:6px;color:var(--forest);font-size:1rem}
     .noteCard p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.58}
+    .noteArt{width:88px;height:72px;color:var(--forest)}
+    .noteArt .soft{fill:rgba(47,127,85,.12)}
+    .noteArt .warm{fill:rgba(225,174,67,.22)}
+    .noteArt .clay{fill:rgba(185,100,68,.2)}
+    .noteArt .line{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .noteArt .thin{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.72}
     .section{padding:58px 28px;border-top:1px solid var(--line)}
     .sectionHeader{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto 28px}
     .sectionTitleRow{display:flex;align-items:end;justify-content:space-between;gap:18px}
     .sectionHeader p:last-child{max-width:720px;color:var(--muted);font-size:1.05rem;line-height:1.78}
     .viewToggle{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,247,.82);box-shadow:0 10px 28px rgba(23,34,29,.08)}
-    .viewToggle button{min-width:68px;min-height:36px;padding:8px 14px;border:0;border-radius:999px;background:transparent;color:var(--forest);font:inherit;font-size:.88rem;font-weight:900;cursor:pointer}
+    .viewToggle button{min-width:68px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 14px;border:0;border-radius:999px;background:transparent;color:var(--forest);font:inherit;font-size:.88rem;font-weight:900;cursor:pointer}
     .viewToggle button:hover,.viewToggle button:focus-visible{background:rgba(47,127,85,.1);outline:none}
     .viewToggle button.active{background:var(--forest);color:#fffdf7}
     .grid{width:min(1160px,calc(100% - var(--page-gutter) * 2));margin:0 auto;display:grid;gap:10px}
@@ -160,7 +172,7 @@
     .preloaderBar:before{content:"";position:absolute;inset:0;width:42%;background:var(--forest);animation:preloadSlide 1.05s ease-in-out infinite}
     @keyframes preloadSlide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
     @media(max-width:980px){.heroGrid,.modalBody{grid-template-columns:1fr}.noteGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.cardView{grid-template-columns:repeat(2,minmax(0,1fr))}.speciesCard{grid-template-columns:48px 100px minmax(0,1fr);align-items:start}.speciesThumb{width:100px;height:84px}.rank{grid-column:1}.speciesMain{grid-column:3}.countBlock{grid-column:3;justify-self:start;text-align:left}.mediaPanel{grid-template-rows:300px auto}.speciesImage{min-height:300px}}
-    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}.sectionTitleRow{align-items:flex-start;flex-direction:column}.rankingControls{width:min(1160px,calc(100% - var(--page-gutter) * 2));display:grid;grid-template-columns:1fr}.districtField,.districtFilter{width:100%}.viewToggle{width:100%;display:grid;grid-template-columns:1fr 1fr}.viewToggle button{width:100%}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.hint,.noteCard p,.sectionHeader p,.speciesCard p,.modalContent p,.fact span,.dataHint,.siteFooter p{word-break:break-all;overflow-wrap:anywhere}.searchInput,.stats,.noteGrid{grid-template-columns:1fr;display:grid}.speciesPicker{max-height:240px}.searchInput button{min-height:44px}.grid.cardView{grid-template-columns:1fr}.speciesCard{min-height:auto;grid-template-columns:1fr}.speciesThumb{width:100%;height:150px}.rank,.countBlock,.speciesMain{grid-column:auto}.siteFooterInner{grid-template-columns:1fr}}
+    @media(max-width:640px){body{padding-top:132px;--page-gutter:18px}.topNav,.hero,.section{padding-left:18px;padding-right:18px}.topNavInner{align-items:flex-start;flex-direction:column}.navLinks{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.navLinks a{flex:0 0 auto;text-align:center}.sectionTitleRow{align-items:flex-start;flex-direction:column}.rankingControls{width:min(1160px,calc(100% - var(--page-gutter) * 2));display:grid;grid-template-columns:1fr}.filterControls{display:grid;grid-template-columns:1fr;gap:10px}.districtField{width:100%;display:grid;gap:8px}.districtFilter{width:100%}.viewToggle{width:100%;display:grid;grid-template-columns:1fr 1fr}.viewToggle button{width:100%}h1{font-size:clamp(2rem,10vw,2.4rem);line-height:1.12;word-break:break-all;overflow-wrap:anywhere}.lead,.hint,.noteCard p,.sectionHeader p,.speciesCard p,.modalContent p,.fact span,.dataHint,.siteFooter p{word-break:break-all;overflow-wrap:anywhere}.searchInput,.stats,.noteGrid{grid-template-columns:1fr;display:grid}.noteCard{min-height:auto;grid-template-columns:minmax(0,1fr) 76px}.noteArt{width:76px;height:62px}.speciesPicker{max-height:240px}.searchInput button{min-height:44px}.grid.cardView{grid-template-columns:1fr}.speciesCard{min-height:auto;grid-template-columns:1fr}.speciesThumb{width:100%;height:150px}.rank,.countBlock,.speciesMain{grid-column:auto}.siteFooterInner{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -209,9 +221,9 @@
 
   <section class="compactNotes" aria-label="看樹種資料前的提醒">
     <div class="noteGrid">
-      <article class="noteCard"><b>同一樹種也會差很多</b><p>大樹和小樹都是一筆紀錄，遮蔭與降溫效果不一樣。</p></article>
-      <article class="noteCard"><b>數量多不代表一定安全</b><p>太依賴少數樹種，遇到病蟲害或極端天氣時風險會集中。</p></article>
-      <article class="noteCard"><b>樹種不是健康診斷</b><p>它只能說明是什麼樹，健康與工程影響仍要另外查驗。</p></article>
+      <article class="noteCard"><div><b>同一樹種也會差很多</b><p>大樹和小樹都是一筆紀錄，遮蔭與降溫效果不一樣。</p></div><svg class="noteArt" viewBox="0 0 120 92" aria-hidden="true"><circle class="soft" cx="36" cy="36" r="25"/><circle class="warm" cx="88" cy="50" r="13"/><path class="line" d="M36 61v16M88 63v10M22 78h78"/><path class="thin" d="M20 36h35M79 50h18"/></svg></article>
+      <article class="noteCard"><div><b>數量多不代表一定安全</b><p>太依賴少數樹種，遇到病蟲害或極端天氣時風險會集中。</p></div><svg class="noteArt" viewBox="0 0 120 92" aria-hidden="true"><circle class="soft" cx="36" cy="38" r="16"/><circle class="soft" cx="63" cy="30" r="16"/><circle class="soft" cx="76" cy="56" r="16"/><path class="line" d="M36 54v16M63 46v24M76 72v8M25 80h62"/><path class="clay" d="M89 18h22v22H89z"/><path class="thin" d="m95 24 10 10m0-10-10 10"/></svg></article>
+      <article class="noteCard"><div><b>樹種不是健康診斷</b><p>它只能說明是什麼樹，健康與工程影響仍要另外查驗。</p></div><svg class="noteArt" viewBox="0 0 120 92" aria-hidden="true"><circle class="soft" cx="43" cy="42" r="22"/><path class="line" d="M43 64v14M30 78h28"/><rect class="warm" x="68" y="18" width="34" height="48" rx="8"/><path class="thin" d="M76 32h18M76 45h12M80 58h10"/><path class="line" d="M93 69v.01"/></svg></article>
     </div>
   </section>
 
@@ -223,17 +235,37 @@
       </div>
       <p>這些卡片依目前本地資料鏡像中的樹種數量排序。數量多不代表比較好或比較健康，只代表它在行道樹資料裡更常出現。</p>
       <div class="stats" aria-label="資料概況">
-        <div class="stat"><b id="tree-count">164,046</b><span>行道樹紀錄</span></div>
-        <div class="stat"><b id="species-count">470</b><span>資料中的樹種</span></div>
-        <div class="stat"><b id="top-species">榕樹</b><span>目前最多紀錄</span></div>
+        <div class="stat">
+          <b id="tree-count">164,046</b><span>行道樹紀錄</span>
+          <svg class="statIcon" viewBox="0 0 48 48" aria-hidden="true"><circle class="soft" cx="24" cy="24" r="20"/><path class="line" d="M24 35V21M16 38h16"/><path class="line" d="M15 22c0-6 4-11 9-11s9 5 9 11c0 5-3 8-9 8s-9-3-9-8Z"/></svg>
+        </div>
+        <div class="stat">
+          <b id="species-count">470</b><span>資料中的樹種</span>
+          <svg class="statIcon" viewBox="0 0 48 48" aria-hidden="true"><circle class="soft" cx="23" cy="24" r="19"/><path class="line" d="M17 33c9-1 16-8 17-17-9 1-16 8-17 17Z"/><path class="line" d="M16 34 32 18M28 34c-3 4-8 5-13 3 1-5 4-9 9-11"/></svg>
+        </div>
+        <div class="stat">
+          <b id="top-species">榕樹</b><span>目前最多紀錄</span>
+          <svg class="statIcon" viewBox="0 0 48 48" aria-hidden="true"><circle class="soft" cx="24" cy="24" r="20"/><path class="line" d="M24 38V25M15 39h18"/><path class="line" d="M13 23c0-7 5-13 11-13s11 6 11 13c0 6-4 10-11 10s-11-4-11-10Z"/><path class="line" d="m18 18 6 7 6-7"/></svg>
+        </div>
       </div>
     </div>
     <div class="rankingControls">
-      <div class="districtField">
-        <label for="ranking-district">行政區</label>
-        <select class="districtFilter" id="ranking-district" aria-label="依行政區篩選排行榜">
-          <option value="">全部行政區</option>
-        </select>
+      <div class="filterControls">
+        <div class="districtField">
+          <label for="ranking-district">行政區</label>
+          <select class="districtFilter" id="ranking-district" aria-label="依行政區篩選排行榜">
+            <option value="">全部行政區</option>
+          </select>
+        </div>
+        <div class="districtField">
+          <label for="ranking-limit">顯示</label>
+          <select class="districtFilter" id="ranking-limit" aria-label="選擇排行榜顯示筆數">
+            <option value="10">10 筆</option>
+            <option value="20">20 筆</option>
+            <option value="30">30 筆</option>
+            <option value="50">50 筆</option>
+          </select>
+        </div>
       </div>
       <div class="viewToggle" aria-label="排行榜瀏覽模式">
         <button class="active" type="button" data-view="list" aria-pressed="true">列表</button>
@@ -22579,6 +22611,7 @@
   let imageSources = {};
   let speciesPlaces = new Map();
   let browseView = "list";
+  let rankingLimit = 10;
   let selectedSpeciesName = "榕樹";
   let selectedRankingDistrict = "";
 
@@ -22748,7 +22781,7 @@
   function renderCards(){
     const grid = document.querySelector("#species-grid");
     grid.classList.toggle("cardView", browseView === "card");
-    grid.innerHTML = speciesCounts.slice(0,10).map(([name,count],index) => {
+    grid.innerHTML = speciesCounts.slice(0,rankingLimit).map(([name,count],index) => {
       const note = getNote(name);
       const image = getImageSource(name);
       const imageStyle = image.imageUrl ? `--species-image:linear-gradient(rgba(16,32,25,.04),rgba(16,32,25,.14)),url('${escapeHtml(image.imageUrl)}')` : "";
@@ -22982,6 +23015,11 @@
   document.querySelector("#ranking-district").addEventListener("change", event => {
     selectedRankingDistrict = event.target.value;
     renderRanking();
+  });
+
+  document.querySelector("#ranking-limit").addEventListener("change", event => {
+    rankingLimit = Number(event.target.value) || 10;
+    renderCards();
   });
 
   document.querySelector("#modal-close").addEventListener("click", closeModal);

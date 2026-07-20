@@ -20,6 +20,7 @@
   <meta name="twitter:description" content="每天給你一種臺北常見行道樹，從一棵樹開始理解公開資料。">
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
   <script defer src="../app/analytics.js"></script>
+  <script defer src="../app/heroicons.js"></script>
   <title>今天給我一棵樹｜臺北市行道樹小幫手</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -33,8 +34,9 @@
     .siteMark{display:inline-flex;align-items:center;gap:9px;color:var(--forest);font-weight:900}
     .siteIcon{width:28px;height:28px;display:inline-grid;place-items:center;flex:0 0 auto;border:1px solid rgba(23,75,63,.18);border-radius:50%;background:rgba(47,127,85,.1);color:var(--forest)}
     .siteIcon svg{width:17px;height:17px;display:block}
+    .heroIcon{width:1.05em;height:1.05em;display:inline-block;flex:0 0 auto}
     .navLinks{display:flex;flex-wrap:wrap;gap:8px}
-    .navLinks a{min-height:40px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .navLinks a{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border:1px solid rgba(23,34,29,.2);border-radius:var(--radius-sm);background:var(--paper);color:var(--forest);font-size:.92rem;font-weight:800;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
     .navLinks a:hover,.navLinks a:focus-visible{border-color:rgba(23,75,63,.48);background:rgba(47,127,85,.1);color:var(--ink);transform:translateY(-1px);box-shadow:0 8px 18px rgba(23,34,29,.08);outline:none}
     .navLinks a.active{background:var(--forest);color:#fffdf7}
     .navLinks a.active:hover,.navLinks a.active:focus-visible{background:var(--forest);color:#fffdf7;border-color:var(--forest)}
@@ -51,7 +53,7 @@
     .lead{max-width:640px;color:#33463c;font-size:clamp(1rem,1.6vw,1.2rem);line-height:1.78}
     .actions{width:min(100%,620px);display:grid;gap:10px;margin-top:24px}
     .secondaryActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .button{width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;border:1px solid var(--forest);border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-size:.96rem;font-weight:900;line-height:1.2;cursor:pointer}
+    .button{width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 16px;border:1px solid var(--forest);border-radius:var(--radius-sm);background:var(--forest);color:#fffdf7;font-size:.96rem;font-weight:900;line-height:1.2;cursor:pointer}
     .button.secondary{background:var(--paper);color:var(--forest)}
     .button:hover,.button:focus-visible{transform:translateY(-1px);box-shadow:0 10px 22px rgba(23,34,29,.1);outline:none}
     .button:disabled{opacity:.68;cursor:wait;transform:none;box-shadow:none}

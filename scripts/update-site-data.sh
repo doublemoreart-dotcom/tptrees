@@ -13,7 +13,29 @@ RUN_PREFLIGHT="true"
 SYNC_LOCAL="true"
 CHECK_ONLY="false"
 RENDER_SOCIAL_PNG="true"
+PREPARE_PUSH="false"
 LOCAL_TARGET="$LOCAL_TARGET_DEFAULT"
+VERIFY_LIVE="false"
+LIVE_URL="https://dinopeng.com/tptrees"
+PORTAL_TARGET="${TPTREES_PORTAL_TARGET:-}"
+
+PUBLISH_ENTRIES=(
+  index.html
+  favicon.svg
+  favicon.ico
+  app
+  daily
+  data
+  docs
+  lifecycle
+  public
+  scripts
+  species
+  tests
+  README.md
+  AGENTS.md
+  .gitignore
+)
 
 usage(){
   cat <<'USAGE'
@@ -30,10 +52,13 @@ Options:
   --with-images       Update species image sources from public APIs.
   --image-limit N     Limit species image update attempts.
   --check-only        Skip data updates and run checks / local sync only.
+  --prepare-push      Run check-only mode and print git push readiness summary.
   --no-social-png     Do not render public/social-preview.png from SVG.
   --no-preflight      Skip release preflight checks.
   --no-sync-local     Do not copy files to outputs/local-tptrees.
   --local-target DIR  Copy the test mirror to another directory.
+  --portal-target DIR Also copy the publish bundle to a portal repo /tptrees directory.
+  --verify-live [URL] Verify the published site after push.
   -h, --help          Show this help.
 USAGE
 }
@@ -64,6 +89,11 @@ while [[ $# -gt 0 ]]; do
       CHECK_ONLY="true"
       shift
       ;;
+    --prepare-push)
+      CHECK_ONLY="true"
+      PREPARE_PUSH="true"
+      shift
+      ;;
     --no-social-png)
       RENDER_SOCIAL_PNG="false"
       shift
@@ -84,6 +114,23 @@ while [[ $# -gt 0 ]]; do
       fi
       shift 2
       ;;
+    --portal-target)
+      PORTAL_TARGET="${2:-}"
+      if [[ -z "$PORTAL_TARGET" ]]; then
+        echo "Missing directory after --portal-target" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
+    --verify-live)
+      VERIFY_LIVE="true"
+      if [[ "${2:-}" != "" && "${2:-}" != --* ]]; then
+        LIVE_URL="$2"
+        shift 2
+      else
+        shift
+      fi
+      ;;
     -h|--help)
       usage
       exit 0
@@ -97,6 +144,64 @@ while [[ $# -gt 0 ]]; do
 done
 
 cd "$SITE_ROOT"
+
+copy_publish_entries(){
+  local target="$1"
+  local label="$2"
+  mkdir -p "$target"
+  for entry in "${PUBLISH_ENTRIES[@]}"; do
+    if [[ -e "$SITE_ROOT/$entry" ]]; then
+      cp -R "$SITE_ROOT/$entry" "$target/"
+    fi
+  done
+  echo "$label: $target"
+}
+
+verify_live_site(){
+  local base_url="${LIVE_URL%/}"
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  echo "Live site: $base_url"
+
+  fetch_live(){
+    local url="$1"
+    local output="$2"
+    local label="$3"
+    if ! curl -fsSL "$url" -o "$output"; then
+      echo "Live verification failed: $label is not available at $url" >&2
+      echo "This usually means the page HTML was deployed but this asset/path was not copied to the published site." >&2
+      exit 1
+    fi
+  }
+
+  declare -a routes=(
+    "/|臺北市行道樹小幫手|app/analytics.js|app/heroicons.js"
+    "/lifecycle/|樹木的生命履歷|tree-records.js|查驗"
+    "/species/|樹種科普|species-image-sources.js|台北市常見樹木排行榜"
+    "/daily/|今天給我一棵樹|share-card|download-card"
+  )
+
+  for route in "${routes[@]}"; do
+    IFS="|" read -r path marker_a marker_b marker_c <<< "$route"
+    local output="$temp_dir${path//\//_}.html"
+    local url="$base_url$path"
+    echo "  - $url"
+    fetch_live "$url" "$output" "page $path"
+    for marker in "$marker_a" "$marker_b" "$marker_c"; do
+      if ! grep -q "$marker" "$output"; then
+        echo "Live verification failed: $url missing marker '$marker'" >&2
+        exit 1
+      fi
+    done
+  done
+
+  fetch_live "$base_url/app/analytics.js" "$temp_dir/analytics.js" "analytics script"
+  fetch_live "$base_url/app/heroicons.js" "$temp_dir/heroicons.js" "heroicons script"
+  fetch_live "$base_url/favicon.svg" "$temp_dir/favicon.svg" "favicon.svg"
+  fetch_live "$base_url/favicon.ico" "$temp_dir/favicon.ico" "favicon.ico"
+  fetch_live "$base_url/public/social-preview.png" "$temp_dir/social-preview.png" "social preview PNG"
+  echo "Live verification complete."
+}
 
 echo "== 1/5 Generate brand assets =="
 node scripts/generate-brand-assets.mjs
@@ -145,13 +250,7 @@ fi
 if [[ "$SYNC_LOCAL" == "true" ]]; then
   echo ""
   echo "== 5/5 Sync local test mirror =="
-  mkdir -p "$LOCAL_TARGET"
-  for entry in index.html favicon.svg favicon.ico app daily data docs lifecycle public scripts species tests README.md AGENTS.md .gitignore; do
-    if [[ -e "$SITE_ROOT/$entry" ]]; then
-      cp -R "$SITE_ROOT/$entry" "$LOCAL_TARGET/"
-    fi
-  done
-  echo "Local mirror: $LOCAL_TARGET"
+  copy_publish_entries "$LOCAL_TARGET" "Local mirror"
   echo "Verify local mirror:"
   (cd "$LOCAL_TARGET" && node scripts/verify-static-pages.mjs)
 else
@@ -159,8 +258,56 @@ else
   echo "== 5/5 Skip local test mirror sync =="
 fi
 
+if [[ -n "$PORTAL_TARGET" ]]; then
+  echo ""
+  echo "== Sync portal publish directory =="
+  copy_publish_entries "$PORTAL_TARGET" "Portal target"
+  echo "Verify portal target:"
+  (cd "$PORTAL_TARGET" && node scripts/verify-static-pages.mjs)
+fi
+
 echo ""
 echo "Update flow complete."
-echo "Review before commit / push:"
-echo "  git status --short"
-echo "  git diff --stat"
+if [[ "$PREPARE_PUSH" == "true" ]]; then
+  CURRENT_BRANCH="$(git branch --show-current)"
+  UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  echo "Git push readiness:"
+  echo "  branch: ${CURRENT_BRANCH:-unknown}"
+  echo "  upstream: ${UPSTREAM:-not set}"
+  echo "  github remote: $(git remote get-url github 2>/dev/null || echo "not set")"
+  if [[ -n "$PORTAL_TARGET" ]]; then
+    echo "  portal target: $PORTAL_TARGET"
+  else
+    echo "  portal target: not set"
+  fi
+  echo ""
+  echo "Changed files:"
+  git status --short
+  echo ""
+  echo "Diff summary:"
+  git diff --stat
+  echo ""
+  echo "Next commands:"
+  echo "  git add <files>"
+  echo "  git commit -m \"Describe update\""
+  if [[ -n "$CURRENT_BRANCH" ]]; then
+    echo "  git push github $CURRENT_BRANCH:main"
+  else
+    echo "  git push github <branch>:main"
+  fi
+  if [[ -z "$PORTAL_TARGET" ]]; then
+    echo ""
+    echo "If this update changes visible pages or assets, also sync the portal repo /tptrees directory."
+    echo "Use --portal-target /path/to/dinopeng-com/tptrees when that repo is available."
+  fi
+else
+  echo "Review before commit / push:"
+  echo "  git status --short"
+  echo "  git diff --stat"
+fi
+
+if [[ "$VERIFY_LIVE" == "true" ]]; then
+  echo ""
+  echo "== Verify published site =="
+  verify_live_site
+fi
