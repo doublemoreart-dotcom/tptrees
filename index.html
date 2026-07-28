@@ -21,6 +21,7 @@
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
   <script defer src="./app/analytics.js"></script>
   <script defer src="./app/heroicons.js"></script>
+  <link rel="stylesheet" href="./app/motion.css">
   <title>臺北市行道樹小幫手現況</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--shadow:0 24px 70px rgba(23,34,29,.16);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -118,6 +119,9 @@
     </div>
   </footer>
 </main>
+<script src="app/vendor/gsap.min.js"></script>
+<script src="app/vendor/ScrollTrigger.min.js"></script>
+<script src="app/motion.js"></script>
 <script>
   function hidePreloader(){const preloader=document.querySelector("#preloader");if(!preloader)return;preloader.classList.add("isHidden");window.setTimeout(()=>preloader.remove(),420);}
   window.addEventListener("load",()=>window.setTimeout(hidePreloader,520));

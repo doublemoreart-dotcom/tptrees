@@ -58,7 +58,7 @@ bash scripts/update-site-data.sh --skip-download
 bash scripts/update-site-data.sh --check-only
 ```
 
-推 git 前可用準備模式，會跑完整檢查、同步本機鏡像，並列出 branch、remote、diff 與建議推送命令：
+推 git 前可用準備模式，會跑完整檢查、同步本機鏡像，並自動偵測主站 repo 的 `/tptrees` 目錄；若找到，會一併同步正式站發布內容，並列出兩個 repo 的推送命令：
 
 ```bash
 bash scripts/update-site-data.sh --prepare-push
@@ -67,18 +67,18 @@ bash scripts/update-site-data.sh --prepare-push
 推送後若要確認正式站真的更新，可跑：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
+bash scripts/update-site-data.sh --verify-live-only
 ```
 
-這會檢查 `https://dinopeng.com/tptrees/`、`/lifecycle/`、`/species/`、`/daily/` 是否都能讀到新版頁面標記，並確認 `app/analytics.js`、`app/heroicons.js`、favicon、社群縮圖與每日樹卡分享功能是否已經出現在正式站。
+這會檢查 `https://dinopeng.com/tptrees/`、`/lifecycle/`、`/species/`、`/daily/` 與共用資產，並比較 `data/site-release-manifest.json` 的版本指紋。只有正式站與本機發布檔完全相符才會通過，舊版頁面不會再被誤判為更新成功。
 
-若要同步到主站 repo 的 `/tptrees` 目錄，可指定目標：
+若自動偵測不到主站 repo，可指定目標：
 
 ```bash
 bash scripts/update-site-data.sh --check-only --portal-target /path/to/dinopeng-com/tptrees
 ```
 
-這會用同一份發布清單同步 HTML、`app/`、`public/`、`data/`、子頁與資產，避免正式站只更新頁面但漏掉 JS、favicon 或社群縮圖。
+這會用同一份發布清單同步 HTML、`app/`、`public/`、`data/`、子頁與資產，避免正式站只更新頁面但漏掉 JS、favicon 或社群縮圖。若這次只想檢查 source repo、不碰主站 repo，可加 `--no-sync-portal`。
 
 若要下載官方 CSV：
 
@@ -94,4 +94,4 @@ bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
 
 更新腳本會重建 `data/tree-data-manifest.json` 與 `data/tree-records.js`，可選擇補齊 `data/species-image-sources.json`，並自動執行基本驗證；其中也會檢查「今天給我一棵樹」的分享與下載分享圖片互動。更新前的 CSV 備份會放在 `data/backups/`，此資料夾不進版控。
 
-正式網站目前由入口網站 repo 統一部署至 GitHub Pages；本 repo 是 TP Trees 的獨立來源。若 GitHub 已推送但正式網址仍沒變，先用 `--verify-live` 確認是部署尚未完成、快取未刷新，或是入口網站尚未同步。
+正式網站由入口網站 repo 統一部署至 GitHub Pages；本 repo 是 TP Trees 的獨立來源。主站 GitHub Actions 每小時會自動同步 source repo，也可以用 `--prepare-push --require-portal` 先同步本機主站 Repo、立即提交。若正式網址仍沒變，用 `--verify-live-only` 的版本指紋確認是同步或部署尚未完成。

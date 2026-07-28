@@ -1,0 +1,35 @@
+.topNav{
+  transition:background-color .24s ease,border-color .24s ease,box-shadow .24s ease;
+}
+
+.topNav.motionScrolled{
+  background:rgba(245,241,232,.96);
+  border-bottom-color:rgba(23,75,63,.18);
+  box-shadow:0 10px 28px rgba(23,34,29,.08);
+}
+
+.motionProgress{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:3px;
+  background:var(--leaf,#2f7f55);
+  pointer-events:none;
+  transform:scaleX(0);
+  transform-origin:left center;
+  will-change:transform;
+}
+
+.mapPanel,
+.treeDot,
+.scanLine,
+.modalCard{
+  will-change:transform;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .topNav{transition:none}
+  .motionProgress{display:none}
+  .mapPanel,.treeDot,.scanLine,.modalCard{will-change:auto}
+}

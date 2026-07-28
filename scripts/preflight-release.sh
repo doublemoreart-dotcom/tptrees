@@ -7,15 +7,19 @@ MANIFEST="$SITE_ROOT/data/tree-data-manifest.json"
 
 cd "$SITE_ROOT"
 
-echo "1/7 Verify inline JavaScript"
+echo "1/8 Build release fingerprint"
+node scripts/build-release-manifest.mjs
+
+echo ""
+echo "2/8 Verify inline JavaScript"
 node scripts/verify-static-pages.mjs
 
 echo ""
-echo "2/7 Verify routes and data manifest"
+echo "3/8 Verify routes and data manifests"
 node --test tests/routes.test.mjs
 
 echo ""
-echo "3/7 Data snapshot"
+echo "4/8 Data snapshot"
 node -e '
 const fs = require("node:fs");
 const manifest = JSON.parse(fs.readFileSync("data/tree-data-manifest.json", "utf8"));
@@ -29,14 +33,14 @@ console.log(`suspiciousHeight: ${manifest.qualityChecks.suspiciousHeight}`);
 '
 
 echo ""
-echo "4/7 Species image source snapshot"
+echo "5/8 Species image source snapshot"
 node scripts/check-species-images.mjs
 
 echo ""
-echo "5/7 Brand asset snapshot"
+echo "6/8 Brand asset snapshot"
 node -e '
 const fs = require("node:fs");
-const required = ["favicon.svg", "favicon.ico", "public/social-preview.svg", "public/social-preview.png", "app/analytics.js", "app/heroicons.js"];
+const required = ["favicon.svg", "favicon.ico", "public/social-preview.svg", "public/social-preview.png", "app/analytics.js", "app/heroicons.js", "app/motion.css", "app/motion.js", "app/vendor/gsap.min.js", "app/vendor/ScrollTrigger.min.js", "data/site-release-manifest.json"];
 for(const file of required){
   const stat = fs.statSync(file);
   console.log(`${file}: ${stat.size} bytes`);
@@ -58,12 +62,15 @@ for(const page of pages){
   if(!html.includes("app/heroicons.js")){
     throw new Error(`${page} missing heroicons script`);
   }
+  if(!html.includes("app/motion.css") || !html.includes("app/motion.js") || !html.includes("vendor/gsap.min.js") || !html.includes("vendor/ScrollTrigger.min.js")){
+    throw new Error(`${page} missing GSAP motion assets`);
+  }
 }
-console.log("social metadata, analytics and heroicons: ok");
+console.log("social metadata, analytics, heroicons and GSAP motion: ok");
 '
 
 echo ""
-echo "6/7 Daily card interaction snapshot"
+echo "7/8 Daily card interaction snapshot"
 node -e '
 const fs = require("node:fs");
 const html = fs.readFileSync("daily/index.html", "utf8");
@@ -84,7 +91,7 @@ console.log("daily card share and download interactions: ok");
 '
 
 echo ""
-echo "7/7 Git status"
+echo "8/8 Git status"
 git status --short
 
 echo ""

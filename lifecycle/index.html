@@ -21,6 +21,7 @@
   <meta name="twitter:image" content="https://dinopeng.com/tptrees/public/social-preview.png">
   <script defer src="../app/analytics.js"></script>
   <script defer src="../app/heroicons.js"></script>
+  <link rel="stylesheet" href="../app/motion.css">
   <title>樹木的生命履歷</title>
   <style>
     :root{--bg:#f5f1e8;--fg:#17221d;--muted:#5f6c64;--forest:#174b3f;--leaf:#2f7f55;--lime:#bddc7a;--gold:#e1ae43;--clay:#b96444;--ink:#102019;--paper:#fffdf7;--line:rgba(23,34,29,.16);--soft:rgba(255,253,247,.72);--shadow:0 20px 58px rgba(23,34,29,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-xl:24px;--page-gutter:clamp(24px,5vw,72px)}
@@ -396,6 +397,9 @@
     </div>
   </footer>
 </main>
+<script src="../app/vendor/gsap.min.js"></script>
+<script src="../app/vendor/ScrollTrigger.min.js"></script>
+<script src="../app/motion.js"></script>
 <script src="../data/tree-records.js"></script>
 <script>
   const sampleTrees = [
@@ -911,11 +915,16 @@
     updateBackButton();
     resultModal.classList.add("open");
     resultModal.setAttribute("aria-hidden","false");
+    window.TPTreesMotion?.openModal(resultModal);
   }
 
   function closeResultModal(){
-    resultModal.classList.remove("open");
-    resultModal.setAttribute("aria-hidden","true");
+    const finish = () => {
+      resultModal.classList.remove("open");
+      resultModal.setAttribute("aria-hidden","true");
+    };
+    if(window.TPTreesMotion) window.TPTreesMotion.closeModal(resultModal,finish);
+    else finish();
   }
 
   function pulseRecord(){

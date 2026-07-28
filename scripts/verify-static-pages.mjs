@@ -14,6 +14,17 @@ const pagePaths = [
 
 const results = [];
 
+for(const scriptPath of ["app/motion.js"]){
+  const source = await readFile(resolve(siteRoot, scriptPath), "utf8");
+  try{
+    new Script(source, {filename:scriptPath});
+    console.log(`${scriptPath}: ok`);
+  }catch(error){
+    console.error(`${scriptPath}: ${error.message}`);
+    process.exitCode = 1;
+  }
+}
+
 for(const pagePath of pagePaths){
   const absolutePath = resolve(siteRoot, pagePath);
   const html = await readFile(absolutePath, "utf8");
@@ -45,6 +56,6 @@ for(const result of results){
   }
 }
 
-if(results.some(result => result.issues.length)){
+if(results.some(result => result.issues.length) || process.exitCode){
   process.exit(1);
 }

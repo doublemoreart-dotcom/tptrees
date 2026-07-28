@@ -16,8 +16,11 @@ RENDER_SOCIAL_PNG="true"
 PREPARE_PUSH="false"
 LOCAL_TARGET="$LOCAL_TARGET_DEFAULT"
 VERIFY_LIVE="false"
+VERIFY_LIVE_ONLY="false"
 LIVE_URL="https://dinopeng.com/tptrees"
 PORTAL_TARGET="${TPTREES_PORTAL_TARGET:-}"
+SYNC_PORTAL="${TPTREES_SYNC_PORTAL:-auto}"
+PORTAL_TARGET_SOURCE="manual"
 
 PUBLISH_ENTRIES=(
   index.html
@@ -58,7 +61,11 @@ Options:
   --no-sync-local     Do not copy files to outputs/local-tptrees.
   --local-target DIR  Copy the test mirror to another directory.
   --portal-target DIR Also copy the publish bundle to a portal repo /tptrees directory.
+  --no-sync-portal    Do not auto-detect or sync the portal repo.
+  --require-portal    Fail if the portal repo /tptrees directory cannot be found.
   --verify-live [URL] Verify the published site after push.
+  --verify-live-only [URL]
+                       Compare the local release fingerprint with the live site only.
   -h, --help          Show this help.
 USAGE
 }
@@ -120,10 +127,34 @@ while [[ $# -gt 0 ]]; do
         echo "Missing directory after --portal-target" >&2
         exit 1
       fi
+      SYNC_PORTAL="true"
       shift 2
+      ;;
+    --no-sync-portal)
+      SYNC_PORTAL="false"
+      shift
+      ;;
+    --require-portal)
+      SYNC_PORTAL="true"
+      shift
       ;;
     --verify-live)
       VERIFY_LIVE="true"
+      if [[ "${2:-}" != "" && "${2:-}" != --* ]]; then
+        LIVE_URL="$2"
+        shift 2
+      else
+        shift
+      fi
+      ;;
+    --verify-live-only)
+      VERIFY_LIVE="true"
+      VERIFY_LIVE_ONLY="true"
+      CHECK_ONLY="true"
+      RUN_PREFLIGHT="false"
+      SYNC_LOCAL="false"
+      SYNC_PORTAL="false"
+      RENDER_SOCIAL_PNG="false"
       if [[ "${2:-}" != "" && "${2:-}" != --* ]]; then
         LIVE_URL="$2"
         shift 2
@@ -145,13 +176,55 @@ done
 
 cd "$SITE_ROOT"
 
+detect_portal_target(){
+  if [[ -n "$PORTAL_TARGET" ]]; then
+    return 0
+  fi
+  if [[ "$SYNC_PORTAL" == "false" ]]; then
+    return 0
+  fi
+
+  local search_root="${TPTREES_PORTAL_SEARCH_ROOT:-$HOME/Documents/Codex}"
+  local candidate repo remote
+  if [[ ! -d "$search_root" ]]; then
+    return 0
+  fi
+
+  while IFS= read -r candidate; do
+    repo="$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ -z "$repo" || ! -d "$repo/tptrees" ]]; then
+      continue
+    fi
+    remote="$(git -C "$repo" remote get-url origin 2>/dev/null || true)"
+    if [[ "$remote" == *"doublemoreart-dotcom/dinopeng-com"* ]]; then
+      PORTAL_TARGET="$repo/tptrees"
+      PORTAL_TARGET_SOURCE="auto"
+      return 0
+    fi
+  done < <(find "$search_root" -maxdepth 7 -type d -name dinopeng-com 2>/dev/null)
+}
+
+detect_portal_target
+if [[ -z "$PORTAL_TARGET" && "$SYNC_PORTAL" == "true" ]]; then
+  echo "Portal repo /tptrees directory was required but not found." >&2
+  echo "Set TPTREES_PORTAL_TARGET or pass --portal-target /path/to/dinopeng-com/tptrees." >&2
+  exit 1
+fi
+
 copy_publish_entries(){
   local target="$1"
   local label="$2"
   mkdir -p "$target"
   for entry in "${PUBLISH_ENTRIES[@]}"; do
-    if [[ -e "$SITE_ROOT/$entry" ]]; then
-      cp -R "$SITE_ROOT/$entry" "$target/"
+    if [[ -d "$SITE_ROOT/$entry" ]]; then
+      mkdir -p "$target/$entry"
+      if [[ "$entry" == "data" ]]; then
+        rsync -a --delete --exclude "backups/" "$SITE_ROOT/$entry/" "$target/$entry/"
+      else
+        rsync -a --delete "$SITE_ROOT/$entry/" "$target/$entry/"
+      fi
+    elif [[ -f "$SITE_ROOT/$entry" ]]; then
+      cp "$SITE_ROOT/$entry" "$target/$entry"
     fi
   done
   echo "$label: $target"
@@ -177,7 +250,7 @@ verify_live_site(){
   declare -a routes=(
     "/|臺北市行道樹小幫手|app/analytics.js|app/heroicons.js"
     "/lifecycle/|樹木的生命履歷|tree-records.js|查驗"
-    "/species/|樹種科普|species-image-sources.js|台北市常見樹木排行榜"
+    "/species/|樹種科普|ranking-limit|台北市常見樹木排行榜"
     "/daily/|今天給我一棵樹|share-card|download-card"
   )
 
@@ -197,11 +270,33 @@ verify_live_site(){
 
   fetch_live "$base_url/app/analytics.js" "$temp_dir/analytics.js" "analytics script"
   fetch_live "$base_url/app/heroicons.js" "$temp_dir/heroicons.js" "heroicons script"
+  fetch_live "$base_url/app/motion.css" "$temp_dir/motion.css" "motion stylesheet"
+  fetch_live "$base_url/app/motion.js" "$temp_dir/motion.js" "motion script"
+  fetch_live "$base_url/app/vendor/gsap.min.js" "$temp_dir/gsap.min.js" "GSAP script"
+  fetch_live "$base_url/app/vendor/ScrollTrigger.min.js" "$temp_dir/ScrollTrigger.min.js" "ScrollTrigger script"
   fetch_live "$base_url/favicon.svg" "$temp_dir/favicon.svg" "favicon.svg"
   fetch_live "$base_url/favicon.ico" "$temp_dir/favicon.ico" "favicon.ico"
   fetch_live "$base_url/public/social-preview.png" "$temp_dir/social-preview.png" "social preview PNG"
-  echo "Live verification complete."
+  fetch_live "$base_url/data/site-release-manifest.json" "$temp_dir/site-release-manifest.json" "release manifest"
+
+  local expected_release live_release
+  expected_release="$(node -p 'JSON.parse(require("node:fs").readFileSync("data/site-release-manifest.json", "utf8")).releaseSha256')"
+  live_release="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).releaseSha256' "$temp_dir/site-release-manifest.json")"
+  if [[ "$expected_release" != "$live_release" ]]; then
+    echo "Live verification failed: the published version is not the current local version." >&2
+    echo "  local: ${expected_release:0:12}" >&2
+    echo "  live:  ${live_release:0:12}" >&2
+    echo "Push the source update, sync the portal repo, wait for deployment, then verify again." >&2
+    exit 1
+  fi
+  echo "Live verification complete: ${live_release:0:12}"
 }
+
+if [[ "$VERIFY_LIVE_ONLY" == "true" ]]; then
+  node scripts/build-release-manifest.mjs
+  verify_live_site
+  exit 0
+fi
 
 echo "== 1/5 Generate brand assets =="
 node scripts/generate-brand-assets.mjs
@@ -238,6 +333,10 @@ else
   node scripts/check-species-images.mjs
 fi
 
+echo ""
+echo "== Build release fingerprint =="
+node scripts/build-release-manifest.mjs
+
 if [[ "$RUN_PREFLIGHT" == "true" ]]; then
   echo ""
   echo "== 4/5 Run preflight =="
@@ -258,12 +357,21 @@ else
   echo "== 5/5 Skip local test mirror sync =="
 fi
 
-if [[ -n "$PORTAL_TARGET" ]]; then
+if [[ -n "$PORTAL_TARGET" && "$SYNC_PORTAL" != "false" ]]; then
   echo ""
   echo "== Sync portal publish directory =="
-  copy_publish_entries "$PORTAL_TARGET" "Portal target"
+  copy_publish_entries "$PORTAL_TARGET" "Portal target ($PORTAL_TARGET_SOURCE)"
   echo "Verify portal target:"
   (cd "$PORTAL_TARGET" && node scripts/verify-static-pages.mjs)
+  if ! cmp -s "$SITE_ROOT/data/site-release-manifest.json" "$PORTAL_TARGET/data/site-release-manifest.json"; then
+    echo "Portal sync failed: release fingerprints do not match." >&2
+    exit 1
+  fi
+  echo "Portal release fingerprint matches source."
+elif [[ "$SYNC_PORTAL" == "auto" ]]; then
+  echo ""
+  echo "== Skip portal sync =="
+  echo "Portal repo was not auto-detected. Set TPTREES_PORTAL_TARGET or pass --portal-target when the formal site repo is available."
 fi
 
 echo ""
@@ -275,8 +383,8 @@ if [[ "$PREPARE_PUSH" == "true" ]]; then
   echo "  branch: ${CURRENT_BRANCH:-unknown}"
   echo "  upstream: ${UPSTREAM:-not set}"
   echo "  github remote: $(git remote get-url github 2>/dev/null || echo "not set")"
-  if [[ -n "$PORTAL_TARGET" ]]; then
-    echo "  portal target: $PORTAL_TARGET"
+  if [[ -n "$PORTAL_TARGET" && "$SYNC_PORTAL" != "false" ]]; then
+    echo "  portal target: $PORTAL_TARGET ($PORTAL_TARGET_SOURCE)"
   else
     echo "  portal target: not set"
   fi
@@ -295,10 +403,20 @@ if [[ "$PREPARE_PUSH" == "true" ]]; then
   else
     echo "  git push github <branch>:main"
   fi
-  if [[ -z "$PORTAL_TARGET" ]]; then
+  if [[ -n "$PORTAL_TARGET" && "$SYNC_PORTAL" != "false" ]]; then
+    PORTAL_REPO="$(git -C "$PORTAL_TARGET" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ -n "$PORTAL_REPO" ]]; then
+      echo ""
+      echo "Portal repo next commands:"
+      echo "  cd \"$PORTAL_REPO\""
+      echo "  git status --short"
+      echo "  git add tptrees"
+      echo "  git commit -m \"Sync TP Trees site bundle\""
+      echo "  git push origin main"
+    fi
+  else
     echo ""
-    echo "If this update changes visible pages or assets, also sync the portal repo /tptrees directory."
-    echo "Use --portal-target /path/to/dinopeng-com/tptrees when that repo is available."
+    echo "Portal repo was not synced. Formal site updates require syncing dinopeng-com/tptrees before live verification."
   fi
 else
   echo "Review before commit / push:"

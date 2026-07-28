@@ -19,6 +19,7 @@ tptrees/
   data/
     TaipeiTree.csv
     tree-data-manifest.json
+    site-release-manifest.json
     tree-records.js
     backups/
   scripts/
@@ -29,6 +30,7 @@ tptrees/
     update-species-images.mjs
     check-species-images.mjs
     build-tree-manifest.mjs
+    build-release-manifest.mjs
     preflight-release.sh
     verify-static-pages.mjs
   docs/
@@ -93,9 +95,12 @@ bash scripts/update-site-data.sh --prepare-push
 - GitHub remote。
 - 待提交檔案。
 - diff 摘要。
-- 建議 commit / push 指令。
+- source repo 的建議 commit / push 指令。
+- 若有找到主站 repo，也會同步 `/tptrees` 並列出 portal repo 的 commit / push 指令。
 
-若這次有改畫面、互動、資料或靜態資產，還需要把同一份發布內容同步到主站 repo 的 `/tptrees` 目錄：
+這個專案有兩層版控：TP Trees source repo 與正式站入口 repo。`update-site-data.sh` 預設會自動在 `~/Documents/Codex` 內尋找 `doublemoreart-dotcom/dinopeng-com`，找到後同步到該 repo 的 `/tptrees` 目錄。
+
+若自動偵測不到主站 repo，可手動指定：
 
 ```bash
 bash scripts/update-site-data.sh --check-only --portal-target /path/to/dinopeng-com/tptrees
@@ -110,13 +115,25 @@ bash scripts/update-site-data.sh --check-only
 
 同步清單由腳本內的 `PUBLISH_ENTRIES` 統一管理，包含 HTML、`app/`、`daily/`、`data/`、`lifecycle/`、`public/`、`scripts/`、`species/`、favicon、README 與測試檔。
 
-推送後若要確認正式站已經吃到新版：
+其他同步控制：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
+bash scripts/update-site-data.sh --check-only --no-sync-portal
+bash scripts/update-site-data.sh --check-only --require-portal
+TPTREES_PORTAL_SEARCH_ROOT=/path/to/search bash scripts/update-site-data.sh --check-only
 ```
 
-這會檢查正式網址下的四個主要頁面與共用資產：
+- `--no-sync-portal`：只更新 source repo 與本機鏡像，不同步正式站 repo。
+- `--require-portal`：找不到正式站 repo 時直接中止，適合推 git 前使用。
+- `TPTREES_PORTAL_SEARCH_ROOT`：指定自動搜尋主站 repo 的根目錄。
+
+推送後若要確認正式站已經吃到「同一版」：
+
+```bash
+bash scripts/update-site-data.sh --verify-live-only
+```
+
+這會檢查正式網址下的四個主要頁面、共用資產，並比對 `data/site-release-manifest.json` 的版本指紋。只要正式站仍是舊版或漏了任何發布檔，就會中止並顯示本機與線上指紋。
 
 - `https://dinopeng.com/tptrees/`
 - `https://dinopeng.com/tptrees/lifecycle/`
@@ -131,7 +148,7 @@ bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
 如果正式站使用不同測試網址，也可以指定：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live https://example.com/tptrees
+bash scripts/update-site-data.sh --verify-live-only https://example.com/tptrees
 ```
 
 若有調整社群縮圖文案或視覺，可以單獨重建品牌資產：
@@ -214,6 +231,7 @@ bash scripts/preflight-release.sh
 - `TaipeiTree.csv`：官方資料的本機鏡像。
 - `tree-records.js`：靜態頁使用的壓縮資料，讓本機 `file://` 也能查全量資料。
 - `tree-data-manifest.json`：資料來源、更新時間、欄位對應、雜湊值與資料品質摘要。
+- `site-release-manifest.json`：頁面、資料與共用資產的發布版本指紋，用來確認本機、主站 Repo 與正式站是否一致。
 - `species-image-sources.json`：樹種科普與每日樹卡使用的圖片來源與授權註記。
 - `species-image-sources.js`：供靜態頁直接讀取的圖片來源資料。
 - `favicon.ico`：瀏覽器分頁與舊版 favicon 使用。
@@ -306,7 +324,7 @@ bash scripts/update-site-data.sh --prepare-push
 推送完成後執行：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
+bash scripts/update-site-data.sh --verify-live-only
 ```
 
 判讀方式：
@@ -317,6 +335,17 @@ bash scripts/update-site-data.sh --check-only --no-sync-local --verify-live
 - `curl` 失敗：正式網址無法讀取，需檢查部署狀態或網址設定。
 
 若出現「頁面 HTML 已更新，但 `app/analytics.js`、`app/heroicons.js`、`favicon.ico` 或 `public/social-preview.png` 404」，代表 source repo 已推，但主站 repo 的 `/tptrees` 目錄沒有完整同步。此時先同步主站目錄，再推主站 repo。
+
+## 固定推送順序
+
+```text
+1. 在 TP Trees source repo 跑 update-site-data.sh --prepare-push。
+2. 確認 source repo diff，commit 並 push 到 doublemoreart-dotcom/tptrees。
+3. 需要立即上線時，確認主站 repo 的 tptrees/ diff，commit 並 push 到 doublemoreart-dotcom/dinopeng-com；否則主站 GitHub Actions 會每小時自動同步。
+4. 部署完成後跑 update-site-data.sh --verify-live-only。
+```
+
+正式網址 `https://dinopeng.com/tptrees/` 只有在主站 repo 同步並部署完成後才會更新；只推 source repo 時，需要等待主站排程同步。
 
 ## 樹種圖片補完流程
 

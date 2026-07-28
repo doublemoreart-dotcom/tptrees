@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "releaseSha256": "3c8d6c64a42b4ca3dee9dbd7fd9a68376bff424dc276c703ac904525dcf42ed1",
+  "fileCount": 19,
+  "files": {
+    "app/analytics.js": "37c47462793b9163b348cff7a8a2f7ca8180afd9135a6a1a7c6bc5daa188aacb",
+    "app/heroicons.js": "f7f1cc5b48ac1de610b7a73542d804201bd247f9720c84c53a45677fa3cf6c22",
+    "app/motion.css": "44893bb4932941c359d3c3de4d1481805bc2be77d1d7c318375826064a884dac",
+    "app/motion.js": "a6788c628314b66bb2e67adced9b31b222084dd13f73011e4288eabcc1a9aa15",
+    "app/vendor/gsap.min.js": "96c01b81f44a3290e2b4532f55e2c9534b2adc43273a19f3756b2cb41f0fd0b6",
+    "app/vendor/ScrollTrigger.min.js": "308219390e5e3b84cda0c481e70caa9820883ae10bda44e6e9a149a81aac4b3f",
+    "daily/index.html": "94e14dc466c7cb60b1575b0c5d7984de8da196430470a6bdad104a25212dfbf5",
+    "data/species-image-sources.js": "f6129f7d325d8cfb88a8b25f450f337a16c47c9eaa590bb35f971bb9d8f30ce2",
+    "data/species-image-sources.json": "8c5dedeb978663d698eb054ce9dcff426f9183656b739bb2f9904e300bea3a2c",
+    "data/TaipeiTree.csv": "9bb016bdd1e104089691a2df18ce5420fe0d87b193722daa6dfac32f37fa390c",
+    "data/tree-data-manifest.json": "d337ca5ececdb2ada9a505a99342f907cabdbc668e13c5ff8e69e75a75b6f713",
+    "data/tree-records.js": "4f2761d3e5b15a829482ab53b1565e7edac86b4a89f38b57ccda53df0eca5d23",
+    "favicon.ico": "79d0f4b3720a7f3cb5ff9a9ed264936e852f276acbff1f153c88a81f972e8b5b",
+    "favicon.svg": "2d32743ae157bd61e5af6dd05826686650a9772383193a6f472ed29d278e1c34",
+    "index.html": "0407655dcc75be14f40e4a913303daecd50a21de9c3bdf5a40bcff216bd02ad9",
+    "lifecycle/index.html": "e40d2fbbed01256aa9a904af746912b49ca6dfae5a6d66a9a8c1995db6acef47",
+    "public/social-preview.png": "85bcad61e6fcd24cffa45f1e3bde98ae81212d7a5e4e6c33737a8daee977ee4f",
+    "public/social-preview.svg": "2965612a00bf8c262b78924d3c68d3b120e3f8c0303c73b0e8e557645da026e5",
+    "species/index.html": "f1eca4f077846da0e0be067045c498f01b61e80b3e862bb6c3912ade8f735eb4"
+  }
+}

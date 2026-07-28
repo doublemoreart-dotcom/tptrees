@@ -7,6 +7,7 @@ const lifecycle = await readFile(new URL("../lifecycle/index.html", import.meta.
 const species = await readFile(new URL("../species/index.html", import.meta.url), "utf8");
 const daily = await readFile(new URL("../daily/index.html", import.meta.url), "utf8");
 const manifest = await readFile(new URL("../data/tree-data-manifest.json", import.meta.url), "utf8");
+const releaseManifest = await readFile(new URL("../data/site-release-manifest.json", import.meta.url), "utf8");
 
 test("publishes the expected pages", () => {
   assert.match(home, /<title>臺北市行道樹小幫手現況<\/title>/);
@@ -39,4 +40,20 @@ test("data manifest documents the current CSV snapshot", () => {
   assert.equal(data.rowCount, 164046);
   assert.equal(data.qualityChecks.requiredColumnsPresent, true);
   assert.equal(data.qualityChecks.duplicateTreeIds, 0);
+});
+
+test("release manifest fingerprints every public dependency", () => {
+  const data = JSON.parse(releaseManifest);
+  assert.match(data.releaseSha256, /^[a-f0-9]{64}$/);
+  assert.ok(data.fileCount > 10);
+  for(const path of [
+    "index.html",
+    "app/motion.css",
+    "app/motion.js",
+    "app/vendor/gsap.min.js",
+    "public/social-preview.png",
+    "data/tree-records.js"
+  ]){
+    assert.match(data.files[path], /^[a-f0-9]{64}$/, `${path} should be fingerprinted`);
+  }
 });
