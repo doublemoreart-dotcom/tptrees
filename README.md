@@ -75,7 +75,7 @@ bash scripts/update-site-data.sh --verify-live-only
 若自動偵測不到主站 repo，可指定目標：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --portal-target /path/to/dinopeng-com/tptrees
+bash scripts/update-site-data.sh --check-only --portal-target /path/to/aidata-portal/tptrees
 ```
 
 這會用同一份發布清單同步 HTML、`app/`、`public/`、`data/`、子頁與資產，避免正式站只更新頁面但漏掉 JS、favicon 或社群縮圖。若這次只想檢查 source repo、不碰主站 repo，可加 `--no-sync-portal`。

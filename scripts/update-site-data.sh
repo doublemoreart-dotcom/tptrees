@@ -196,18 +196,18 @@ detect_portal_target(){
       continue
     fi
     remote="$(git -C "$repo" remote get-url origin 2>/dev/null || true)"
-    if [[ "$remote" == *"doublemoreart-dotcom/dinopeng-com"* ]]; then
+    if [[ "$remote" == *"doublemoreart-dotcom/aidata-portal"* ]]; then
       PORTAL_TARGET="$repo/tptrees"
       PORTAL_TARGET_SOURCE="auto"
       return 0
     fi
-  done < <(find "$search_root" -maxdepth 7 -type d -name dinopeng-com 2>/dev/null)
+  done < <(find "$search_root" -maxdepth 7 -type d -name aidata-portal 2>/dev/null)
 }
 
 detect_portal_target
 if [[ -z "$PORTAL_TARGET" && "$SYNC_PORTAL" == "true" ]]; then
   echo "Portal repo /tptrees directory was required but not found." >&2
-  echo "Set TPTREES_PORTAL_TARGET or pass --portal-target /path/to/dinopeng-com/tptrees." >&2
+  echo "Set TPTREES_PORTAL_TARGET or pass --portal-target /path/to/aidata-portal/tptrees." >&2
   exit 1
 fi
 
@@ -416,7 +416,7 @@ if [[ "$PREPARE_PUSH" == "true" ]]; then
     fi
   else
     echo ""
-    echo "Portal repo was not synced. Formal site updates require syncing dinopeng-com/tptrees before live verification."
+    echo "Portal repo was not synced. Formal site updates require syncing aidata-portal/tptrees before live verification."
   fi
 else
   echo "Review before commit / push:"
