@@ -98,18 +98,18 @@ bash scripts/update-site-data.sh --prepare-push
 - source repo 的建議 commit / push 指令。
 - 若有找到主站 repo，也會同步 `/tptrees` 並列出 portal repo 的 commit / push 指令。
 
-這個專案有兩層版控：TP Trees source repo 與正式站入口 repo。`update-site-data.sh` 預設會自動在 `~/Documents/Codex` 內尋找 `doublemoreart-dotcom/dinopeng-com`，找到後同步到該 repo 的 `/tptrees` 目錄。
+這個專案有兩層版控：TP Trees source repo 與正式站入口 repo。`update-site-data.sh` 預設會自動在 `~/Documents/Codex` 內尋找 `doublemoreart-dotcom/aidata-portal`，找到後同步到該 repo 的 `/tptrees` 目錄。
 
 若自動偵測不到主站 repo，可手動指定：
 
 ```bash
-bash scripts/update-site-data.sh --check-only --portal-target /path/to/dinopeng-com/tptrees
+bash scripts/update-site-data.sh --check-only --portal-target /path/to/aidata-portal/tptrees
 ```
 
 也可以先設定環境變數，之後不用每次輸入路徑：
 
 ```bash
-export TPTREES_PORTAL_TARGET=/path/to/dinopeng-com/tptrees
+export TPTREES_PORTAL_TARGET=/path/to/aidata-portal/tptrees
 bash scripts/update-site-data.sh --check-only
 ```
 
@@ -341,7 +341,7 @@ bash scripts/update-site-data.sh --verify-live-only
 ```text
 1. 在 TP Trees source repo 跑 update-site-data.sh --prepare-push。
 2. 確認 source repo diff，commit 並 push 到 doublemoreart-dotcom/tptrees。
-3. 需要立即上線時，確認主站 repo 的 tptrees/ diff，commit 並 push 到 doublemoreart-dotcom/dinopeng-com；否則主站 GitHub Actions 會每小時自動同步。
+3. 需要立即上線時，確認主站 repo 的 tptrees/ diff，commit 並 push 到 doublemoreart-dotcom/aidata-portal；否則主站 GitHub Actions 會每小時自動同步。
 4. 部署完成後跑 update-site-data.sh --verify-live-only。
 ```
 
