@@ -17,6 +17,7 @@
 - `data/`：臺北市行道樹 CSV、本地前端索引與資料 manifest
 - `favicon.ico`、`favicon.svg`、`public/social-preview.svg`：瀏覽器與社群分享資產
 - `scripts/`：資料更新、圖片來源補齊、manifest 建立與靜態頁語法檢查
+- [`docs/PROJECT_BASELINE.md`](docs/PROJECT_BASELINE.md)：專案目標、責任邊界、驗證與已知限制的維護基準
 - `docs/CSV_UPDATE_FLOW.md`：資料更新流程說明
 - `tests/routes.test.mjs`：頁面、導覽與資料 manifest 的基本驗證
 
@@ -46,52 +47,64 @@ bash scripts/preflight-release.sh
 
 ## 更新資料
 
-日常更新建議跑總入口，會更新資料、檢查頁面，並同步本機測試鏡像：
+更新流程只會修改與推送本專案 `doublemoreart-dotcom/tptrees`。它不會寫入本機鏡像、入口網站 Repo、GitHub Pages、網域或其他部署設定。
+
+先看來源分支、遠端差異、版本指紋與未提交檔案：
 
 ```bash
-bash scripts/update-site-data.sh --skip-download
+bash scripts/release-site.sh status
 ```
 
-若只是要確認目前版本能不能提交或推送，不重新產生資料：
+使用既有 CSV 更新資料與資產：
+
+```bash
+bash scripts/release-site.sh refresh --skip-download
+```
+
+若要下載官方 CSV，移除 `--skip-download`；若要補樹種圖片，可加 `--with-images --image-limit 120`。
+
+發布前建立完整預檢與交接包：
+
+```bash
+bash scripts/release-site.sh prepare
+```
+
+`prepare` 會先確認目前來源沒有落後快取的 `github/main`；若遠端較新會停止，避免從舊基底產生發布包。
+
+輸出位於 `.release/`：
+
+- `bundles/tptrees-<fingerprint>.tar.gz`：只含正式網站需要的公開檔案。
+- `release-handoff.json`：來源 commit、版本指紋、候選／可交接狀態、bundle SHA-256、檔案大小、目標路徑與外部部署需求。
+- `last-prepare.env`：本次準備狀態，供發布與追蹤使用。
+
+確認差異後，只推 TP Trees source Repo：
+
+```bash
+bash scripts/release-site.sh publish --message "Describe update" --confirm
+```
+
+`publish` 會先確認目前 `HEAD` 與 `github/main` 一致，再預檢、commit 並 push；不會改動任何外部專案。正式站若由 `doublemoreart-dotcom/aidata-portal` 發布，需要協調工作階段依 `release-handoff.json` 另行同步與部署。
+
+部署完成後可唯讀查驗正式站：
+
+```bash
+bash scripts/release-site.sh verify
+```
+
+若最近一次由此腳本發布的 source 需要回復：
+
+```bash
+bash scripts/release-site.sh rollback --confirm
+```
+
+回復使用 `git revert` 產生新 commit，不使用 `reset --hard` 或 force push；若遠端已有後續版本會停止。外部部署仍須使用新交接包另行處理。
+
+底層資料更新腳本也可單獨使用：
 
 ```bash
 bash scripts/update-site-data.sh --check-only
-```
-
-推 git 前可用準備模式，會跑完整檢查、同步本機鏡像，並自動偵測主站 repo 的 `/tptrees` 目錄；若找到，會一併同步正式站發布內容，並列出兩個 repo 的推送命令：
-
-```bash
 bash scripts/update-site-data.sh --prepare-push
-```
-
-推送後若要確認正式站真的更新，可跑：
-
-```bash
 bash scripts/update-site-data.sh --verify-live-only
 ```
 
-這會檢查 `https://dinopeng.com/tptrees/`、`/lifecycle/`、`/species/`、`/daily/` 與共用資產，並比較 `data/site-release-manifest.json` 的版本指紋。只有正式站與本機發布檔完全相符才會通過，舊版頁面不會再被誤判為更新成功。
-
-若自動偵測不到主站 repo，可指定目標：
-
-```bash
-bash scripts/update-site-data.sh --check-only --portal-target /path/to/aidata-portal/tptrees
-```
-
-這會用同一份發布清單同步 HTML、`app/`、`public/`、`data/`、子頁與資產，避免正式站只更新頁面但漏掉 JS、favicon 或社群縮圖。若這次只想檢查 source repo、不碰主站 repo，可加 `--no-sync-portal`。
-
-若要下載官方 CSV：
-
-```bash
-bash scripts/update-site-data.sh
-```
-
-若要同時補樹種照片來源，可限制批次數，先從高出現率樹種補起：
-
-```bash
-bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
-```
-
-更新腳本會重建 `data/tree-data-manifest.json` 與 `data/tree-records.js`，可選擇補齊 `data/species-image-sources.json`，並自動執行基本驗證；其中也會檢查「今天給我一棵樹」的分享與下載分享圖片互動。更新前的 CSV 備份會放在 `data/backups/`，此資料夾不進版控。
-
-正式網站由入口網站 repo 統一部署至 GitHub Pages；本 repo 是 TP Trees 的獨立來源。主站 GitHub Actions 每小時會自動同步 source repo，也可以用 `--prepare-push --require-portal` 先同步本機主站 Repo、立即提交。若正式網址仍沒變，用 `--verify-live-only` 的版本指紋確認是同步或部署尚未完成。
+線上查驗會檢查四個頁面、共用資產與 `data/site-release-manifest.json`。只有正式站版本指紋與目前來源一致才會通過。

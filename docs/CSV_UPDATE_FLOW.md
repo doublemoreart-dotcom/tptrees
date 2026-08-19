@@ -27,6 +27,9 @@ tptrees/
     render-social-preview-png.sh
     update-site-data.sh
     update-tree-csv.sh
+    build-release-bundle.sh
+    write-release-handoff.mjs
+    release-site.sh
     update-species-images.mjs
     check-species-images.mjs
     build-tree-manifest.mjs
@@ -58,8 +61,7 @@ bash scripts/update-site-data.sh --skip-download
 3. 執行頁面語法、路由與資料測試。
 4. 檢查樹種圖片來源覆蓋率與可疑檔名。
 5. 檢查品牌資產、社群分享 meta、GA4 與「今天給我一棵樹」分享 / 下載互動。
-6. 同步到本機測試鏡像 `outputs/local-tptrees`。
-7. 驗證本機測試鏡像的四個頁面 inline JavaScript。
+6. 建立站台版本指紋，確認正式發布檔案彼此一致。
 
 若要下載官方 CSV：
 
@@ -81,7 +83,7 @@ bash scripts/update-site-data.sh --skip-download --with-images --image-limit 120
 bash scripts/update-site-data.sh --check-only
 ```
 
-這會跑圖片來源檢查、preflight，並重新同步與驗證本機鏡像。
+這會跑圖片來源檢查、站台版本指紋與 preflight，不寫入任何外部專案。
 
 若下一步就是準備推 git，建議改用：
 
@@ -96,36 +98,24 @@ bash scripts/update-site-data.sh --prepare-push
 - 待提交檔案。
 - diff 摘要。
 - source repo 的建議 commit / push 指令。
-- 若有找到主站 repo，也會同步 `/tptrees` 並列出 portal repo 的 commit / push 指令。
+- 外部部署仍待交接的提醒。
 
-這個專案有兩層版控：TP Trees source repo 與正式站入口 repo。`update-site-data.sh` 預設會自動在 `~/Documents/Codex` 內尋找 `doublemoreart-dotcom/aidata-portal`，找到後同步到該 repo 的 `/tptrees` 目錄。
+本工作流程只負責 TP Trees source repo。它不搜尋、不複製、不提交，也不推送其他本機專案或 GitHub Repo。
 
-若自動偵測不到主站 repo，可手動指定：
-
-```bash
-bash scripts/update-site-data.sh --check-only --portal-target /path/to/aidata-portal/tptrees
-```
-
-也可以先設定環境變數，之後不用每次輸入路徑：
+需要交給正式站部署流程時，使用發布入口建立隔離交接包：
 
 ```bash
-export TPTREES_PORTAL_TARGET=/path/to/aidata-portal/tptrees
-bash scripts/update-site-data.sh --check-only
+bash scripts/release-site.sh prepare
 ```
 
-同步清單由腳本內的 `PUBLISH_ENTRIES` 統一管理，包含 HTML、`app/`、`daily/`、`data/`、`lifecycle/`、`public/`、`scripts/`、`species/`、favicon、README 與測試檔。
+這會產生：
 
-其他同步控制：
+- `.release/bundles/tptrees-<fingerprint>.tar.gz`：可部署的公開檔案。
+- `.release/release-handoff.json`：來源 commit、版本指紋、bundle SHA-256、檔案大小、目標路徑與所需外部動作。
 
-```bash
-bash scripts/update-site-data.sh --check-only --no-sync-portal
-bash scripts/update-site-data.sh --check-only --require-portal
-TPTREES_PORTAL_SEARCH_ROOT=/path/to/search bash scripts/update-site-data.sh --check-only
-```
+`.release/` 不進版控。正式站若由 `doublemoreart-dotcom/aidata-portal` 管理，必須由具備該專案權限的協調工作階段另外接手；本腳本不會跨專案執行。
 
-- `--no-sync-portal`：只更新 source repo 與本機鏡像，不同步正式站 repo。
-- `--require-portal`：找不到正式站 repo 時直接中止，適合推 git 前使用。
-- `TPTREES_PORTAL_SEARCH_ROOT`：指定自動搜尋主站 repo 的根目錄。
+工作區尚未 commit 時，handoff 會標記為 `candidate`；`publish` 完成 source commit 後會重建 bundle 與 handoff，狀態才會是 `source-ready`。外部部署只能使用已發布 source commit 對應的版本。
 
 推送後若要確認正式站已經吃到「同一版」：
 
@@ -334,18 +324,44 @@ bash scripts/update-site-data.sh --verify-live-only
 - 某個 asset/path 404：頁面 HTML 已更新，但部署端漏同步資產或資料夾。
 - `curl` 失敗：正式網址無法讀取，需檢查部署狀態或網址設定。
 
-若出現「頁面 HTML 已更新，但 `app/analytics.js`、`app/heroicons.js`、`favicon.ico` 或 `public/social-preview.png` 404」，代表 source repo 已推，但主站 repo 的 `/tptrees` 目錄沒有完整同步。此時先同步主站目錄，再推主站 repo。
+若出現「頁面 HTML 已更新，但 `app/analytics.js`、`app/heroicons.js`、`favicon.ico` 或 `public/social-preview.png` 404」，代表正式站部署內容不完整。請把 `.release/release-handoff.json` 與對應 bundle 交給管理正式站 Repo 的協調工作階段處理。
 
 ## 固定推送順序
 
-```text
-1. 在 TP Trees source repo 跑 update-site-data.sh --prepare-push。
-2. 確認 source repo diff，commit 並 push 到 doublemoreart-dotcom/tptrees。
-3. 需要立即上線時，確認主站 repo 的 tptrees/ diff，commit 並 push 到 doublemoreart-dotcom/aidata-portal；否則主站 GitHub Actions 會每小時自動同步。
-4. 部署完成後跑 update-site-data.sh --verify-live-only。
+建議使用發布控制入口，固定 source 更新與交接順序：
+
+```bash
+bash scripts/release-site.sh status
+bash scripts/release-site.sh refresh --skip-download
+bash scripts/release-site.sh prepare
+bash scripts/release-site.sh publish --message "Describe update" --confirm
+bash scripts/release-site.sh verify
 ```
 
-正式網址 `https://dinopeng.com/tptrees/` 只有在主站 repo 同步並部署完成後才會更新；只推 source repo 時，需要等待主站排程同步。
+各階段用途：
+
+1. `status`：顯示 source branch、快取遠端差異、release fingerprint 與工作區狀態。
+2. `refresh`：只在 source repo 更新資料或資產並跑 preflight。
+3. `prepare`：再次驗證，建立 bundle、handoff JSON 與 `.release/last-prepare.env`。
+4. `publish`：只 commit / push `doublemoreart-dotcom/tptrees`；未加 `--confirm` 不會推送。
+5. `verify`：部署尚未完成時自動重試，直到正式站指紋與本機一致。
+
+若已推送的版本需要退回：
+
+```bash
+bash scripts/release-site.sh rollback --confirm --verify
+```
+
+腳本會讀取 `.release/last-publish.env`，以 `git revert` 回復 source 並建立新的交接包。它不使用 `reset --hard` 或 force push；若遠端已有後續版本則直接停止。正式站部署仍須由協調工作階段依新交接包處理。
+
+```text
+1. 在 TP Trees source repo 跑 `release-site.sh status` 與 `release-site.sh prepare`。
+2. 確認 source repo diff，使用 `release-site.sh publish --confirm` 推送 `doublemoreart-dotcom/tptrees`。
+3. 把 `.release/release-handoff.json` 與對應 bundle 交給管理 `doublemoreart-dotcom/aidata-portal` 的協調工作階段。
+4. 外部部署完成後跑 `release-site.sh verify`。
+```
+
+正式網址 `https://dinopeng.com/tptrees/` 只有在外部部署完成後才會更新；只推 source repo 不代表正式站已發布。
 
 ## 樹種圖片補完流程
 
