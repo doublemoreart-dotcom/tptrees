@@ -8,14 +8,14 @@ import test from "node:test";
 const releaseScript = new URL("../scripts/release-site.sh", import.meta.url);
 const transactionChecker = new URL("../scripts/check-publish-transaction.mjs", import.meta.url);
 const rollbackPreparer = new URL("../scripts/prepare-release-rollback.mjs", import.meta.url);
+const releaseScriptSource = await readFile(releaseScript, "utf8");
 
 const sourcePublishPaths = [
-  "AGENTS.md",
-  "README.md",
-  "docs/CSV_UPDATE_FLOW.md",
-  "docs/PROJECT_BASELINE.md",
+  "data/site-release-manifest.json",
+  "lifecycle/index.html",
   "scripts/release-site.sh",
   "tests/release-site-integration.test.mjs",
+  "tests/routes.test.mjs",
 ];
 
 const trackedPublishPaths = new Set(sourcePublishPaths);
@@ -109,6 +109,7 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
   );
 
   for (const path of trackedPublishPaths) {
+    if (path === "data/site-release-manifest.json") continue;
     const executable = path.endsWith(".sh");
     const body = executable
       ? `#!/usr/bin/env bash\n# base ${path}\n`
@@ -128,9 +129,14 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
   git(repository, "push", "-q", "-u", "github", "main");
 
   for (const path of trackedPublishPaths) {
-    if (path === "scripts/release-site.sh") continue;
+    if (["data/site-release-manifest.json", "scripts/release-site.sh"].includes(path)) continue;
     await writeRepositoryFile(repository, path, `published ${path}\n`);
   }
+  await writeRepositoryFile(
+    repository,
+    "data/site-release-manifest.json",
+    `${JSON.stringify({ releaseSha256: "b".repeat(64) }, null, 2)}\n`,
+  );
   await copyRuntimeScript(releaseScript, join(repository, "scripts", "release-site.sh"), true);
 
   assert.deepEqual(dirtyPaths(repository), sourcePublishPaths);
@@ -142,7 +148,13 @@ function assertUnpublished(fixture) {
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), fixture.base);
 }
 
-test("release-site publishes and resumes the exact 6-path scope, then resumes a public-tree rollback", async (t) => {
+test("release-site publishes and resumes the exact 5-path scope, then resumes a public-tree rollback", async (t) => {
+  const allowlistBlock = releaseScriptSource.match(/SOURCE_PUBLISH_PATHS=\(\n([\s\S]*?)\n\)/);
+  assert.ok(allowlistBlock, "production source publish allowlist should exist");
+  const productionPaths = [...allowlistBlock[1].matchAll(/^\s+(\S+)\s*$/gm)].map((match) => match[1]);
+  assert.deepEqual(productionPaths, sourcePublishPaths);
+  assert.doesNotMatch(releaseScriptSource, /git add --all|git add -A|git add \.(?:\s|$)/);
+  assert.match(releaseScriptSource, /git add -- "\$\{SOURCE_PUBLISH_PATHS\[@\]\}"/);
   const fixture = await createFixture(t);
   const rejectMarker = join(fixture.remote, "reject-once");
   await writeFile(rejectMarker, "reject the next push\n");
@@ -185,7 +197,7 @@ fi
   await writeFile(join(fixture.repository, "index.html"), "published site\n");
   await writeFile(
     join(fixture.repository, "data", "site-release-manifest.json"),
-    `${JSON.stringify({ releaseSha256: "b".repeat(64) }, null, 2)}\n`,
+    `${JSON.stringify({ releaseSha256: "c".repeat(64) }, null, 2)}\n`,
   );
   git(fixture.repository, "add", "--", "index.html", "data/site-release-manifest.json");
   git(fixture.repository, "commit", "-q", "-m", "fixture public publish");
@@ -199,7 +211,7 @@ SOURCE_BEFORE=${published}
 SOURCE_PUBLISHED=${publicPublished}
 SOURCE_BRANCH=main
 PUBLISHED_COMMIT_COUNT=1
-RELEASE_SHA256=${"b".repeat(64)}
+RELEASE_SHA256=${"c".repeat(64)}
 BUNDLE=.release/bundles/fixture.tar.gz
 `,
   );
@@ -225,7 +237,7 @@ BUNDLE=.release/bundles/fixture.tar.gz
   const rollback = git(fixture.repository, "rev-parse", "HEAD");
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), rollback);
   assert.equal(await readFile(join(fixture.repository, "index.html"), "utf8"), "base site\n");
-  assert.equal(await readFile(join(fixture.repository, "README.md"), "utf8"), "published README.md\n");
+  assert.equal(await readFile(join(fixture.repository, "lifecycle", "index.html"), "utf8"), "published lifecycle/index.html\n");
   assert.deepEqual(git(fixture.repository, "diff", "--name-only", publicPublished, rollback).split("\n"), [
     "data/site-release-manifest.json",
     "index.html",
@@ -246,7 +258,7 @@ test("release-site rejects an extra untracked path before staging", async (t) =>
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: unexpected\.txt/);
-  assert.match(result.stderr, /6-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /5-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -262,7 +274,7 @@ test("release-site rejects a missing expected path before staging", async (t) =>
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /missing: tests\/release-site-integration\.test\.mjs/);
-  assert.match(result.stderr, /6-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /5-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -300,6 +312,6 @@ exit "$status"
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: staging-drift\.txt/);
-  assert.match(result.stderr, /6-path allowlist \(after staging\)/);
+  assert.match(result.stderr, /5-path allowlist \(after staging\)/);
   assertUnpublished(fixture);
 });

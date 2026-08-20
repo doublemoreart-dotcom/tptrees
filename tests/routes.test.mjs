@@ -105,6 +105,20 @@ test("query-string deep links restore lifecycle and species state", () => {
   assert.match(species, /showSpecies\(initial\.name, initial\.shouldOpen\)/);
 });
 
+test("lifecycle fails closed without substituting demonstration tree records", () => {
+  assert.doesNotMatch(lifecycle, /\bsampleTrees\b|\bTP-[A-Z0-9-]+\b/);
+  assert.match(lifecycle, /let trees = \[\];/);
+  assert.match(lifecycle, /let selectedTreeId = "";/);
+  assert.match(lifecycle, /公開樹籍資料目前無法載入，本頁暫停查驗/);
+  assert.match(lifecycle, /示範資料不得作為查驗結果/);
+  assert.match(lifecycle, /form\.querySelectorAll\("button,input,select"\)/);
+  assert.match(lifecycle, /control\.disabled = true/);
+  assert.match(lifecycle, /resultMeta\.setAttribute\("role","alert"\)/);
+  assert.match(lifecycle, /catch\(error\)\{\s*renderUnavailableState\(\);\s*return;\s*\}/);
+  assert.match(lifecycle, /Array\.isArray\(window\.TAIPEI_TREE_RECORDS\)/);
+  assert.match(lifecycle, /fetch\(bundledCsvPath\)/);
+});
+
 test("all pages declare canonical URLs that match their Open Graph URLs", () => {
   for (const { html, canonical } of pages) {
     assert.ok(html.includes(`<link rel="canonical" href="${canonical}">`));

@@ -243,6 +243,7 @@
           <button class="modeButton" type="button" data-mode="place" aria-pressed="false">用地點找</button>
           <button class="modeButton" type="button" data-mode="species" aria-pressed="false">用樹種找</button>
         </div>
+        <p class="modeHint" id="data-load-status" role="status" aria-live="polite">正在載入公開樹籍資料。</p>
 
         <div class="searchPanel active" data-panel="all">
           <p class="modeHint">不知道要怎麼查時，先輸入任何線索。</p>
@@ -356,18 +357,18 @@
           <div class="record">
             <aside class="identity">
               <div class="identityTitle">
-                <div class="treeId" id="tree-id">TREE-TP-04281</div>
+                <div class="treeId" id="tree-id">尚未載入樹籍</div>
                 <div class="badge" id="record-badge">公開資料</div>
               </div>
               <div class="facts" id="facts">
-                <div class="fact"><b>行政區</b><span id="fact-district">松山區</span></div>
-                <div class="fact"><b>道路</b><span id="fact-road">民生東路</span></div>
-                <div class="fact"><b>位置備註</b><span id="fact-note">富錦街口</span></div>
-                <div class="fact"><b>樹種</b><span id="fact-species">白千層</span></div>
-                <div class="fact"><b>胸徑</b><span id="fact-dbh">74 cm</span></div>
-                <div class="fact"><b>樹高</b><span id="fact-height">12 m</span></div>
-                <div class="fact"><b>調查日期</b><span id="fact-date">2024-08-12</span></div>
-                <div class="fact"><b>座標</b><span id="fact-coord">25.0581, 121.5634</span></div>
+                <div class="fact"><b>行政區</b><span id="fact-district">尚未載入</span></div>
+                <div class="fact"><b>道路</b><span id="fact-road">尚未載入</span></div>
+                <div class="fact"><b>位置備註</b><span id="fact-note">尚未載入</span></div>
+                <div class="fact"><b>樹種</b><span id="fact-species">尚未載入</span></div>
+                <div class="fact"><b>胸徑</b><span id="fact-dbh">尚未載入</span></div>
+                <div class="fact"><b>樹高</b><span id="fact-height">尚未載入</span></div>
+                <div class="fact"><b>調查日期</b><span id="fact-date">尚未載入</span></div>
+                <div class="fact"><b>座標</b><span id="fact-coord">尚未載入</span></div>
               </div>
             </aside>
             <div>
@@ -375,8 +376,8 @@
                 <div class="profileTop">
                   <div>
                     <p class="kicker">樹木履歷</p>
-                    <h3 id="profile-title">這是一棵白千層</h3>
-                    <p id="profile-copy">這筆公開資料記錄它的位置、樹種、胸徑、樹高與調查日期。你可以先用這些資訊確認是不是同一棵樹，再搭配現場觀察。</p>
+                    <h3 id="profile-title">尚未載入樹籍</h3>
+                    <p id="profile-copy">公開樹籍載入後，這裡才會顯示選定樹木的資料履歷。</p>
                   </div>
                   <a class="speciesLink" id="species-link" href="../species/index.html">看樹種介紹</a>
                 </div>
@@ -403,25 +404,7 @@
 <script src="../app/motion.js"></script>
 <script src="../data/tree-records.js"></script>
 <script>
-  const sampleTrees = [
-    {treeId:"TP-SON-000421",district:"松山區",road:"民生東路",note:"富錦街口人行道",species:"白千層",dbh:74,height:12,surveyDate:"2024-08-12",lat:25.0581,lng:121.5634},
-    {treeId:"TP-SHI-001184",district:"士林區",road:"中山北路",note:"福林橋南側安全島",species:"臺灣欒樹",dbh:42,height:10,surveyDate:"2023-11-06",lat:25.0968,lng:121.5269},
-    {treeId:"TP-DAA-003912",district:"大安區",road:"仁愛路",note:"敦化南路口東側",species:"樟樹",dbh:58,height:14,surveyDate:"2024-03-18",lat:25.0374,lng:121.5487},
-    {treeId:"TP-ZHO-002306",district:"中正區",road:"中山南路",note:"凱達格蘭大道旁",species:"大王椰子",dbh:38,height:16,surveyDate:"2022-09-22",lat:25.0398,lng:121.5191},
-    {treeId:"TP-BEI-004815",district:"北投區",road:"承德路",note:"立農街口",species:"榕樹",dbh:66,height:13,surveyDate:"2024-05-04",lat:25.1162,lng:121.5104},
-    {treeId:"TP-NEI-000774",district:"內湖區",road:"瑞光路",note:"港墘路至洲子街",species:"大花紫薇",dbh:24,height:7,surveyDate:"2023-07-19",lat:25.0776,lng:121.5756},
-    {treeId:"TP-WAN-000143",district:"萬華區",road:"西園路",note:"艋舺大道口",species:"茄苳",dbh:46,height:11,surveyDate:"2021-10-13",lat:25.0352,lng:121.4997},
-    {treeId:"TP-DAT-000892",district:"大同區",road:"重慶北路",note:"民生西路口",species:"小葉欖仁",dbh:22,height:8,surveyDate:"2024-01-29",lat:25.0569,lng:121.5135},
-    {treeId:"TP-XIN-002221",district:"信義區",road:"松仁路",note:"市府轉運站周邊",species:"臺灣欒樹",dbh:31,height:9,surveyDate:"2023-12-01",lat:25.0406,lng:121.5688},
-    {treeId:"TP-NAN-001047",district:"南港區",road:"研究院路",note:"中央研究院前",species:"楓香",dbh:52,height:15,surveyDate:"2022-04-08",lat:25.0421,lng:121.6159},
-    {treeId:"TP-WEN-000531",district:"文山區",road:"木柵路",note:"指南路口",species:"水黃皮",dbh:28,height:8,surveyDate:"2024-02-14",lat:24.9876,lng:121.5704},
-    {treeId:"TP-ZHO-004002",district:"中山區",road:"民權東路",note:"松江路口",species:"黑板樹",dbh:35,height:2023,surveyDate:"2023-05-21",lat:25.0628,lng:121.5327},
-    {treeId:"TP-SON-000987",district:"松山區",road:"南京東路",note:"光復北路口",species:"榕樹",dbh:0,height:10,surveyDate:"2024-06-17",lat:25.0519,lng:121.5578},
-    {treeId:"TP-DAA-004518",district:"大安區",road:"新生南路",note:"和平東路口",species:"茄苳",dbh:63,height:13,surveyDate:"2020-12-03",lat:25.0261,lng:121.5334},
-    {treeId:"TP-SHI-003301",district:"士林區",road:"文林路",note:"士林官邸周邊",species:"白千層",dbh:39,height:null,surveyDate:"2024-04-11",lat:25.0942,lng:121.5251},
-    {treeId:"TP-NEI-001882",district:"內湖區",road:"成功路",note:"康寧路口",species:"苦楝",dbh:27,height:9,surveyDate:"",lat:25.0812,lng:121.5906}
-  ];
-  let trees = [...sampleTrees];
+  let trees = [];
   const bundledCsvPath = "../data/TaipeiTree.csv";
   const resultLimit = 80;
 
@@ -439,6 +422,7 @@
     lng:"座標 Y"
   };
   const form = document.querySelector("#search-form");
+  const dataLoadStatus = document.querySelector("#data-load-status");
   const input = document.querySelector("#tree-search");
   const treeIdQuery = document.querySelector("#tree-id-query");
   const speciesKeyword = document.querySelector("#species-keyword");
@@ -460,7 +444,7 @@
   const clearFilters = document.querySelector("#clear-filters");
   const quickChips = document.querySelector("#quick-chips");
   const modeButtons = [...document.querySelectorAll("[data-mode]")];
-  let selectedTreeId = trees[0].treeId;
+  let selectedTreeId = "";
   let searchMode = "all";
   let queryHistory = [];
   let resultModalTrigger = null;
@@ -747,6 +731,7 @@
     document.querySelector("#profile-title").textContent = `這是一棵${tree.species || "尚未標明樹種的樹"}`;
     document.querySelector("#profile-copy").textContent = `${tree.species || "這棵樹"}位在${tree.district || "未提供行政區"} ${tree.road || "未提供道路"}，公開資料記錄胸徑 ${displayValue(tree.dbh,"cm")}、樹高 ${displayValue(tree.height,"m")}，調查日期為 ${displayValue(tree.surveyDate)}。`;
     const speciesLink = document.querySelector("#species-link");
+    speciesLink.hidden = false;
     speciesLink.textContent = tree.species ? `看${tree.species}介紹` : "看樹種介紹";
     const speciesParams = new URLSearchParams({
       species: tree.species || "",
@@ -858,6 +843,46 @@
     document.querySelector("#species-link").href = "../species/index.html";
     timeline.innerHTML = `<div class="emptyState">尚未選定樹木。請先送出查詢。</div>`;
     verdict.innerHTML = "";
+  }
+
+  function disableVerificationControls(){
+    [...form.querySelectorAll("button,input,select")].forEach(control => {
+      control.disabled = true;
+    });
+    quickChips.innerHTML = "";
+  }
+
+  function renderUnavailableState(){
+    const unavailableMessage = "公開樹籍資料目前無法載入，本頁暫停查驗";
+    trees = [];
+    selectedTreeId = "";
+    disableVerificationControls();
+    dataLoadStatus.hidden = false;
+    dataLoadStatus.textContent = `${unavailableMessage}。示範資料不得作為查驗結果。`;
+    dataLoadStatus.setAttribute("role","alert");
+    dataLoadStatus.setAttribute("aria-live","assertive");
+    resultMeta.textContent = unavailableMessage;
+    resultMeta.setAttribute("role","alert");
+    resultMeta.setAttribute("aria-live","assertive");
+    resultList.innerHTML = `<div class="emptyState">無法查驗：公開樹籍尚未載入，且不會以示範資料替代正式查驗結果。</div>`;
+    summaryScope.textContent = "無法查驗：公開樹籍資料目前未載入。";
+    summaryTotal.textContent = "0";
+    summaryGrid.innerHTML = `<div class="summaryBlock"><b>暫停查驗</b><p>請稍後再試；本頁不會顯示示範或虛構樹籍。</p></div>`;
+    document.querySelector("#tree-id").textContent = "無法查驗";
+    document.querySelector("#record-badge").textContent = "資料未載入";
+    ["#fact-district","#fact-road","#fact-note","#fact-species","#fact-dbh","#fact-height","#fact-date","#fact-coord"].forEach(selector => {
+      document.querySelector(selector).textContent = "無法查驗";
+    });
+    document.querySelector("#profile-title").textContent = "樹木履歷目前無法查驗";
+    document.querySelector("#profile-copy").textContent = "正式公開樹籍未載入，因此不建立或顯示任何樹木紀錄。";
+    const speciesLink = document.querySelector("#species-link");
+    speciesLink.textContent = "樹種資料無法查驗";
+    speciesLink.removeAttribute("href");
+    speciesLink.hidden = true;
+    timeline.innerHTML = `<div class="emptyState">生命履歷無法查驗：沒有可用的正式公開樹籍。</div>`;
+    verdict.innerHTML = `<div class="check alert"><b>查驗已停用</b><p>待正式資料恢復後才能重新查驗。</p></div>`;
+    resultModal.setAttribute("aria-hidden","true");
+    hidePreloader();
   }
 
   function getSearchState(){
@@ -1238,6 +1263,11 @@
   }
 
   function finishLoading(){
+    dataLoadStatus.hidden = true;
+    dataLoadStatus.setAttribute("role","status");
+    dataLoadStatus.setAttribute("aria-live","polite");
+    resultMeta.removeAttribute("role");
+    resultMeta.removeAttribute("aria-live");
     populateControls();
     if(!restoreSearchFromUrl()) renderInitialState();
     hidePreloader();
@@ -1245,10 +1275,13 @@
 
   async function loadBundledCsv(){
     if(Array.isArray(window.TAIPEI_TREE_RECORDS) && window.TAIPEI_TREE_RECORDS.length){
-      trees = normalizeSharedRecords();
-      selectedTreeId = trees[0]?.treeId || sampleTrees[0].treeId;
-      finishLoading();
-      return;
+      const bundledRecords = normalizeSharedRecords();
+      if(bundledRecords.length){
+        trees = bundledRecords;
+        selectedTreeId = trees[0]?.treeId || "";
+        finishLoading();
+        return;
+      }
     }
     try{
       const response = await fetch(bundledCsvPath);
@@ -1259,8 +1292,8 @@
       trees = imported;
       selectedTreeId = trees[0].treeId;
     }catch(error){
-      trees = [...sampleTrees];
-      selectedTreeId = trees[0].treeId;
+      renderUnavailableState();
+      return;
     }
     finishLoading();
   }
