@@ -15,8 +15,8 @@ echo "2/8 Verify inline JavaScript"
 node scripts/verify-static-pages.mjs
 
 echo ""
-echo "3/8 Verify routes and data manifests"
-node --test tests/routes.test.mjs
+echo "3/8 Verify routes, data manifests, and release isolation"
+node --test tests/*.test.mjs
 
 echo ""
 echo "4/8 Data snapshot"

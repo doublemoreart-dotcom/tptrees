@@ -27,7 +27,10 @@ tptrees/
     render-social-preview-png.sh
     update-site-data.sh
     update-tree-csv.sh
+    build-release-archive.mjs
     build-release-bundle.sh
+    check-publish-transaction.mjs
+    prepare-release-rollback.mjs
     write-release-handoff.mjs
     release-site.sh
     update-species-images.mjs
@@ -110,10 +113,10 @@ bash scripts/release-site.sh prepare
 
 這會產生：
 
-- `.release/bundles/tptrees-<fingerprint>.tar.gz`：可部署的公開檔案。
+- `.release/bundles/tptrees-<fingerprint>.tar.gz`：可部署的公開檔案；固定排序、檔案 metadata 與 gzip header，讓相同內容可重建出相同 SHA-256。
 - `.release/release-handoff.json`：來源 commit、版本指紋、bundle SHA-256、檔案大小、目標路徑與所需外部動作。
 
-`.release/` 不進版控。正式站若由 `doublemoreart-dotcom/aidata-portal` 管理，必須由具備該專案權限的協調工作階段另外接手；本腳本不會跨專案執行。
+`.release/` 不進版控。`doublemoreart-dotcom/aidata-portal` 是獨立的 Private portal Repo，`doublemoreart-dotcom/dinopeng-com` 是目前正式 Pages 發布 Repo；兩者都必須由中央協調工作階段另案授權接手，本腳本不會跨專案執行。
 
 工作區尚未 commit 時，handoff 會標記為 `candidate`；`publish` 完成 source commit 後會重建 bundle 與 handoff，狀態才會是 `source-ready`。外部部署只能使用已發布 source commit 對應的版本。
 
@@ -147,6 +150,8 @@ bash scripts/update-site-data.sh --verify-live-only https://example.com/tptrees
 node scripts/generate-brand-assets.mjs
 bash scripts/render-social-preview-png.sh
 ```
+
+在 Git worktree 中，`render-social-preview-png.sh` 以 tracked SVG 相對 `HEAD` 的內容差異判斷是否重建，不使用 checkout mtime：SVG 內容未變且 tracked PNG 存在時保留既有 PNG；SVG 內容有變或 PNG 缺失時才啟動 Chrome。非 Git 環境才使用 mtime fallback。這項規則避免相同 source 因不同 checkout 時間或 Chrome 輸出形成不同 fingerprint；修改此流程時須執行 `tests/social-preview-render.test.mjs`。
 
 一般日常更新不需要另外記這兩條，`update-site-data.sh` 會自動處理。若環境沒有 Chrome 或暫時不想轉 PNG，可加：
 
@@ -209,12 +214,14 @@ bash scripts/preflight-release.sh
 這會檢查：
 
 1. 四個 HTML 頁面的 inline JavaScript。
-2. 首頁、生命履歷、樹種科普、今天給我一棵樹的路由測試。
+2. 首頁、生命履歷、樹種科普、今天給我一棵樹的基本 landmark、互動選擇器狀態、結果 dialog 與焦點回復、導覽、靜態本機連結、頁內錨點與 `/tptrees/` 路徑隔離測試。
 3. `tree-data-manifest.json` 的筆數、雜湊與品質摘要。
 4. `species-image-sources.json` 的覆蓋率與可疑圖片標題。
 5. `favicon.ico`、`favicon.svg`、`social-preview.svg`、社群分享 meta 與 GA4 追蹤檔是否存在。
 6. `daily/index.html` 的換樹、分享與下載分享圖片互動是否存在。
 7. `git status --short`，確認有哪些檔案待提交。
+
+Preflight 不會自行啟動瀏覽器。若修改 dialog、鍵盤互動或手機導覽，另以只提供本 Repo 的本機 `/tptrees/` 靜態站確認焦點進入與回復、Tab／Shift+Tab 焦點循環、Escape 關閉，以及 390px viewport 沒有整頁橫向溢出。
 
 ## 更新後會產生什麼
 
@@ -346,19 +353,30 @@ bash scripts/release-site.sh verify
 4. `publish`：只 commit / push `doublemoreart-dotcom/tptrees`；未加 `--confirm` 不會推送。
 5. `verify`：部署尚未完成時自動重試，直到正式站指紋與本機一致。
 
+`publish` 在 push 前會把 `REMOTE_BEFORE`、`SOURCE_PUBLISHED` 與本次 commit 數寫入 `.release/pending-publish.env`。若 push 或 source-ready handoff finalize 中斷，修正環境後重跑相同的 `publish --confirm` 即可；只有遠端仍在保存的基底或已到達發布 commit 時才會續跑，其他遠端狀態一律停止。
+
+`tests/release-site-integration.test.mjs` 會在系統暫存目錄建立 fixture repo 與本機 bare remote，實際測試 publish push 被拒後續跑，以及 rollback 在 commit 後、bundle 前中斷再續跑。測試不使用真正 GitHub remote。
+
 若已推送的版本需要退回：
 
 ```bash
 bash scripts/release-site.sh rollback --confirm --verify
 ```
 
-腳本會讀取 `.release/last-publish.env`，以 `git revert` 回復 source 並建立新的交接包。它不使用 `reset --hard` 或 force push；若遠端已有後續版本則直接停止。正式站部署仍須由協調工作階段依新交接包處理。
+腳本會讀取 `.release/last-publish.env`，以保存的 `REMOTE_BEFORE` 將公開網站樹（`index.html`、favicon、`app/`、各頁面目錄、`data/` 與 `public/`）恢復成發布前內容，再建立新的 source commit。控制流程、測試與文件保留目前版本，避免回復網站內容時同時刪除正在執行的 release 工具。
+
+`.release/pending-rollback.env` 會依序保存 `restoring`、`committed`、`ready` 三個階段；網站樹恢復、commit、bundle、push 或 source-ready handoff finalize 中斷後，修正環境並重跑相同的 `rollback --confirm` 即可。腳本會驗證 rollback commit 只有公開樹異動且內容精確等於發布前版本，也只會在遠端仍位於被回復版本或已到達保存的 rollback commit 時續跑；其他遠端狀態、非公開樹異動、未追蹤檔案或手動改寫的恢復內容一律停止。
+
+若最近一次 publish 只有文件、測試或 release 工具異動，公開網站樹沒有差異，`rollback` 會在建立 `.release/pending-rollback.env` 前停止；此情況沒有外部網站版本需要回復，也不應建立空的 rollback commit。
+
+發布與回復 pending 狀態互斥：存在 `.release/pending-publish.env` 時不得開始回復，存在 `.release/pending-rollback.env` 時也不得開始新發布。回復以新 commit 表達，不使用 `reset --hard` 或 force push；若原發布範圍含 merge commit 或 commit 數不符則直接停止。正式站部署仍須由協調工作階段依新交接包處理。
 
 ```text
 1. 在 TP Trees source repo 跑 `release-site.sh status` 與 `release-site.sh prepare`。
 2. 確認 source repo diff，使用 `release-site.sh publish --confirm` 推送 `doublemoreart-dotcom/tptrees`。
-3. 把 `.release/release-handoff.json` 與對應 bundle 交給管理 `doublemoreart-dotcom/aidata-portal` 的協調工作階段。
-4. 外部部署完成後跑 `release-site.sh verify`。
+3. 把 `source-ready` 的 `.release/release-handoff.json` 與對應 bundle 交給中央協調工作階段驗證；`candidate` 不得交付部署。
+4. 由中央協調工作階段另案授權 portal 整合與 `doublemoreart-dotcom/dinopeng-com` 發布；TP Trees 工作階段不得直接操作 `aidata-portal` 或 `dinopeng-com`。
+5. 外部部署完成後跑 `release-site.sh verify`。
 ```
 
 正式網址 `https://dinopeng.com/tptrees/` 只有在外部部署完成後才會更新；只推 source repo 不代表正式站已發布。

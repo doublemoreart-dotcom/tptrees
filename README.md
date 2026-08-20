@@ -19,7 +19,7 @@
 - `scripts/`：資料更新、圖片來源補齊、manifest 建立與靜態頁語法檢查
 - [`docs/PROJECT_BASELINE.md`](docs/PROJECT_BASELINE.md)：專案目標、責任邊界、驗證與已知限制的維護基準
 - `docs/CSV_UPDATE_FLOW.md`：資料更新流程說明
-- `tests/routes.test.mjs`：頁面、導覽與資料 manifest 的基本驗證
+- `tests/*.test.mjs`：頁面、導覽、資料 manifest、handoff 狀態與專案隔離驗證
 
 ## 本機檢視
 
@@ -29,7 +29,7 @@
 
 ```bash
 node scripts/verify-static-pages.mjs
-node --test tests/routes.test.mjs
+node --test tests/*.test.mjs
 ```
 
 若有調整品牌視覺或社群縮圖文案，可重建站台資產：
@@ -38,6 +38,8 @@ node --test tests/routes.test.mjs
 node scripts/generate-brand-assets.mjs
 bash scripts/render-social-preview-png.sh
 ```
+
+在 Git worktree 中，SVG 內容相對 `HEAD` 未變且既有 PNG 已受版本控制時，renderer 會保留該 PNG，不以 checkout mtime 重新產生；SVG 內容變更或 PNG 缺失時才重建。
 
 上線前可直接跑完整檢查：
 
@@ -73,7 +75,7 @@ bash scripts/release-site.sh prepare
 
 輸出位於 `.release/`：
 
-- `bundles/tptrees-<fingerprint>.tar.gz`：只含正式網站需要的公開檔案。
+- `bundles/tptrees-<fingerprint>.tar.gz`：只含正式網站需要的公開檔案；相同內容會產生相同的 bundle SHA-256。
 - `release-handoff.json`：來源 commit、版本指紋、候選／可交接狀態、bundle SHA-256、檔案大小、目標路徑與外部部署需求。
 - `last-prepare.env`：本次準備狀態，供發布與追蹤使用。
 
@@ -83,7 +85,9 @@ bash scripts/release-site.sh prepare
 bash scripts/release-site.sh publish --message "Describe update" --confirm
 ```
 
-`publish` 會先確認目前 `HEAD` 與 `github/main` 一致，再預檢、commit 並 push；不會改動任何外部專案。正式站若由 `doublemoreart-dotcom/aidata-portal` 發布，需要協調工作階段依 `release-handoff.json` 另行同步與部署。
+`publish` 會先確認目前 source 未落後或分叉自 `github/main`，再預檢、依本次核准的精確路徑 allowlist staging、commit 並以 fast-forward push；staging 前後的路徑集合必須與核准範圍完全一致，不得使用全域 staging。流程不會改動任何外部專案。`doublemoreart-dotcom/aidata-portal` 是獨立的 Private portal Repo，目前正式 Pages 發布 Repo 是 `doublemoreart-dotcom/dinopeng-com`；兩者都只能由中央協調工作階段另案授權處理。
+
+若 push 或 source-ready handoff finalize 中斷，`.release/pending-publish.env` 會保留遠端基底、發布後 commit 與 commit 數；修正環境後重跑同一條 `publish --confirm`，腳本只會在遠端仍位於保存的基底或已發布 commit 時安全續跑。遠端若有其他更新會停止。
 
 部署完成後可唯讀查驗正式站：
 
@@ -97,7 +101,7 @@ bash scripts/release-site.sh verify
 bash scripts/release-site.sh rollback --confirm
 ```
 
-回復使用 `git revert` 產生新 commit，不使用 `reset --hard` 或 force push；若遠端已有後續版本會停止。外部部署仍須使用新交接包另行處理。
+回復會以發布前的遠端 SHA 為基底，把公開網站樹（頁面、資產與資料）恢復到發布前內容，再建立新的 source commit；release 腳本、測試與文件不會跟著舊網站內容退版，也不使用 `reset --hard` 或 force push。`.release/pending-rollback.env` 會依序記錄 `restoring`、`committed`、`ready` 階段，因此從網站樹恢復、commit、bundle、push 到 source-ready handoff finalize 任一階段中斷，都可重跑相同的 `rollback --confirm` 安全續跑。若該次 publish 只有文件或工具異動而沒有公開網站差異，腳本會在建立 pending 狀態前停止，因為沒有網站版本需要回復。遠端若已有其他版本、工作樹含非預期手動修改，或 rollback commit 改到公開樹以外的檔案，腳本也會停止。外部部署仍須使用新交接包另行處理。
 
 底層資料更新腳本也可單獨使用：
 
@@ -108,3 +112,5 @@ bash scripts/update-site-data.sh --verify-live-only
 ```
 
 線上查驗會檢查四個頁面、共用資產與 `data/site-release-manifest.json`。只有正式站版本指紋與目前來源一致才會通過。
+
+生命履歷支援以 `?treeId=...` 還原指定樹木；從生命履歷前往樹種科普時，也會保留樹種、樹木編號、行政區、道路與位置備註等可用查詢脈絡。這些 query deep link 由 routes regression 與本機 `/tptrees/` 瀏覽器 smoke test 驗證。

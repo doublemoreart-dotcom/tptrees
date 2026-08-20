@@ -5,11 +5,36 @@
   const ScrollTrigger = window.ScrollTrigger;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const numberTargets = new Set(["tree-count","species-count","card-count"]);
+  const modalFocusableSelector = [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(",");
+
+  function trapModalFocus(modal, event){
+    if(!modal || event.key !== "Tab") return;
+    const focusable = [...modal.querySelectorAll(modalFocusableSelector)]
+      .filter(element => element.getClientRects().length > 0);
+    if(!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if(event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))){
+      event.preventDefault();
+      last.focus();
+    }else if(!event.shiftKey && document.activeElement === last){
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   if(!gsap || reduceMotion){
     window.TPTreesMotion = {
-      openModal(){},
+      openModal(modal, ready){ if(typeof ready === "function") ready(); },
       closeModal(modal, done){ if(typeof done === "function") done(); },
+      trapModalFocus,
       revealDynamic(){},
       animateNumber(){}
     };
@@ -108,12 +133,20 @@
     animateNumbers(scope);
   }
 
-  function openModal(modal){
-    if(!modal) return;
+  function openModal(modal, ready){
+    if(!modal){
+      if(typeof ready === "function") ready();
+      return;
+    }
     const card = modal.querySelector(".modalCard");
-    if(!card) return;
+    if(!card){
+      if(typeof ready === "function") ready();
+      return;
+    }
     gsap.killTweensOf([modal,card]);
-    const timeline = gsap.timeline();
+    const timeline = gsap.timeline({
+      onComplete(){ if(typeof ready === "function") ready(); }
+    });
     timeline.fromTo(modal,
       {autoAlpha:0},
       {autoAlpha:1, duration:.2, ease:"power1.out"}
@@ -251,7 +284,7 @@
     window.addEventListener("load", () => ScrollTrigger?.refresh(), {once:true});
   }
 
-  window.TPTreesMotion = {openModal,closeModal,revealDynamic,animateNumber};
+  window.TPTreesMotion = {openModal,closeModal,trapModalFocus,revealDynamic,animateNumber};
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
 })();

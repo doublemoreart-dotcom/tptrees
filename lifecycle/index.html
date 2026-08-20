@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="icon" href="../favicon.ico" sizes="any">
+  <link rel="canonical" href="https://dinopeng.com/tptrees/lifecycle/">
   <meta name="description" content="從臺北市行道樹公開資料查一棵樹的位置、樹種、尺寸與資料完整度。">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="臺北市行道樹小幫手">
@@ -214,8 +215,7 @@
     <div class="preloaderBar" aria-hidden="true"></div>
   </div>
 </div>
-<main>
-  <nav class="topNav" aria-label="頁面導覽">
+<nav class="topNav" aria-label="頁面導覽">
     <div class="topNavInner">
       <a class="siteMark" href="../index.html"><span class="siteIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 12.5C4.8 12.5 3 10.8 3 8.4C3 5.8 5.2 4 8.1 4C10 4 11.4 4.8 12 6.1C12.6 4.8 14 4 15.9 4C18.8 4 21 5.8 21 8.4C21 10.8 19.2 12.5 16.5 12.5C14.5 12.5 13.1 11.7 12 10.3C10.9 11.7 9.5 12.5 7.5 12.5Z" fill="currentColor"/></svg></span><span>臺北市行道樹小幫手</span></a>
       <div class="navLinks">
@@ -227,6 +227,7 @@
       </div>
     </div>
   </nav>
+<main>
 
   <section class="hero">
     <div class="wrap heroGrid">
@@ -236,11 +237,11 @@
         <p class="lead">先找到一棵樹，再看公開資料目前能說明什麼：它在哪裡、是什麼樹、有多大、資料是否完整，以及哪些狀態仍需要現場確認。</p>
       </div>
       <form class="searchBox" id="search-form">
-        <div class="modeGrid" aria-label="搜尋方式">
-          <button class="modeButton active" type="button" data-mode="all">綜合搜尋</button>
-          <button class="modeButton" type="button" data-mode="id">用編號找</button>
-          <button class="modeButton" type="button" data-mode="place">用地點找</button>
-          <button class="modeButton" type="button" data-mode="species">用樹種找</button>
+        <div class="modeGrid" role="group" aria-label="搜尋方式">
+          <button class="modeButton active" type="button" data-mode="all" aria-pressed="true">綜合搜尋</button>
+          <button class="modeButton" type="button" data-mode="id" aria-pressed="false">用編號找</button>
+          <button class="modeButton" type="button" data-mode="place" aria-pressed="false">用地點找</button>
+          <button class="modeButton" type="button" data-mode="species" aria-pressed="false">用樹種找</button>
         </div>
 
         <div class="searchPanel active" data-panel="all">
@@ -318,12 +319,12 @@
     </div>
   </section>
 
-  <section class="resultModal" id="record" aria-hidden="true" aria-label="查驗結果彈窗">
+  <section class="resultModal" id="record" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="record-title">
     <div class="modalCard">
       <div class="modalHeader">
         <div>
           <p class="kicker">查驗結果</p>
-          <h2>查驗結果與樹木履歷</h2>
+          <h2 id="record-title">查驗結果與樹木履歷</h2>
           <p>先確認是不是你要找的那一棵，再看公開資料能告訴你什麼，並延伸認識這種樹。</p>
         </div>
         <button class="modalClose" id="modal-close" type="button" aria-label="關閉查驗結果">×</button>
@@ -390,13 +391,13 @@
       </div>
     </div>
   </section>
+  </main>
   <footer class="siteFooter">
     <div class="siteFooterInner">
       <strong>Open Data 使用聲明</strong>
-      <p>本網站以臺北市政府資料大平臺公開之「臺北市行道樹分布圖」資料為基礎，整理為市民查詢、理解與公共討論用途。內容用於協助辨認行道樹位置、樹種與基礎樹籍，不代表官方即時狀態、樹木健康診斷、工程核准或法律裁定；實際處置仍應以主管機關公告、工程文件與現場查驗為準。</p>
+      <p>本網站以<a href="https://data.taipei/dataset/detail?id=7a49d00c-a5ff-4a6b-be9e-aaa6dc1ff7e8" target="_blank" rel="noopener" style="text-decoration:underline;text-underline-offset:3px">臺北市政府資料大平臺「臺北市行道樹分布圖」</a>公開資料為基礎，整理為市民查詢、理解與公共討論用途。內容用於協助辨認行道樹位置、樹種與基礎樹籍，不代表官方即時狀態、樹木健康診斷、工程核准或法律裁定；實際處置仍應以主管機關公告、工程文件與現場查驗為準。</p>
     </div>
   </footer>
-</main>
 <script src="../app/vendor/gsap.min.js"></script>
 <script src="../app/vendor/ScrollTrigger.min.js"></script>
 <script src="../app/motion.js"></script>
@@ -462,6 +463,7 @@
   let selectedTreeId = trees[0].treeId;
   let searchMode = "all";
   let queryHistory = [];
+  let resultModalTrigger = null;
   const groupThreshold = 300;
 
   function hidePreloader(){
@@ -874,7 +876,11 @@
   }
 
   function updateModeUi(focus = false){
-    modeButtons.forEach(button => button.classList.toggle("active", button.dataset.mode === searchMode));
+    modeButtons.forEach(button => {
+      const isActive = button.dataset.mode === searchMode;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
     document.querySelectorAll("[data-panel]").forEach(panel => {
       panel.classList.toggle("active", panel.dataset.panel === searchMode);
     });
@@ -912,16 +918,25 @@
   }
 
   function openResultModal(){
+    if(!resultModal.classList.contains("open")){
+      const activeElement = document.activeElement;
+      resultModalTrigger = activeElement instanceof HTMLElement && activeElement !== document.body ? activeElement : null;
+    }
     updateBackButton();
     resultModal.classList.add("open");
     resultModal.setAttribute("aria-hidden","false");
-    window.TPTreesMotion?.openModal(resultModal);
+    if(window.TPTreesMotion) window.TPTreesMotion.openModal(resultModal, () => modalClose.focus());
+    else modalClose.focus();
   }
 
   function closeResultModal(){
+    if(!resultModal.classList.contains("open")) return;
     const finish = () => {
       resultModal.classList.remove("open");
       resultModal.setAttribute("aria-hidden","true");
+      const returnTarget = resultModalTrigger;
+      resultModalTrigger = null;
+      if(returnTarget?.isConnected) returnTarget.focus();
     };
     if(window.TPTreesMotion) window.TPTreesMotion.closeModal(resultModal,finish);
     else finish();
@@ -990,7 +1005,11 @@
   modeButtons.forEach(button => {
     button.addEventListener("click", () => {
       searchMode = button.dataset.mode || "all";
-      modeButtons.forEach(item => item.classList.toggle("active", item === button));
+      modeButtons.forEach(item => {
+        const isActive = item === button;
+        item.classList.toggle("active", isActive);
+        item.setAttribute("aria-pressed", String(isActive));
+      });
       if(searchMode !== "all") input.value = "";
       if(searchMode !== "id") treeIdQuery.value = "";
       if(searchMode !== "place"){
@@ -1093,7 +1112,13 @@
   });
 
   document.addEventListener("keydown", event => {
-    if(event.key === "Escape") closeResultModal();
+    if(!resultModal.classList.contains("open")) return;
+    if(event.key === "Escape"){
+      event.preventDefault();
+      closeResultModal();
+    }else if(event.key === "Tab"){
+      window.TPTreesMotion?.trapModalFocus(resultModal,event);
+    }
   });
 
   function parseCsv(text){
@@ -1175,13 +1200,54 @@
     })).filter(tree => hasValue(tree.treeId) || hasValue(tree.district) || hasValue(tree.road) || hasValue(tree.species));
   }
 
+  function restoreSearchFromUrl(){
+    const params = new URLSearchParams(location.search);
+    const treeId = (params.get("treeId") || "").trim();
+    const query = (params.get("query") || "").trim();
+    const district = (params.get("district") || "").trim();
+    const road = (params.get("road") || "").trim();
+    const species = (params.get("species") || "").trim();
+    const coord = (params.get("coord") || "").trim();
+    const issue = ["1","true","yes"].includes((params.get("issue") || "").toLowerCase());
+    const requestedMode = params.get("mode") || "";
+    const hasDeepLink = Boolean(treeId || query || district || road || species || coord || issue);
+    if(!hasDeepLink) return false;
+
+    searchMode = ["all","id","place","species"].includes(requestedMode)
+      ? requestedMode
+      : treeId
+        ? "id"
+        : species
+          ? "species"
+          : district || road
+            ? "place"
+            : "all";
+    input.value = searchMode === "all" ? query : "";
+    treeIdQuery.value = searchMode === "id" ? treeId || query : "";
+    speciesKeyword.value = searchMode === "species" ? species || query : "";
+    districtFilter.value = district;
+    updateRoadOptions();
+    roadFilter.value = road;
+    speciesFilter.value = species;
+    coordFilter.value = coord;
+    issueFilter.checked = issue;
+    if(treeId) selectedTreeId = treeId;
+    updateModeUi(false);
+    runSearch(true);
+    return true;
+  }
+
+  function finishLoading(){
+    populateControls();
+    if(!restoreSearchFromUrl()) renderInitialState();
+    hidePreloader();
+  }
+
   async function loadBundledCsv(){
     if(Array.isArray(window.TAIPEI_TREE_RECORDS) && window.TAIPEI_TREE_RECORDS.length){
       trees = normalizeSharedRecords();
       selectedTreeId = trees[0]?.treeId || sampleTrees[0].treeId;
-      populateControls();
-      renderInitialState();
-      hidePreloader();
+      finishLoading();
       return;
     }
     try{
@@ -1196,9 +1262,7 @@
       trees = [...sampleTrees];
       selectedTreeId = trees[0].treeId;
     }
-    populateControls();
-    renderInitialState();
-    hidePreloader();
+    finishLoading();
   }
 
   window.addEventListener("load", () => window.setTimeout(hidePreloader, 4500));

@@ -12,6 +12,33 @@ MESSAGE="Update TP Trees site"
 ATTEMPTS=12
 WAIT_SECONDS=15
 UPDATE_ARGS=()
+PUBLIC_RELEASE_PATHS=(index.html favicon.svg favicon.ico app daily data lifecycle public species)
+SOURCE_PUBLISH_PATHS=(
+  AGENTS.md
+  README.md
+  app/motion.js
+  daily/index.html
+  data/site-release-manifest.json
+  docs/CSV_UPDATE_FLOW.md
+  docs/PROJECT_BASELINE.md
+  index.html
+  lifecycle/index.html
+  scripts/build-release-archive.mjs
+  scripts/build-release-bundle.sh
+  scripts/check-publish-transaction.mjs
+  scripts/preflight-release.sh
+  scripts/prepare-release-rollback.mjs
+  scripts/release-site.sh
+  scripts/render-social-preview-png.sh
+  scripts/write-release-handoff.mjs
+  species/index.html
+  tests/release-archive.test.mjs
+  tests/release-flow.test.mjs
+  tests/release-site-integration.test.mjs
+  tests/release-transaction.test.mjs
+  tests/routes.test.mjs
+  tests/social-preview-render.test.mjs
+)
 
 if [[ $# -gt 0 ]]; then
   shift
@@ -33,18 +60,53 @@ Commands:
   prepare   Validate source and build an isolated deployment handoff bundle.
   publish   Commit and push doublemoreart-dotcom/tptrees only.
   verify    Read the live site and compare its release fingerprint.
-  rollback  Revert the last scripted TP Trees source publish only.
+  rollback  Restore the public site tree from before the last scripted publish.
 
 Isolation:
-  No command writes to a local mirror, portal repository, Pages settings,
-  workflow, domain, or deployment directory. Cross-project deployment must be
-  handled by a coordinating session using the generated handoff bundle.
+  No command searches or writes a local mirror, aidata-portal, dinopeng-com,
+  Pages settings, workflow, CNAME, domain, or deployment directory.
+  Cross-project integration and publication require separate authorization in
+  a coordinating session using a source-ready handoff bundle.
 USAGE
 }
 
 die(){
   echo "Release error: $*" >&2
   exit 1
+}
+
+list_expected_source_publish_paths(){
+  printf '%s\n' "${SOURCE_PUBLISH_PATHS[@]}" | LC_ALL=C sort -u
+}
+
+list_dirty_source_paths(){
+  {
+    git diff --name-only HEAD --
+    git ls-files --others --exclude-standard
+  } | LC_ALL=C sort -u
+}
+
+list_staged_source_paths(){
+  git diff --cached --name-only -- | LC_ALL=C sort -u
+}
+
+require_exact_source_publish_paths(){
+  local phase="$1"
+  local list_actual="$2"
+  local expected actual missing unexpected path
+  expected="$(list_expected_source_publish_paths)"
+  actual="$("$list_actual")"
+  [[ "$actual" == "$expected" ]] && return 0
+
+  missing="$(comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual"))"
+  unexpected="$(comm -13 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual"))"
+  while IFS= read -r path; do
+    [[ -z "$path" ]] || echo "  missing: $path" >&2
+  done <<< "$missing"
+  while IFS= read -r path; do
+    [[ -z "$path" ]] || echo "  unexpected: $path" >&2
+  done <<< "$unexpected"
+  die "Source publish path set does not match the 24-path allowlist ($phase)"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -107,6 +169,16 @@ release_fingerprint(){
   node -e 'const fs=require("node:fs");const value=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(value.releaseSha256||"invalid")' "$manifest"
 }
 
+handoff_bundle(){
+  node -e '
+const fs = require("node:fs");
+const handoff = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const bundle = handoff.artifact?.bundle;
+if (!bundle) throw new Error("release handoff is missing artifact.bundle");
+process.stdout.write(bundle);
+' "$STATE_DIR/release-handoff.json"
+}
+
 write_state(){
   local file="$1"
   shift
@@ -129,6 +201,260 @@ require_clean_repo(){
 require_cached_remote_base(){
   git rev-parse --verify github/main >/dev/null 2>&1 || die "Cached github/main is unavailable; fetch the TP Trees source repo first"
   git merge-base --is-ancestor github/main HEAD || die "Source is behind cached github/main; integrate the remote source change before preparing a release"
+}
+
+load_publish_state(){
+  local file="$1"
+  local name
+  [[ -f "$file" ]] || die "Publish state is unavailable: ${file#$SITE_ROOT/}"
+  unset CREATED_AT REMOTE_BEFORE SOURCE_BEFORE SOURCE_PUBLISHED SOURCE_BRANCH RELEASE_SHA256 BUNDLE PUBLISHED_COMMIT_COUNT
+  # shellcheck disable=SC1090
+  source "$file"
+  for name in REMOTE_BEFORE SOURCE_BEFORE SOURCE_PUBLISHED SOURCE_BRANCH RELEASE_SHA256 BUNDLE PUBLISHED_COMMIT_COUNT; do
+    [[ -n "${!name:-}" ]] || die "Publish state is missing $name: ${file#$SITE_ROOT/}"
+  done
+}
+
+load_rollback_state(){
+  local file="$1"
+  local name
+  [[ -f "$file" ]] || die "Rollback state is unavailable: ${file#$SITE_ROOT/}"
+  unset CREATED_AT PHASE ORIGINAL_REMOTE_BEFORE ROLLBACK_REMOTE_BEFORE SOURCE_REVERTED REVERTED_COMMIT_COUNT SOURCE_ROLLBACK SOURCE_BRANCH ROLLBACK_COMMIT_COUNT RELEASE_SHA256 BUNDLE
+  # shellcheck disable=SC1090
+  source "$file"
+  for name in PHASE ORIGINAL_REMOTE_BEFORE SOURCE_REVERTED REVERTED_COMMIT_COUNT SOURCE_BRANCH; do
+    [[ -n "${!name:-}" ]] || die "Rollback state is missing $name: ${file#$SITE_ROOT/}"
+  done
+  case "$PHASE" in
+    restoring) ;;
+    committed)
+      for name in ROLLBACK_REMOTE_BEFORE SOURCE_ROLLBACK ROLLBACK_COMMIT_COUNT RELEASE_SHA256; do
+        [[ -n "${!name:-}" ]] || die "Rollback state is missing $name: ${file#$SITE_ROOT/}"
+      done
+      ;;
+    ready)
+      for name in ROLLBACK_REMOTE_BEFORE SOURCE_ROLLBACK ROLLBACK_COMMIT_COUNT RELEASE_SHA256 BUNDLE; do
+        [[ -n "${!name:-}" ]] || die "Rollback state is missing $name: ${file#$SITE_ROOT/}"
+      done
+      ;;
+    *) die "Rollback state has unknown phase: $PHASE" ;;
+  esac
+  if [[ "$PHASE" != "restoring" ]]; then
+    [[ "$ROLLBACK_REMOTE_BEFORE" == "$SOURCE_REVERTED" ]] || die "Rollback state has inconsistent source transaction boundaries"
+  fi
+}
+
+inspect_publish_transaction(){
+  node scripts/check-publish-transaction.mjs "$1" "$2"
+}
+
+finalize_pending_publish(){
+  local state="$STATE_DIR/pending-publish.env"
+  local publish_started_at current_branch transaction_output transaction_status commit_count bundle
+  load_publish_state "$state"
+  publish_started_at="${CREATED_AT:-unknown}"
+  require_clean_repo
+  current_branch="$(git branch --show-current)"
+  [[ "$current_branch" == "$SOURCE_BRANCH" ]] || die "Pending publish belongs to branch $SOURCE_BRANCH, not ${current_branch:-detached}"
+
+  git fetch github main
+  transaction_output="$(inspect_publish_transaction "$REMOTE_BEFORE" "$SOURCE_PUBLISHED")"
+  read -r transaction_status commit_count <<< "$transaction_output"
+  [[ "$commit_count" == "$PUBLISHED_COMMIT_COUNT" ]] || die "Pending publish commit count changed"
+
+  case "$transaction_status" in
+    needs-push)
+      git push github "$SOURCE_BRANCH:main"
+      git fetch github main
+      transaction_output="$(inspect_publish_transaction "$REMOTE_BEFORE" "$SOURCE_PUBLISHED")"
+      read -r transaction_status commit_count <<< "$transaction_output"
+      [[ "$transaction_status" == "published" ]] || die "Published source could not be confirmed on github/main"
+      ;;
+    published) ;;
+    *) die "Unexpected pending publish state: $transaction_status" ;;
+  esac
+
+  [[ "$(release_fingerprint)" == "$RELEASE_SHA256" ]] || die "Release fingerprint changed while finalizing the pending publish"
+  bash scripts/build-release-bundle.sh --release-status source-ready
+  bundle="$(handoff_bundle)"
+  write_state "$STATE_DIR/last-publish.env" \
+    PUBLISH_STARTED_AT "$publish_started_at" \
+    FINALIZED_AT "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    REMOTE_BEFORE "$REMOTE_BEFORE" \
+    SOURCE_BEFORE "$SOURCE_BEFORE" \
+    SOURCE_PUBLISHED "$SOURCE_PUBLISHED" \
+    SOURCE_BRANCH "$SOURCE_BRANCH" \
+    PUBLISHED_COMMIT_COUNT "$PUBLISHED_COMMIT_COUNT" \
+    RELEASE_SHA256 "$RELEASE_SHA256" \
+    BUNDLE "$bundle"
+  rm "$state"
+  echo "Published TP Trees source ${SOURCE_PUBLISHED:0:12} ($PUBLISHED_COMMIT_COUNT commit(s))."
+  echo "aidata-portal and dinopeng-com were not modified. A coordinating session must process the source-ready handoff."
+}
+
+finalize_pending_rollback(){
+  local state="$STATE_DIR/pending-rollback.env"
+  local rollback_started_at current_branch transaction_output transaction_status commit_count bundle
+  load_rollback_state "$state"
+  [[ "$PHASE" == "ready" ]] || die "Pending rollback is not ready for source publication"
+  rollback_started_at="${CREATED_AT:-unknown}"
+  require_clean_repo
+  current_branch="$(git branch --show-current)"
+  [[ "$current_branch" == "$SOURCE_BRANCH" ]] || die "Pending rollback belongs to branch $SOURCE_BRANCH, not ${current_branch:-detached}"
+
+  git fetch github main
+  transaction_output="$(inspect_publish_transaction "$ROLLBACK_REMOTE_BEFORE" "$SOURCE_ROLLBACK")"
+  read -r transaction_status commit_count <<< "$transaction_output"
+  [[ "$commit_count" == "$ROLLBACK_COMMIT_COUNT" ]] || die "Pending rollback commit count changed"
+
+  case "$transaction_status" in
+    needs-push)
+      git push github "$SOURCE_BRANCH:main"
+      git fetch github main
+      transaction_output="$(inspect_publish_transaction "$ROLLBACK_REMOTE_BEFORE" "$SOURCE_ROLLBACK")"
+      read -r transaction_status commit_count <<< "$transaction_output"
+      [[ "$transaction_status" == "published" ]] || die "Published source rollback could not be confirmed on github/main"
+      ;;
+    published) ;;
+    *) die "Unexpected pending rollback state: $transaction_status" ;;
+  esac
+
+  [[ "$commit_count" == "$ROLLBACK_COMMIT_COUNT" ]] || die "Published rollback commit count changed"
+  [[ "$(release_fingerprint)" == "$RELEASE_SHA256" ]] || die "Release fingerprint changed while finalizing the pending rollback"
+  bash scripts/build-release-bundle.sh --release-status source-ready
+  bundle="$(handoff_bundle)"
+  write_state "$STATE_DIR/last-rollback.env" \
+    ROLLBACK_STARTED_AT "$rollback_started_at" \
+    FINALIZED_AT "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    SOURCE_REMOTE_BEFORE "$ORIGINAL_REMOTE_BEFORE" \
+    ROLLBACK_REMOTE_BEFORE "$ROLLBACK_REMOTE_BEFORE" \
+    SOURCE_REVERTED "$SOURCE_REVERTED" \
+    REVERTED_COMMIT_COUNT "$REVERTED_COMMIT_COUNT" \
+    SOURCE_ROLLBACK "$SOURCE_ROLLBACK" \
+    SOURCE_BRANCH "$SOURCE_BRANCH" \
+    ROLLBACK_COMMIT_COUNT "$ROLLBACK_COMMIT_COUNT" \
+    RELEASE_SHA256 "$RELEASE_SHA256" \
+    BUNDLE "$bundle"
+  rm "$state"
+  echo "TP Trees public release rollback published for a $REVERTED_COMMIT_COUNT-commit source transaction."
+  echo "aidata-portal and dinopeng-com remain unchanged and require a separately authorized coordinating session."
+}
+
+prepare_committed_rollback(){
+  local state="$STATE_DIR/pending-rollback.env"
+  local rollback_started_at original_remote_before source_reverted reverted_commit_count source_rollback source_branch rollback_commit_count release bundle transaction_output transaction_status commit_count
+  load_rollback_state "$state"
+  [[ "$PHASE" == "committed" ]] || die "Pending rollback is not in the committed phase"
+  rollback_started_at="${CREATED_AT:-unknown}"
+  original_remote_before="$ORIGINAL_REMOTE_BEFORE"
+  source_reverted="$SOURCE_REVERTED"
+  reverted_commit_count="$REVERTED_COMMIT_COUNT"
+  source_rollback="$SOURCE_ROLLBACK"
+  source_branch="$SOURCE_BRANCH"
+  rollback_commit_count="$ROLLBACK_COMMIT_COUNT"
+  release="$RELEASE_SHA256"
+
+  require_clean_repo
+  [[ "$(git branch --show-current)" == "$source_branch" ]] || die "Pending rollback belongs to branch $source_branch"
+  node scripts/prepare-release-rollback.mjs "$original_remote_before" "$source_reverted" "$source_rollback"
+  git fetch github main
+  transaction_output="$(inspect_publish_transaction "$source_reverted" "$source_rollback")"
+  read -r transaction_status commit_count <<< "$transaction_output"
+  [[ "$transaction_status" == "needs-push" || "$transaction_status" == "published" ]] || die "Unexpected committed rollback state: $transaction_status"
+  [[ "$commit_count" == "$rollback_commit_count" ]] || die "Committed rollback count changed"
+  [[ "$(release_fingerprint)" == "$release" ]] || die "Release fingerprint changed after the rollback commit"
+
+  bash scripts/build-release-bundle.sh
+  bundle="$(handoff_bundle)"
+  write_state "$state" \
+    CREATED_AT "$rollback_started_at" \
+    PHASE ready \
+    ORIGINAL_REMOTE_BEFORE "$original_remote_before" \
+    ROLLBACK_REMOTE_BEFORE "$source_reverted" \
+    SOURCE_REVERTED "$source_reverted" \
+    REVERTED_COMMIT_COUNT "$reverted_commit_count" \
+    SOURCE_ROLLBACK "$source_rollback" \
+    SOURCE_BRANCH "$source_branch" \
+    ROLLBACK_COMMIT_COUNT "$rollback_commit_count" \
+    RELEASE_SHA256 "$release" \
+    BUNDLE "$bundle"
+  finalize_pending_rollback
+}
+
+record_rollback_commit(){
+  local state="$STATE_DIR/pending-rollback.env"
+  local rollback_started_at original_remote_before source_reverted reverted_commit_count source_branch source_rollback release transaction_output transaction_status rollback_commit_count
+  load_rollback_state "$state"
+  [[ "$PHASE" == "restoring" ]] || die "Pending rollback is not in the restoring phase"
+  rollback_started_at="${CREATED_AT:-unknown}"
+  original_remote_before="$ORIGINAL_REMOTE_BEFORE"
+  source_reverted="$SOURCE_REVERTED"
+  reverted_commit_count="$REVERTED_COMMIT_COUNT"
+  source_branch="$SOURCE_BRANCH"
+  source_rollback="$(git rev-parse HEAD)"
+
+  require_clean_repo
+  node scripts/prepare-release-rollback.mjs "$original_remote_before" "$source_reverted" "$source_rollback"
+  release="$(release_fingerprint)"
+  transaction_output="$(inspect_publish_transaction "$source_reverted" "$source_rollback")"
+  read -r transaction_status rollback_commit_count <<< "$transaction_output"
+  [[ "$transaction_status" == "needs-push" || "$transaction_status" == "published" ]] || die "Unexpected new rollback state: $transaction_status"
+
+  write_state "$state" \
+    CREATED_AT "$rollback_started_at" \
+    PHASE committed \
+    ORIGINAL_REMOTE_BEFORE "$original_remote_before" \
+    ROLLBACK_REMOTE_BEFORE "$source_reverted" \
+    SOURCE_REVERTED "$source_reverted" \
+    REVERTED_COMMIT_COUNT "$reverted_commit_count" \
+    SOURCE_ROLLBACK "$source_rollback" \
+    SOURCE_BRANCH "$source_branch" \
+    ROLLBACK_COMMIT_COUNT "$rollback_commit_count" \
+    RELEASE_SHA256 "$release"
+  prepare_committed_rollback
+}
+
+continue_pending_rollback_restore(){
+  local state="$STATE_DIR/pending-rollback.env"
+  local original_remote_before source_reverted reverted_commit_count source_branch transaction_output transaction_status commit_count current_head
+  load_rollback_state "$state"
+  [[ "$PHASE" == "restoring" ]] || die "Pending rollback is not in the restoring phase"
+  original_remote_before="$ORIGINAL_REMOTE_BEFORE"
+  source_reverted="$SOURCE_REVERTED"
+  reverted_commit_count="$REVERTED_COMMIT_COUNT"
+  source_branch="$SOURCE_BRANCH"
+  [[ "$(git branch --show-current)" == "$source_branch" ]] || die "Pending rollback belongs to branch $source_branch"
+
+  current_head="$(git rev-parse HEAD)"
+  if [[ "$current_head" != "$source_reverted" ]]; then
+    echo "Rollback commit already exists; validating it before resuming."
+    record_rollback_commit
+    return 0
+  fi
+
+  git fetch github main
+  transaction_output="$(inspect_publish_transaction "$original_remote_before" "$source_reverted")"
+  read -r transaction_status commit_count <<< "$transaction_output"
+  [[ "$transaction_status" == "published" ]] || die "Saved publish is not the current github/main transaction"
+  [[ "$commit_count" == "$reverted_commit_count" ]] || die "Saved publish commit count changed"
+
+  node scripts/prepare-release-rollback.mjs "$original_remote_before" "$source_reverted"
+  node scripts/build-release-manifest.mjs
+  bash scripts/preflight-release.sh
+  git add -- "${PUBLIC_RELEASE_PATHS[@]}"
+  git diff --cached --quiet "$original_remote_before" -- "${PUBLIC_RELEASE_PATHS[@]}" || die "Restored public tree differs from the saved source base"
+  git diff --cached --quiet && die "The saved publish has no public release changes to roll back"
+  git commit -m "Restore TP Trees public release before ${source_reverted:0:12}"
+  record_rollback_commit
+}
+
+resume_pending_rollback(){
+  load_rollback_state "$STATE_DIR/pending-rollback.env"
+  case "$PHASE" in
+    restoring) continue_pending_rollback_restore ;;
+    committed) prepare_committed_rollback ;;
+    ready) finalize_pending_rollback ;;
+  esac
 }
 
 show_status(){
@@ -154,6 +480,20 @@ show_status(){
   else
     echo "  handoff: not prepared"
   fi
+  if [[ -f "$STATE_DIR/pending-publish.env" ]]; then
+    echo "  publish transaction: pending (rerun publish --confirm to resume)"
+  elif [[ -f "$STATE_DIR/last-publish.env" ]]; then
+    echo "  publish transaction: finalized"
+  else
+    echo "  publish transaction: none"
+  fi
+  if [[ -f "$STATE_DIR/pending-rollback.env" ]]; then
+    echo "  rollback transaction: pending (restore, bundle, or publish; rerun rollback --confirm)"
+  elif [[ -f "$STATE_DIR/last-rollback.env" ]]; then
+    echo "  rollback transaction: finalized"
+  else
+    echo "  rollback transaction: none"
+  fi
   echo "  external writes: disabled"
 }
 
@@ -164,7 +504,7 @@ prepare_release(){
 
   local release bundle
   release="$(release_fingerprint)"
-  bundle="$(node -p 'JSON.parse(require("node:fs").readFileSync(".release/release-handoff.json","utf8")).bundle')"
+  bundle="$(handoff_bundle)"
   write_state "$STATE_DIR/last-prepare.env" \
     CREATED_AT "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     SOURCE_BASE "$(git rev-parse HEAD)" \
@@ -172,7 +512,8 @@ prepare_release(){
     RELEASE_SHA256 "$release" \
     BUNDLE "$bundle"
   echo "Prepared source-only release handoff: $bundle"
-  echo "Required external action: sync this bundle to doublemoreart-dotcom/aidata-portal tptrees/ in a coordinating session."
+  echo "Candidate only: do not deploy this handoff."
+  echo "After source publication, a coordinating session must validate the source-ready handoff and separately authorize portal integration and dinopeng-com publication."
 }
 
 verify_release(){
@@ -192,8 +533,18 @@ verify_release(){
 
 publish_release(){
   [[ "$CONFIRM" == "true" ]] || die "publish requires --confirm"
+  [[ ! -f "$STATE_DIR/pending-rollback.env" ]] || die "A TP Trees source rollback is pending; rerun rollback --confirm before publishing"
+  if [[ -f "$STATE_DIR/pending-publish.env" ]]; then
+    echo "Pending TP Trees source publish found; validating and resuming it."
+    finalize_pending_publish
+    [[ "$VERIFY_AFTER" == "false" ]] || verify_release
+    return 0
+  fi
+
   git fetch github main
-  [[ "$(git rev-parse HEAD)" == "$(git rev-parse github/main)" ]] || die "Source HEAD is not current with github/main; integrate the remote change before publishing"
+  require_cached_remote_base
+  local remote_before
+  remote_before="$(git rev-parse github/main)"
 
   prepare_release
   local source_before release branch
@@ -202,7 +553,9 @@ publish_release(){
   branch="$(git branch --show-current)"
   [[ -n "$branch" ]] || die "Source repo is in detached HEAD state"
 
-  git add --all
+  require_exact_source_publish_paths "after prepare, before staging" list_dirty_source_paths
+  git add -- "${SOURCE_PUBLISH_PATHS[@]}"
+  require_exact_source_publish_paths "after staging" list_staged_source_paths
   if ! git diff --cached --quiet; then
     git commit -m "$MESSAGE"
   fi
@@ -212,50 +565,74 @@ publish_release(){
   bash scripts/build-release-bundle.sh
 
   local bundle
-  bundle="$(node -p 'JSON.parse(require("node:fs").readFileSync(".release/release-handoff.json","utf8")).artifact.bundle')"
+  bundle="$(handoff_bundle)"
+
+  local transaction_output transaction_status published_commit_count
+  transaction_output="$(inspect_publish_transaction "$remote_before" "$source_published")"
+  read -r transaction_status published_commit_count <<< "$transaction_output"
+  if [[ "$transaction_status" == "no-change" ]]; then
+    bash scripts/build-release-bundle.sh --release-status source-ready
+    echo "TP Trees source is already published at ${source_published:0:12}; no publish transaction was recorded."
+    echo "aidata-portal and dinopeng-com were not modified."
+    [[ "$VERIFY_AFTER" == "false" ]] || verify_release
+    return 0
+  fi
+  [[ "$transaction_status" == "needs-push" ]] || die "Unexpected new publish state: $transaction_status"
 
   write_state "$STATE_DIR/pending-publish.env" \
     CREATED_AT "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    REMOTE_BEFORE "$remote_before" \
     SOURCE_BEFORE "$source_before" \
     SOURCE_PUBLISHED "$source_published" \
     SOURCE_BRANCH "$branch" \
+    PUBLISHED_COMMIT_COUNT "$published_commit_count" \
     RELEASE_SHA256 "$release" \
     BUNDLE "$bundle"
 
-  git push github "$branch:main"
-  cp "$STATE_DIR/pending-publish.env" "$STATE_DIR/last-publish.env"
-  rm "$STATE_DIR/pending-publish.env"
-  echo "Published TP Trees source ${source_published:0:12}."
-  echo "External deployment was not modified. A coordinating session must process .release/release-handoff.json."
+  finalize_pending_publish
   [[ "$VERIFY_AFTER" == "false" ]] || verify_release
 }
 
 rollback_release(){
   [[ "$CONFIRM" == "true" ]] || die "rollback requires --confirm"
-  local state="$STATE_DIR/last-publish.env"
-  [[ -f "$state" ]] || die "No scripted TP Trees publish state found"
-  # shellcheck disable=SC1090
-  source "$state"
-  require_clean_repo
-  git fetch github main
-  [[ "$(git rev-parse HEAD)" == "$SOURCE_PUBLISHED" ]] || die "Source HEAD changed since the saved publish; review manually"
-  [[ "$(git rev-parse github/main)" == "$SOURCE_PUBLISHED" ]] || die "Remote source changed since the saved publish; review manually"
+  [[ ! -f "$STATE_DIR/pending-publish.env" ]] || die "A TP Trees source publish is pending; rerun publish --confirm before rolling back"
+  if [[ -f "$STATE_DIR/pending-rollback.env" ]]; then
+    echo "Pending TP Trees source rollback found; validating and resuming it."
+    resume_pending_rollback
+    [[ "$VERIFY_AFTER" == "false" ]] || verify_release
+    return 0
+  fi
 
-  git revert --no-commit "$SOURCE_PUBLISHED"
-  node scripts/build-release-manifest.mjs
-  bash scripts/preflight-release.sh
-  git add --all
-  git commit -m "Revert TP Trees release ${SOURCE_PUBLISHED:0:12}"
-  local rollback_commit
-  rollback_commit="$(git rev-parse HEAD)"
-  bash scripts/build-release-bundle.sh
-  git push github "$(git branch --show-current):main"
-  write_state "$STATE_DIR/last-rollback.env" \
+  local state="$STATE_DIR/last-publish.env"
+  local transaction_output transaction_status commit_count
+  load_publish_state "$state"
+  local original_remote_before source_reverted reverted_commit_count published_branch
+  original_remote_before="$REMOTE_BEFORE"
+  source_reverted="$SOURCE_PUBLISHED"
+  reverted_commit_count="$PUBLISHED_COMMIT_COUNT"
+  published_branch="$SOURCE_BRANCH"
+  require_clean_repo
+  local branch
+  branch="$(git branch --show-current)"
+  [[ "$branch" == "$published_branch" ]] || die "Saved publish belongs to branch $published_branch, not ${branch:-detached}"
+  git fetch github main
+  transaction_output="$(inspect_publish_transaction "$original_remote_before" "$source_reverted")"
+  read -r transaction_status commit_count <<< "$transaction_output"
+  [[ "$transaction_status" == "published" ]] || die "Saved publish is not the current github/main transaction"
+  [[ "$commit_count" == "$reverted_commit_count" ]] || die "Saved publish commit count changed"
+  if git diff --quiet "$original_remote_before" "$source_reverted" -- "${PUBLIC_RELEASE_PATHS[@]}"; then
+    die "Saved publish contains no public release changes; no rollback transaction was created"
+  fi
+
+  write_state "$STATE_DIR/pending-rollback.env" \
     CREATED_AT "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    SOURCE_REVERTED "$SOURCE_PUBLISHED" \
-    SOURCE_ROLLBACK "$rollback_commit"
-  echo "TP Trees source rollback published without rewriting history."
-  echo "External deployment remains unchanged and requires a coordinating session."
+    PHASE restoring \
+    ORIGINAL_REMOTE_BEFORE "$original_remote_before" \
+    SOURCE_REVERTED "$source_reverted" \
+    REVERTED_COMMIT_COUNT "$reverted_commit_count" \
+    SOURCE_BRANCH "$branch"
+
+  continue_pending_rollback_restore
   [[ "$VERIFY_AFTER" == "false" ]] || verify_release
 }
 

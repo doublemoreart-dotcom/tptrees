@@ -7,6 +7,29 @@ SITE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 STATE_DIR="$SITE_ROOT/.release"
 BUNDLE_DIR="$STATE_DIR/bundles"
 HANDOFF="$STATE_DIR/release-handoff.json"
+RELEASE_STATUS="candidate"
+
+if [[ $# -gt 0 ]]; then
+  if [[ "$1" != "--release-status" || -z "${2:-}" ]]; then
+    echo "Usage: bash scripts/build-release-bundle.sh [--release-status candidate|source-ready]" >&2
+    exit 1
+  fi
+  RELEASE_STATUS="$2"
+  shift 2
+fi
+
+[[ $# -eq 0 ]] || {
+  echo "Unexpected release bundle arguments: $*" >&2
+  exit 1
+}
+
+case "$RELEASE_STATUS" in
+  candidate|source-ready) ;;
+  *)
+    echo "Invalid release status: $RELEASE_STATUS" >&2
+    exit 1
+    ;;
+esac
 
 cd "$SITE_ROOT"
 node scripts/build-release-manifest.mjs
@@ -19,10 +42,24 @@ if [[ -n "$(git status --porcelain=v1)" ]]; then
   WORKTREE_DIRTY="true"
 fi
 
+if [[ "$RELEASE_STATUS" == "source-ready" && "$WORKTREE_DIRTY" == "true" ]]; then
+  echo "A source-ready bundle requires a clean TP Trees worktree" >&2
+  exit 1
+fi
+
+if [[ "$RELEASE_STATUS" == "source-ready" ]]; then
+  git rev-parse --verify github/main >/dev/null 2>&1 || {
+    echo "A source-ready bundle requires a fetched github/main" >&2
+    exit 1
+  }
+  if [[ "$(git rev-parse HEAD)" != "$(git rev-parse github/main)" ]]; then
+    echo "A source-ready bundle requires HEAD to match the published github/main commit" >&2
+    exit 1
+  fi
+fi
+
 mkdir -p "$BUNDLE_DIR"
-tar -czf "$BUNDLE" \
-  --exclude='data/backups' \
-  index.html favicon.svg favicon.ico app daily data lifecycle public species
+node scripts/build-release-archive.mjs "$BUNDLE"
 
 for required in index.html lifecycle/index.html species/index.html daily/index.html data/site-release-manifest.json; do
   tar -tzf "$BUNDLE" | grep -qx "$required" || {
@@ -41,6 +78,7 @@ node scripts/write-release-handoff.mjs \
   "$(git rev-parse HEAD)" \
   "$(git branch --show-current)" \
   "$WORKTREE_DIRTY" \
+  "$RELEASE_STATUS" \
   "$BUNDLE_SHA256" \
   "$BUNDLE_SIZE_BYTES"
 
