@@ -10,8 +10,18 @@
 
 - This repository's dedicated Codex thread is `01a01b43-a36c-7ae3-87d7-ef37539e0d3d` (`TP Trees｜Repo 專屬對話`).
 - The repository authorization authority is Codex thread `019f5fbe-f9d6-7af1-94ad-d36b38ecdd97` (`規劃 Repo 拆分 / 統一設定路徑`).
+- The required source-publication reviewer is Codex thread `01a01b1b-94d8-7f52-b5e1-f195d91e1f6d` (`Documentation`). Its review is necessary before any source commit or push, but it is not an authorization; that thread must obtain a one-time, exact-scope AUTH from the repository authorization authority.
 - Obtain explicit authorization from that authority before creating or adopting another repository, or changing repository boundaries, ownership, location, name, remote, publication target, or cross-repository scope.
 - Ordinary edits inside this already-authorized repository may proceed when they do not change those repository-level boundaries.
+- A source publish or source rollback is not an ordinary edit: unless the user explicitly supplies a still-valid authority decision, it requires documentation review followed by a one-time AUTH bound to the repository, executor task, base and head SHAs, exact path allowlist, commit message, release fingerprint, bundle SHA, allowed command, expiry, and invalidation conditions.
+
+## Authoritative source and local verification
+
+- The authoritative source is the fetched `github/main` commit for `doublemoreart-dotcom/tptrees`; a local branch, detached worktree, candidate bundle, or older test result is never authoritative merely because it exists.
+- The designated local construction-verification task is `01a01ded-be42-77b2-b135-c9dac7915e50`, but it may operate only in a clean worktree created from the current authoritative full commit SHA. Its old detached `38ef0ec` worktree and `6ade…` diagnostic candidate are retired evidence and must not be cleaned, rebased, or relabeled as the current test baseline.
+- A construction-verification task may run a local `/tptrees/` test site, browser smoke tests, and implementation diagnostics. It may not update Markdown governance, commit, push, publish, deploy, redefine the source baseline, or operate another repository.
+- Before using a local test worktree, record its full base SHA and confirm clean staged, unstaged, and untracked state. Stop if it differs from the authoritative source, has a pending publish or rollback transaction, contains `CNAME`, or preserves unexplained files from an older candidate.
+- If implementation is required, use a fresh construction task or clean worktree and return an exact patch handoff. Integrate and reverify it in the authoritative source checkout before documentation or publication review treats it as current.
 
 ## Session continuity
 

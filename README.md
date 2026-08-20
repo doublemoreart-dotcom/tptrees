@@ -25,6 +25,8 @@
 
 頁面導覽以正式的 `/tptrees/` 路徑為準。本機可從包含 `tptrees/` 目錄的上一層啟動靜態伺服器，再瀏覽 `/tptrees/`。
 
+本機 construction verification 必須使用從目前 `doublemoreart-dotcom/tptrees` 的 authoritative `github/main` 完整 SHA 建立的乾淨 worktree。舊 detached worktree、未整合 patch 或 `candidate` bundle 都不是目前 source 基準；若 base、dirty/staged/untracked、pending transaction 或 `CNAME` 不符，先停止，不啟動測試站。
+
 ## 驗證
 
 ```bash
@@ -85,7 +87,9 @@ bash scripts/release-site.sh prepare
 bash scripts/release-site.sh publish --message "Describe update" --confirm
 ```
 
-`publish` 會先確認目前 source 未落後或分叉自 `github/main`，再預檢、依本次核准的精確路徑 allowlist staging、commit 並以 fast-forward push；staging 前後的路徑集合必須與核准範圍完全一致，不得使用全域 staging。流程不會改動任何外部專案。`doublemoreart-dotcom/aidata-portal` 是獨立的 Private portal Repo，目前正式 Pages 發布 Repo 是 `doublemoreart-dotcom/dinopeng-com`；兩者都只能由中央協調工作階段另案授權處理。
+這條命令不是一般日常指令。任何 source commit/push 前，除非使用者已提供仍有效的 authority 決定，必須先由文件／規則 task `01a01b1b-94d8-7f52-b5e1-f195d91e1f6d` 完成發布審閱，再由 authority `019f5fbe-f9d6-7af1-94ad-d36b38ecdd97` 核發一次性 AUTH；文件 task 的回覆不能取代 AUTH。
+
+`publish` 會先確認目前 source 未落後或分叉自 `github/main`，再預檢、依本次核准的精確路徑 allowlist staging、commit 並以 fast-forward push；prepare 後、staging 前與 staging 後的路徑集合都必須與核准範圍完全一致，不得使用全域 staging。AUTH 必須綁定 executor、base/head SHA、路徑集合、commit message、fingerprint、bundle SHA、唯一命令、期限與失效條件；任一值漂移即停止。流程不會改動任何外部專案。`doublemoreart-dotcom/aidata-portal` 是獨立的 Private portal Repo，目前正式 Pages 發布 Repo 是 `doublemoreart-dotcom/dinopeng-com`；兩者都只能由中央協調工作階段另案授權處理。
 
 若 push 或 source-ready handoff finalize 中斷，`.release/pending-publish.env` 會保留遠端基底、發布後 commit 與 commit 數；修正環境後重跑同一條 `publish --confirm`，腳本只會在遠端仍位於保存的基底或已發布 commit 時安全續跑。遠端若有其他更新會停止。
 
@@ -101,7 +105,7 @@ bash scripts/release-site.sh verify
 bash scripts/release-site.sh rollback --confirm
 ```
 
-回復會以發布前的遠端 SHA 為基底，把公開網站樹（頁面、資產與資料）恢復到發布前內容，再建立新的 source commit；release 腳本、測試與文件不會跟著舊網站內容退版，也不使用 `reset --hard` 或 force push。`.release/pending-rollback.env` 會依序記錄 `restoring`、`committed`、`ready` 階段，因此從網站樹恢復、commit、bundle、push 到 source-ready handoff finalize 任一階段中斷，都可重跑相同的 `rollback --confirm` 安全續跑。若該次 publish 只有文件或工具異動而沒有公開網站差異，腳本會在建立 pending 狀態前停止，因為沒有網站版本需要回復。遠端若已有其他版本、工作樹含非預期手動修改，或 rollback commit 改到公開樹以外的檔案，腳本也會停止。外部部署仍須使用新交接包另行處理。
+Rollback 也是新的 source commit/push，必須重新經過文件審閱與一次性 authority AUTH；既有 `last-publish.env` 是交易證據，不是持續授權。回復會以發布前的遠端 SHA 為基底，把公開網站樹（頁面、資產與資料）恢復到發布前內容，再建立新的 source commit；release 腳本、測試與文件不會跟著舊網站內容退版，也不使用 destructive reset 或 force push。`.release/pending-rollback.env` 會依序記錄 `restoring`、`committed`、`ready` 階段，因此從網站樹恢復、commit、bundle、push 到 source-ready handoff finalize 任一階段中斷，都只能在同一 AUTH 與交易邊界內重跑相同的 `rollback --confirm` 安全續跑。若該次 publish 只有文件或工具異動而沒有公開網站差異，腳本會在建立 pending 狀態前停止，因為沒有網站版本需要回復。遠端若已有其他版本、工作樹含非預期手動修改，或 rollback commit 改到公開樹以外的檔案，腳本也會停止。外部部署回復仍須使用新交接包，由 `dinopeng-com` 的獨立 executor 另案取得 AUTH。
 
 底層資料更新腳本也可單獨使用：
 

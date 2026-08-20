@@ -16,28 +16,10 @@ PUBLIC_RELEASE_PATHS=(index.html favicon.svg favicon.ico app daily data lifecycl
 SOURCE_PUBLISH_PATHS=(
   AGENTS.md
   README.md
-  app/motion.js
-  daily/index.html
-  data/site-release-manifest.json
   docs/CSV_UPDATE_FLOW.md
   docs/PROJECT_BASELINE.md
-  index.html
-  lifecycle/index.html
-  scripts/build-release-archive.mjs
-  scripts/build-release-bundle.sh
-  scripts/check-publish-transaction.mjs
-  scripts/preflight-release.sh
-  scripts/prepare-release-rollback.mjs
   scripts/release-site.sh
-  scripts/render-social-preview-png.sh
-  scripts/write-release-handoff.mjs
-  species/index.html
-  tests/release-archive.test.mjs
-  tests/release-flow.test.mjs
   tests/release-site-integration.test.mjs
-  tests/release-transaction.test.mjs
-  tests/routes.test.mjs
-  tests/social-preview-render.test.mjs
 )
 
 if [[ $# -gt 0 ]]; then
@@ -106,7 +88,7 @@ require_exact_source_publish_paths(){
   while IFS= read -r path; do
     [[ -z "$path" ]] || echo "  unexpected: $path" >&2
   done <<< "$unexpected"
-  die "Source publish path set does not match the 24-path allowlist ($phase)"
+  die "Source publish path set does not match the 6-path allowlist ($phase)"
 }
 
 while [[ $# -gt 0 ]]; do

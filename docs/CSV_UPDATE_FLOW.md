@@ -308,6 +308,23 @@ http://localhost:8000/
 bash scripts/update-site-data.sh --prepare-push
 ```
 
+執行前先完成 source identity 與交易檢查；不能只看本機快取或舊 handoff：
+
+```bash
+git fetch github main
+git remote get-url github
+git branch --show-current
+git rev-parse HEAD
+git rev-parse github/main
+git rev-list --left-right --count github/main...HEAD
+git status --short
+git diff --cached --name-only
+bash scripts/release-site.sh status
+test ! -e CNAME
+```
+
+若 source 落後／分叉、dirty path 無法完整分類、已有 staged path、存在 pending publish／rollback、remote 不符或出現 `CNAME`，立即停止。新的 changeset 若不等於 `SOURCE_PUBLISH_PATHS`，不得沿用舊 allowlist；先由 construction task 更新 allowlist 與 fixture tests，再回 authoritative source checkout 重驗。
+
 並確認：
 
 - `tree-data-manifest.json` 的 `rowCount` 合理。
@@ -345,6 +362,10 @@ bash scripts/release-site.sh publish --message "Describe update" --confirm
 bash scripts/release-site.sh verify
 ```
 
+在 `publish` 之前還有兩個治理閘門：文件／規則 task `01a01b1b-94d8-7f52-b5e1-f195d91e1f6d` 必須先審閱實際 changeset 與全部驗證證據，再由 authority `019f5fbe-f9d6-7af1-94ad-d36b38ecdd97` 核發一次性精確 AUTH。審閱結論不是 AUTH；未取得 AUTH 不得 commit 或 push。
+
+申請必須附上 executor、base/head SHA、ahead/behind、精確 dirty-path allowlist、staged=0、pending 狀態、CNAME、完整測試、瀏覽器 smoke、兩次 deterministic prepare、fingerprint、bundle SHA／size／entries、固定 commit message 與唯一執行命令。AUTH 後任何一項改變即失效，prepare 後與 staging 後仍要再次核對完整路徑集合。
+
 各階段用途：
 
 1. `status`：顯示 source branch、快取遠端差異、release fingerprint 與工作區狀態。
@@ -355,6 +376,8 @@ bash scripts/release-site.sh verify
 
 `publish` 在 push 前會把 `REMOTE_BEFORE`、`SOURCE_PUBLISHED` 與本次 commit 數寫入 `.release/pending-publish.env`。若 push 或 source-ready handoff finalize 中斷，修正環境後重跑相同的 `publish --confirm` 即可；只有遠端仍在保存的基底或已到達發布 commit 時才會續跑，其他遠端狀態一律停止。
 
+續跑不會擴張原 AUTH：只能由同一 executor 使用原命令、message、path set 與 transaction boundaries。若 AUTH 已過期、遠端或工作樹漂移，先停止並回文件／規則 task 與 authority，不得自行清 pending、補 commit 或 force push。
+
 `tests/release-site-integration.test.mjs` 會在系統暫存目錄建立 fixture repo 與本機 bare remote，實際測試 publish push 被拒後續跑，以及 rollback 在 commit 後、bundle 前中斷再續跑。測試不使用真正 GitHub remote。
 
 若已推送的版本需要退回：
@@ -362,6 +385,8 @@ bash scripts/release-site.sh verify
 ```bash
 bash scripts/release-site.sh rollback --confirm --verify
 ```
+
+這條命令同樣需要新的文件審閱與一次性 rollback AUTH；先前 publish AUTH 不會自動包含 rollback。外部 `dinopeng-com` 回復也不包含在 source rollback AUTH 中，必須由其獨立 executor 另案申請。
 
 腳本會讀取 `.release/last-publish.env`，以保存的 `REMOTE_BEFORE` 將公開網站樹（`index.html`、favicon、`app/`、各頁面目錄、`data/` 與 `public/`）恢復成發布前內容，再建立新的 source commit。控制流程、測試與文件保留目前版本，避免回復網站內容時同時刪除正在執行的 release 工具。
 

@@ -6,55 +6,19 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const releaseScript = new URL("../scripts/release-site.sh", import.meta.url);
-const rendererScript = new URL("../scripts/render-social-preview-png.sh", import.meta.url);
 const transactionChecker = new URL("../scripts/check-publish-transaction.mjs", import.meta.url);
 const rollbackPreparer = new URL("../scripts/prepare-release-rollback.mjs", import.meta.url);
 
 const sourcePublishPaths = [
   "AGENTS.md",
   "README.md",
-  "app/motion.js",
-  "daily/index.html",
-  "data/site-release-manifest.json",
   "docs/CSV_UPDATE_FLOW.md",
   "docs/PROJECT_BASELINE.md",
-  "index.html",
-  "lifecycle/index.html",
-  "scripts/build-release-archive.mjs",
-  "scripts/build-release-bundle.sh",
-  "scripts/check-publish-transaction.mjs",
-  "scripts/preflight-release.sh",
-  "scripts/prepare-release-rollback.mjs",
   "scripts/release-site.sh",
-  "scripts/render-social-preview-png.sh",
-  "scripts/write-release-handoff.mjs",
-  "species/index.html",
-  "tests/release-archive.test.mjs",
-  "tests/release-flow.test.mjs",
   "tests/release-site-integration.test.mjs",
-  "tests/release-transaction.test.mjs",
-  "tests/routes.test.mjs",
-  "tests/social-preview-render.test.mjs",
 ];
 
-const trackedPublishPaths = new Set([
-  "AGENTS.md",
-  "README.md",
-  "app/motion.js",
-  "daily/index.html",
-  "data/site-release-manifest.json",
-  "docs/CSV_UPDATE_FLOW.md",
-  "docs/PROJECT_BASELINE.md",
-  "index.html",
-  "lifecycle/index.html",
-  "scripts/build-release-bundle.sh",
-  "scripts/preflight-release.sh",
-  "scripts/release-site.sh",
-  "scripts/render-social-preview-png.sh",
-  "scripts/write-release-handoff.mjs",
-  "species/index.html",
-  "tests/routes.test.mjs",
-]);
+const trackedPublishPaths = new Set(sourcePublishPaths);
 
 function run(command, args, cwd, { allowFailure = false, env = {} } = {}) {
   const result = spawnSync(command, args, {
@@ -104,9 +68,27 @@ async function createFixture(t) {
   await writeRepositoryFile(repository, ".gitignore", ".release/\n");
   await writeRepositoryFile(repository, "favicon.svg", "fixture svg\n");
   await writeRepositoryFile(repository, "favicon.ico", "fixture ico\n");
+  for (const directory of ["app", "daily", "lifecycle", "species"]) {
+    await writeRepositoryFile(repository, `${directory}/fixture.txt`, "public fixture\n");
+  }
+  await writeRepositoryFile(repository, "index.html", "base site\n");
+  await writeRepositoryFile(
+    repository,
+    "data/site-release-manifest.json",
+    `${JSON.stringify({ releaseSha256: "a".repeat(64) }, null, 2)}\n`,
+  );
   await writeRepositoryFile(repository, "public/fixture.txt", "public fixture\n");
   await writeRepositoryFile(repository, "scripts/update-site-data.sh", "#!/usr/bin/env bash\nset -euo pipefail\n", true);
+  await writeRepositoryFile(repository, "scripts/preflight-release.sh", "#!/usr/bin/env bash\nset -euo pipefail\n", true);
   await writeRepositoryFile(repository, "scripts/build-release-manifest.mjs", "// Fixture manifest is restored directly from Git.\n");
+  await writeRepositoryFile(
+    repository,
+    "scripts/build-release-bundle.sh",
+    "#!/usr/bin/env bash\nset -euo pipefail\nnode scripts/test-build-release-bundle.mjs \"$@\"\n",
+    true,
+  );
+  await copyRuntimeScript(transactionChecker, join(repository, "scripts", "check-publish-transaction.mjs"));
+  await copyRuntimeScript(rollbackPreparer, join(repository, "scripts", "prepare-release-rollback.mjs"));
   await writeRepositoryFile(
     repository,
     "scripts/test-build-release-bundle.mjs",
@@ -128,11 +110,9 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
 
   for (const path of trackedPublishPaths) {
     const executable = path.endsWith(".sh");
-    const body = path === "data/site-release-manifest.json"
-      ? `${JSON.stringify({ releaseSha256: "a".repeat(64) }, null, 2)}\n`
-      : executable
-        ? `#!/usr/bin/env bash\n# base ${path}\n`
-        : `base ${path}\n`;
+    const body = executable
+      ? `#!/usr/bin/env bash\n# base ${path}\n`
+      : `base ${path}\n`;
     await writeRepositoryFile(repository, path, body, executable);
   }
 
@@ -148,36 +128,10 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
   git(repository, "push", "-q", "-u", "github", "main");
 
   for (const path of trackedPublishPaths) {
-    if ([
-      "data/site-release-manifest.json",
-      "scripts/build-release-bundle.sh",
-      "scripts/preflight-release.sh",
-      "scripts/release-site.sh",
-      "scripts/render-social-preview-png.sh",
-    ].includes(path)) continue;
+    if (path === "scripts/release-site.sh") continue;
     await writeRepositoryFile(repository, path, `published ${path}\n`);
   }
-  await writeRepositoryFile(
-    repository,
-    "data/site-release-manifest.json",
-    `${JSON.stringify({ releaseSha256: "b".repeat(64) }, null, 2)}\n`,
-  );
-  await writeRepositoryFile(
-    repository,
-    "scripts/build-release-bundle.sh",
-    "#!/usr/bin/env bash\nset -euo pipefail\nnode scripts/test-build-release-bundle.mjs \"$@\"\n",
-    true,
-  );
-  await writeRepositoryFile(repository, "scripts/preflight-release.sh", "#!/usr/bin/env bash\nset -euo pipefail\n# published fixture\n", true);
   await copyRuntimeScript(releaseScript, join(repository, "scripts", "release-site.sh"), true);
-  await copyRuntimeScript(rendererScript, join(repository, "scripts", "render-social-preview-png.sh"), true);
-
-  await writeRepositoryFile(repository, "scripts/build-release-archive.mjs", "// fixture release archive\n");
-  await copyRuntimeScript(transactionChecker, join(repository, "scripts", "check-publish-transaction.mjs"));
-  await copyRuntimeScript(rollbackPreparer, join(repository, "scripts", "prepare-release-rollback.mjs"));
-  for (const path of sourcePublishPaths.filter((path) => path.startsWith("tests/") && !trackedPublishPaths.has(path))) {
-    await writeRepositoryFile(repository, path, `// fixture ${path}\n`);
-  }
 
   assert.deepEqual(dirtyPaths(repository), sourcePublishPaths);
   return { root, repository, remote, base };
@@ -188,7 +142,7 @@ function assertUnpublished(fixture) {
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), fixture.base);
 }
 
-test("release-site publishes the exact 24-path scope, resumes, and rolls back the public tree", async (t) => {
+test("release-site publishes and resumes the exact 6-path scope, then resumes a public-tree rollback", async (t) => {
   const fixture = await createFixture(t);
   const rejectMarker = join(fixture.remote, "reject-once");
   await writeFile(rejectMarker, "reject the next push\n");
@@ -228,6 +182,28 @@ fi
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), published);
   assert.equal(JSON.parse(await readFile(join(fixture.repository, ".release", "release-handoff.json"), "utf8")).releaseStatus, "source-ready");
 
+  await writeFile(join(fixture.repository, "index.html"), "published site\n");
+  await writeFile(
+    join(fixture.repository, "data", "site-release-manifest.json"),
+    `${JSON.stringify({ releaseSha256: "b".repeat(64) }, null, 2)}\n`,
+  );
+  git(fixture.repository, "add", "--", "index.html", "data/site-release-manifest.json");
+  git(fixture.repository, "commit", "-q", "-m", "fixture public publish");
+  const publicPublished = git(fixture.repository, "rev-parse", "HEAD");
+  git(fixture.repository, "push", "-q", "github", "main");
+  await writeFile(
+    join(fixture.repository, ".release", "last-publish.env"),
+    `CREATED_AT=2026-08-20T00:00:00Z
+REMOTE_BEFORE=${published}
+SOURCE_BEFORE=${published}
+SOURCE_PUBLISHED=${publicPublished}
+SOURCE_BRANCH=main
+PUBLISHED_COMMIT_COUNT=1
+RELEASE_SHA256=${"b".repeat(64)}
+BUNDLE=.release/bundles/fixture.tar.gz
+`,
+  );
+
   const interruptedRollback = run(
     "bash",
     ["scripts/release-site.sh", "rollback", "--confirm"],
@@ -238,7 +214,7 @@ fi
   assert.match(interruptedRollback.stderr, /intentional candidate bundle interruption/);
   const pendingRollback = await readFile(join(fixture.repository, ".release", "pending-rollback.env"), "utf8");
   assert.match(pendingRollback, /PHASE=committed/);
-  assert.equal(git(fixture.repository, "rev-parse", "github/main"), published);
+  assert.equal(git(fixture.repository, "rev-parse", "github/main"), publicPublished);
 
   const resumedRollback = run(
     "bash",
@@ -248,15 +224,11 @@ fi
   assert.match(resumedRollback.stdout, /Pending TP Trees source rollback found/);
   const rollback = git(fixture.repository, "rev-parse", "HEAD");
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), rollback);
-  assert.equal(await readFile(join(fixture.repository, "index.html"), "utf8"), "base index.html\n");
+  assert.equal(await readFile(join(fixture.repository, "index.html"), "utf8"), "base site\n");
   assert.equal(await readFile(join(fixture.repository, "README.md"), "utf8"), "published README.md\n");
-  assert.deepEqual(git(fixture.repository, "diff", "--name-only", published, rollback).split("\n"), [
-    "app/motion.js",
-    "daily/index.html",
+  assert.deepEqual(git(fixture.repository, "diff", "--name-only", publicPublished, rollback).split("\n"), [
     "data/site-release-manifest.json",
     "index.html",
-    "lifecycle/index.html",
-    "species/index.html",
   ]);
   assert.equal(JSON.parse(await readFile(join(fixture.repository, ".release", "release-handoff.json"), "utf8")).releaseStatus, "source-ready");
   await assert.rejects(readFile(join(fixture.repository, ".release", "pending-rollback.env")), { code: "ENOENT" });
@@ -274,13 +246,13 @@ test("release-site rejects an extra untracked path before staging", async (t) =>
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: unexpected\.txt/);
-  assert.match(result.stderr, /24-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /6-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
 test("release-site rejects a missing expected path before staging", async (t) => {
   const fixture = await createFixture(t);
-  await rm(join(fixture.repository, "tests", "social-preview-render.test.mjs"));
+  git(fixture.repository, "restore", "--", "tests/release-site-integration.test.mjs");
 
   const result = run(
     "bash",
@@ -289,8 +261,8 @@ test("release-site rejects a missing expected path before staging", async (t) =>
     { allowFailure: true },
   );
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /missing: tests\/social-preview-render\.test\.mjs/);
-  assert.match(result.stderr, /24-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /missing: tests\/release-site-integration\.test\.mjs/);
+  assert.match(result.stderr, /6-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -328,6 +300,6 @@ exit "$status"
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: staging-drift\.txt/);
-  assert.match(result.stderr, /24-path allowlist \(after staging\)/);
+  assert.match(result.stderr, /6-path allowlist \(after staging\)/);
   assertUnpublished(fixture);
 });
