@@ -14,11 +14,9 @@ WAIT_SECONDS=15
 UPDATE_ARGS=()
 PUBLIC_RELEASE_PATHS=(index.html favicon.svg favicon.ico app daily data lifecycle public species)
 SOURCE_PUBLISH_PATHS=(
-  data/site-release-manifest.json
-  lifecycle/index.html
+  docs/PROJECT_BASELINE.md
   scripts/release-site.sh
   tests/release-site-integration.test.mjs
-  tests/routes.test.mjs
 )
 
 if [[ $# -gt 0 ]]; then
@@ -87,7 +85,7 @@ require_exact_source_publish_paths(){
   while IFS= read -r path; do
     [[ -z "$path" ]] || echo "  unexpected: $path" >&2
   done <<< "$unexpected"
-  die "Source publish path set does not match the 5-path allowlist ($phase)"
+  die "Source publish path set does not match the 3-path allowlist ($phase)"
 }
 
 while [[ $# -gt 0 ]]; do

@@ -55,13 +55,13 @@ bash scripts/preflight-release.sh
 
 ## 最近正式發布快照
 
-截至 2026-08-20，最近一次完成 source publish 並同步至正式站的 source commit 為 `180590ce5408303d8e546fe9fd9aa964f2ee711d`；該次完成時 `github/main` 與本機 source checkout 均為此 SHA，ahead 0、behind 0，工作樹乾淨，publish 已 finalized、pending publish／rollback 皆無，且沒有 `CNAME`。
+截至 2026-08-20，最近一次完成 source publish 並同步至正式站的 source commit 為 `6f57a3ee16bc8428e7244ac862b847e292c12aa5`；該次完成時 `github/main` 與本機 source checkout 均為此 SHA，ahead 0、behind 0，工作樹乾淨，publish 已 finalized、pending publish／rollback 皆無，且沒有 `CNAME`。
 
-- 該次 Source 發布前 Routes：13/13；完整 Node tests 與 preflight：33/33；本機真實瀏覽器 deep-link、dialog focus、console 與資源 smoke test 通過。
-- 該次 Source-ready release fingerprint：`90a0b109bf810ceed033b46c4c9025a69b860c5df693b4b1db3dd298653db071`。
-- 該次 Source-ready bundle：`tptrees-90a0b109bf81.tar.gz`；SHA-256 `b89143af07be290a67d989708344218763f388cefb84b89769e695ecd5e704f3`；5,889,700 bytes、27 entries。
-- 正式發布 Repo `doublemoreart-dotcom/dinopeng-com` 已由獨立 executor 以 PR #2 發布；main／Pages build commit 為 `9248027e55fd1fb901ef0c50dd81bdd29b9711e4`，線上四頁、manifest 與主要資產均為 HTTP 200，線上 fingerprint 與 source-ready 一致。
-- 舊 construction worktree `/Users/dino/.codex/worktrees/0adc/taipei-street-trees-site` 仍是 detached `38ef0ec` 與歷史診斷狀態，不是 authoritative source 或本機測試基準。
+- 該次 Source 發布前 Routes：14/14；完整 Node tests 與 preflight：34/34；本機真實瀏覽器 normal／failure smoke test 通過，正式資料雙來源皆不可用時會顯示不可查驗狀態，不使用示範樹籍替代查驗結果。
+- 該次 Source-ready release fingerprint：`a296e81b6c84d233966090669876604863aee62df8b732ea41d39bff5199b0ab`。
+- 該次 Source-ready bundle：`tptrees-a296e81b6c84.tar.gz`；SHA-256 `5bca508432c94707ba26a2998fe1ecc574d15b0ae724c52a5a32d407684450c6`；5,889,172 bytes、27 entries。
+- 正式發布 Repo `doublemoreart-dotcom/dinopeng-com` 已由獨立 executor 以 PR #3 發布；main／Pages build commit 為 `16faa417172c035ae52dbe3ffa0ab4b65071b3c6`，Pages run `32367061067` 成功，線上四頁、manifest 與其 19 個發布檔案均為 HTTP 200 且 SHA 一致，線上 fingerprint 與 source-ready 相同。
+- 舊 construction worktree `/Users/dino/.codex/worktrees/0adc/taipei-street-trees-site`（detached `38ef0ec`）與 `/Users/dino/.codex/worktrees/tptrees-local-verification-2d651389/taipei-street-trees-site`（detached `2d651389` 的已完成 data-integrity patch）都只保留為歷史證據，不是 authoritative source 或新的乾淨本機測試基準。
 
 本節只作為最近一次精簡交接參考；新 Session 開始時仍須以實際 Git、manifest、transaction 與測試狀態重新確認，不得只引用此快照。
 

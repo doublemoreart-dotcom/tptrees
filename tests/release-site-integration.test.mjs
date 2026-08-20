@@ -11,11 +11,9 @@ const rollbackPreparer = new URL("../scripts/prepare-release-rollback.mjs", impo
 const releaseScriptSource = await readFile(releaseScript, "utf8");
 
 const sourcePublishPaths = [
-  "data/site-release-manifest.json",
-  "lifecycle/index.html",
+  "docs/PROJECT_BASELINE.md",
   "scripts/release-site.sh",
   "tests/release-site-integration.test.mjs",
-  "tests/routes.test.mjs",
 ];
 
 const trackedPublishPaths = new Set(sourcePublishPaths);
@@ -109,7 +107,6 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
   );
 
   for (const path of trackedPublishPaths) {
-    if (path === "data/site-release-manifest.json") continue;
     const executable = path.endsWith(".sh");
     const body = executable
       ? `#!/usr/bin/env bash\n# base ${path}\n`
@@ -129,14 +126,9 @@ await writeFile(".release/release-handoff.json", JSON.stringify({
   git(repository, "push", "-q", "-u", "github", "main");
 
   for (const path of trackedPublishPaths) {
-    if (["data/site-release-manifest.json", "scripts/release-site.sh"].includes(path)) continue;
+    if (path === "scripts/release-site.sh") continue;
     await writeRepositoryFile(repository, path, `published ${path}\n`);
   }
-  await writeRepositoryFile(
-    repository,
-    "data/site-release-manifest.json",
-    `${JSON.stringify({ releaseSha256: "b".repeat(64) }, null, 2)}\n`,
-  );
   await copyRuntimeScript(releaseScript, join(repository, "scripts", "release-site.sh"), true);
 
   assert.deepEqual(dirtyPaths(repository), sourcePublishPaths);
@@ -148,7 +140,7 @@ function assertUnpublished(fixture) {
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), fixture.base);
 }
 
-test("release-site publishes and resumes the exact 5-path scope, then resumes a public-tree rollback", async (t) => {
+test("release-site publishes and resumes the exact 3-path scope, then resumes a public-tree rollback", async (t) => {
   const allowlistBlock = releaseScriptSource.match(/SOURCE_PUBLISH_PATHS=\(\n([\s\S]*?)\n\)/);
   assert.ok(allowlistBlock, "production source publish allowlist should exist");
   const productionPaths = [...allowlistBlock[1].matchAll(/^\s+(\S+)\s*$/gm)].map((match) => match[1]);
@@ -237,7 +229,14 @@ BUNDLE=.release/bundles/fixture.tar.gz
   const rollback = git(fixture.repository, "rev-parse", "HEAD");
   assert.equal(git(fixture.repository, "rev-parse", "github/main"), rollback);
   assert.equal(await readFile(join(fixture.repository, "index.html"), "utf8"), "base site\n");
-  assert.equal(await readFile(join(fixture.repository, "lifecycle", "index.html"), "utf8"), "published lifecycle/index.html\n");
+  assert.equal(
+    JSON.parse(await readFile(join(fixture.repository, "data", "site-release-manifest.json"), "utf8")).releaseSha256,
+    "a".repeat(64),
+  );
+  assert.equal(
+    await readFile(join(fixture.repository, "docs", "PROJECT_BASELINE.md"), "utf8"),
+    "published docs/PROJECT_BASELINE.md\n",
+  );
   assert.deepEqual(git(fixture.repository, "diff", "--name-only", publicPublished, rollback).split("\n"), [
     "data/site-release-manifest.json",
     "index.html",
@@ -258,7 +257,7 @@ test("release-site rejects an extra untracked path before staging", async (t) =>
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: unexpected\.txt/);
-  assert.match(result.stderr, /5-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /3-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -274,7 +273,7 @@ test("release-site rejects a missing expected path before staging", async (t) =>
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /missing: tests\/release-site-integration\.test\.mjs/);
-  assert.match(result.stderr, /5-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /3-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -312,6 +311,6 @@ exit "$status"
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unexpected: staging-drift\.txt/);
-  assert.match(result.stderr, /5-path allowlist \(after staging\)/);
+  assert.match(result.stderr, /3-path allowlist \(after staging\)/);
   assertUnpublished(fixture);
 });
