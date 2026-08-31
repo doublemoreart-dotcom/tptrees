@@ -16,6 +16,9 @@ const sourcePublishPaths = [
   "tests/release-site-integration.test.mjs",
 ];
 
+const sourcePublishPathCount = 3;
+assert.equal(sourcePublishPaths.length, sourcePublishPathCount);
+assert.equal(new Set(sourcePublishPaths).size, sourcePublishPathCount);
 const trackedPublishPaths = new Set(sourcePublishPaths);
 
 function run(command, args, cwd, { allowFailure = false, env = {} } = {}) {
@@ -145,6 +148,13 @@ test("release-site publishes and resumes the exact 3-path scope, then resumes a 
   assert.ok(allowlistBlock, "production source publish allowlist should exist");
   const productionPaths = [...allowlistBlock[1].matchAll(/^\s+(\S+)\s*$/gm)].map((match) => match[1]);
   assert.deepEqual(productionPaths, sourcePublishPaths);
+  assert.match(releaseScriptSource, /^SOURCE_PUBLISH_PATH_COUNT=3$/m);
+  assert.match(releaseScriptSource, /Source publish allowlist must contain exactly \$SOURCE_PUBLISH_PATH_COUNT paths/);
+  assert.match(releaseScriptSource, /Source publish allowlist must contain \$SOURCE_PUBLISH_PATH_COUNT unique paths/);
+  const publishStart = releaseScriptSource.indexOf("publish_release(){");
+  const cohortGate = releaseScriptSource.indexOf("\n  require_valid_source_publish_cohort\n", publishStart);
+  const prepareCall = releaseScriptSource.indexOf("\n  prepare_release\n", publishStart);
+  assert.ok(publishStart >= 0 && cohortGate > publishStart && cohortGate < prepareCall);
   assert.doesNotMatch(releaseScriptSource, /git add --all|git add -A|git add \.(?:\s|$)/);
   assert.match(releaseScriptSource, /git add -- "\$\{SOURCE_PUBLISH_PATHS\[@\]\}"/);
   const fixture = await createFixture(t);
@@ -256,8 +266,10 @@ test("release-site rejects an extra untracked path before staging", async (t) =>
     { allowFailure: true },
   );
   assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Source publish path mismatch \(after prepare, before staging\)/);
+  assert.match(result.stderr, /missing: \(none\)/);
   assert.match(result.stderr, /unexpected: unexpected\.txt/);
-  assert.match(result.stderr, /3-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /exact 3-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -272,8 +284,10 @@ test("release-site rejects a missing expected path before staging", async (t) =>
     { allowFailure: true },
   );
   assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Source publish path mismatch \(after prepare, before staging\)/);
   assert.match(result.stderr, /missing: tests\/release-site-integration\.test\.mjs/);
-  assert.match(result.stderr, /3-path allowlist \(after prepare, before staging\)/);
+  assert.match(result.stderr, /unexpected: \(none\)/);
+  assert.match(result.stderr, /exact 3-path allowlist \(after prepare, before staging\)/);
   assertUnpublished(fixture);
 });
 
@@ -310,7 +324,9 @@ exit "$status"
     },
   );
   assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Source publish path mismatch \(after staging\)/);
+  assert.match(result.stderr, /missing: \(none\)/);
   assert.match(result.stderr, /unexpected: staging-drift\.txt/);
-  assert.match(result.stderr, /3-path allowlist \(after staging\)/);
+  assert.match(result.stderr, /exact 3-path allowlist \(after staging\)/);
   assertUnpublished(fixture);
 });

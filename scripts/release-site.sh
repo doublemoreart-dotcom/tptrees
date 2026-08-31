@@ -13,6 +13,7 @@ ATTEMPTS=12
 WAIT_SECONDS=15
 UPDATE_ARGS=()
 PUBLIC_RELEASE_PATHS=(index.html favicon.svg favicon.ico app daily data lifecycle public species)
+SOURCE_PUBLISH_PATH_COUNT=3
 SOURCE_PUBLISH_PATHS=(
   docs/PROJECT_BASELINE.md
   scripts/release-site.sh
@@ -54,6 +55,16 @@ die(){
   exit 1
 }
 
+require_valid_source_publish_cohort(){
+  local actual_count unique_count
+  actual_count="${#SOURCE_PUBLISH_PATHS[@]}"
+  [[ "$actual_count" -eq "$SOURCE_PUBLISH_PATH_COUNT" ]] || \
+    die "Source publish allowlist must contain exactly $SOURCE_PUBLISH_PATH_COUNT paths (found $actual_count)"
+  unique_count="$(printf '%s\n' "${SOURCE_PUBLISH_PATHS[@]}" | LC_ALL=C sort -u | wc -l | tr -d '[:space:]')"
+  [[ "$unique_count" -eq "$SOURCE_PUBLISH_PATH_COUNT" ]] || \
+    die "Source publish allowlist must contain $SOURCE_PUBLISH_PATH_COUNT unique paths (found $unique_count)"
+}
+
 list_expected_source_publish_paths(){
   printf '%s\n' "${SOURCE_PUBLISH_PATHS[@]}" | LC_ALL=C sort -u
 }
@@ -79,13 +90,22 @@ require_exact_source_publish_paths(){
 
   missing="$(comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual"))"
   unexpected="$(comm -13 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual"))"
-  while IFS= read -r path; do
-    [[ -z "$path" ]] || echo "  missing: $path" >&2
-  done <<< "$missing"
-  while IFS= read -r path; do
-    [[ -z "$path" ]] || echo "  unexpected: $path" >&2
-  done <<< "$unexpected"
-  die "Source publish path set does not match the 3-path allowlist ($phase)"
+  echo "Source publish path mismatch ($phase)" >&2
+  if [[ -z "$missing" ]]; then
+    echo "  missing: (none)" >&2
+  else
+    while IFS= read -r path; do
+      [[ -z "$path" ]] || echo "  missing: $path" >&2
+    done <<< "$missing"
+  fi
+  if [[ -z "$unexpected" ]]; then
+    echo "  unexpected: (none)" >&2
+  else
+    while IFS= read -r path; do
+      [[ -z "$path" ]] || echo "  unexpected: $path" >&2
+    done <<< "$unexpected"
+  fi
+  die "Source publish path set does not match the exact 3-path allowlist ($phase)"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -513,6 +533,7 @@ verify_release(){
 publish_release(){
   [[ "$CONFIRM" == "true" ]] || die "publish requires --confirm"
   [[ ! -f "$STATE_DIR/pending-rollback.env" ]] || die "A TP Trees source rollback is pending; rerun rollback --confirm before publishing"
+  require_valid_source_publish_cohort
   if [[ -f "$STATE_DIR/pending-publish.env" ]]; then
     echo "Pending TP Trees source publish found; validating and resuming it."
     finalize_pending_publish

@@ -55,7 +55,7 @@ bash scripts/preflight-release.sh
 
 ## 最近正式發布快照
 
-截至 2026-08-20，最近一次完成 source publish 並同步至正式站的 source commit 為 `6f57a3ee16bc8428e7244ac862b847e292c12aa5`；該次完成時 `github/main` 與本機 source checkout 均為此 SHA，ahead 0、behind 0，工作樹乾淨，publish 已 finalized、pending publish／rollback 皆無，且沒有 `CNAME`。
+截至 2026-08-24，最近一次改變公開 bundle 並同步至正式站的 source commit 為 `6f57a3ee16bc8428e7244ac862b847e292c12aa5`；該次完成時 `github/main` 與本機 source checkout 均為此 SHA，ahead 0、behind 0，工作樹乾淨，publish 已 finalized、pending publish／rollback 皆無，且沒有 `CNAME`。其後的 authoritative source commit `7b9ef94d49cd144798f0aa92367a0e046bdb59b0` 只更新文件／發布狀態，公開 bundle input 與 release fingerprint 逐 byte 不變，因此正式站不需重新整合或部署。
 
 - 該次 Source 發布前 Routes：14/14；完整 Node tests 與 preflight：34/34；本機真實瀏覽器 normal／failure smoke test 通過，正式資料雙來源皆不可用時會顯示不可查驗狀態，不使用示範樹籍替代查驗結果。
 - 該次 Source-ready release fingerprint：`a296e81b6c84d233966090669876604863aee62df8b732ea41d39bff5199b0ab`。
